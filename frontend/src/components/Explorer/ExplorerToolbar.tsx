@@ -24,8 +24,12 @@ export default function ExplorerToolbar({ onOpenExplorer, isOpen }: ExplorerTool
         title="Open Explorer"
       >
         <div className="relative w-8 h-8 flex items-center justify-center">
-          {/* Wristband Logo */}
-          
+          {/* Wristband Symbol */}
+          <img 
+            src="/wristband_symbol.svg" 
+            alt="Wristband" 
+            className="w-8 h-8"
+          />
         </div>
         
         {/* Animated background glow */}

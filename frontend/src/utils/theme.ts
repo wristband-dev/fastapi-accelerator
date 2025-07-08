@@ -2,13 +2,20 @@
 export interface UserTheme {
   primary: string;
   primaryLight: string;
+  secondary: string;
 }
 
-// Default theme - users can easily modify these colors
 export const userTheme: UserTheme = {
   primary: '#00AA81',      // Primary color
-  primaryLight: '#00FFC1', // Primary light color
+  primaryLight: '#00FFC1', // Primary light colo
+  secondary: '#00AA81',
 };
+
+// export const userTheme: UserTheme = {
+//   primary: '#00AA81',      // Primary color
+//   primaryLight: '#00FFC1', // Primary light colo
+//   secondary: '#00AA81',
+// };
 
 // Extended theme interface for internal use
 export interface ExtendedTheme extends UserTheme {

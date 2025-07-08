@@ -8,7 +8,7 @@ import {
   ShieldCheckIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
-import { getGradientClasses } from '../../utils/theme';
+import { getGradientClasses, getPrimaryColor, getPrimaryLightColor, getPrimaryDarkColor } from '../../utils/theme';
 
 interface User {
   id: string;
@@ -58,6 +58,10 @@ export default function UsersSection() {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<User['role']>('user');
+  
+  const primaryColor = getPrimaryColor();
+  const primaryLight = getPrimaryLightColor();
+  const primaryDark = getPrimaryDarkColor();
 
   const filteredUsers = users.filter(user =>
     user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -79,9 +83,9 @@ export default function UsersSection() {
   const getRoleIcon = (role: User['role']) => {
     switch (role) {
       case 'admin':
-        return <ShieldCheckIcon className="w-4 h-4 text-red-500" />;
+        return <ShieldCheckIcon className="w-4 h-4" style={{ color: primaryColor }} />;
       case 'user':
-        return <UserIcon className="w-4 h-4 text-blue-500" />;
+        return <UserIcon className="w-4 h-4" style={{ color: primaryColor }} />;
       case 'viewer':
         return <UserIcon className="w-4 h-4 text-gray-500" />;
     }
@@ -126,7 +130,17 @@ export default function UsersSection() {
         </h3>
         <button
           onClick={() => setIsInviteModalOpen(true)}
-          className="flex items-center px-4 py-2 bg-gradient-to-r from-[#00AA81] to-[#00CC9A] text-white rounded-xl hover:from-[#00AA81]/90 hover:to-[#00CC9A]/90 focus:outline-none focus:ring-2 focus:ring-[#00CC9A] focus:ring-offset-2 transition-all duration-200 shadow-lg"
+          className="flex items-center px-4 py-2 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 shadow-lg"
+          style={{
+            backgroundColor: primaryColor,
+            '--tw-ring-color': primaryColor,
+          } as React.CSSProperties}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = `${primaryColor}e6`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = primaryColor;
+          }}
         >
           <UserPlusIcon className="w-4 h-4 mr-2" />
           Invite User
@@ -143,7 +157,16 @@ export default function UsersSection() {
           placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2"
+          style={{
+            '--tw-ring-color': primaryColor,
+          } as React.CSSProperties}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = primaryColor;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = '';
+          }}
         />
       </div>
 
@@ -152,15 +175,28 @@ export default function UsersSection() {
         {filteredUsers.map((user, index) => (
           <div
             key={user.id}
-            className="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-lg hover:border-[#00CC9A] dark:hover:border-[#00FFC1] transition-all duration-300 hover:scale-[1.02]"
+            className="group relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
             style={{
-              animationDelay: `${index * 100}ms`
+              animationDelay: `${index * 100}ms`,
+              '--hover-border-color': primaryColor,
+              '--hover-border-color-dark': primaryLight,
+            } as React.CSSProperties}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = primaryColor;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '';
             }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 min-w-0 flex-1">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#00AA81] to-[#00CC9A] rounded-xl flex items-center justify-center shadow-lg">
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                    style={{
+                      background: `linear-gradient(to right, ${primaryDark}, ${primaryColor})`,
+                    }}
+                  >
                     <UserIcon className="w-6 h-6 text-white" />
                   </div>
                 </div>
@@ -185,7 +221,13 @@ export default function UsersSection() {
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(user.status)}`}>
                     {user.status}
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#00AA81]/20 to-[#00CC9A]/20 text-[#00AA81] dark:from-[#00AA81]/30 dark:to-[#00CC9A]/30 dark:text-[#00CC9A] capitalize">
+                  <span 
+                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize"
+                    style={{
+                      background: `linear-gradient(to right, ${primaryDark}33, ${primaryColor}33)`,
+                      color: primaryColor,
+                    }}
+                  >
                     {user.role}
                   </span>
                 </div>
@@ -193,7 +235,19 @@ export default function UsersSection() {
                 <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <button
                     onClick={() => setSelectedUser(user)}
-                    className="p-2 text-gray-400 hover:text-[#00AA81] dark:hover:text-[#00CC9A] transition-colors rounded-lg hover:bg-[#00AA81]/10 dark:hover:bg-[#00CC9A]/20"
+                    className="p-2 text-gray-400 transition-colors rounded-lg"
+                    style={{
+                      '--hover-text-color': primaryColor,
+                      '--hover-bg-color': `${primaryColor}1a`,
+                    } as React.CSSProperties}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = primaryColor;
+                      e.currentTarget.style.backgroundColor = `${primaryColor}1a`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '';
+                      e.currentTarget.style.backgroundColor = '';
+                    }}
                     title="Edit user"
                   >
                     <PencilIcon className="w-4 h-4" />
@@ -210,7 +264,12 @@ export default function UsersSection() {
             </div>
             
             {/* Hover gradient border */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#00AA81]/10 to-[#00CC9A]/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <div 
+              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              style={{
+                background: `linear-gradient(to right, ${primaryDark}1a, ${primaryColor}1a)`,
+              }}
+            ></div>
           </div>
         ))}
       </div>
@@ -221,7 +280,12 @@ export default function UsersSection() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-700 transform transition-all duration-300 scale-100">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-r from-[#00AA81] to-[#00CC9A] rounded-xl flex items-center justify-center mr-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mr-3"
+                  style={{
+                    background: `linear-gradient(to right, ${primaryDark}, ${primaryColor})`,
+                  }}
+                >
                   <UserPlusIcon className="w-5 h-5 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -240,7 +304,16 @@ export default function UsersSection() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="user@example.com"
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white transition-all duration-200"
+                  style={{
+                    '--tw-ring-color': primaryColor,
+                  } as React.CSSProperties}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = primaryColor;
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = '';
+                  }}
                   required
                   autoComplete="email"
                 />
@@ -254,7 +327,16 @@ export default function UsersSection() {
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value as User['role'])}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white appearance-none transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white appearance-none transition-all duration-200"
+                    style={{
+                      '--tw-ring-color': primaryColor,
+                    } as React.CSSProperties}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = primaryColor;
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '';
+                    }}
                   >
                     <option value="viewer">👀 Viewer - View only access</option>
                     <option value="user">👤 User - Standard access</option>
@@ -278,7 +360,17 @@ export default function UsersSection() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-[#00AA81] to-[#00CC9A] text-white rounded-xl hover:from-[#00AA81]/90 hover:to-[#00CC9A]/90 focus:outline-none focus:ring-2 focus:ring-[#00CC9A] focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg"
+                  className="px-6 py-3 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg"
+                  style={{
+                    background: `linear-gradient(to right, ${primaryDark}, ${primaryColor})`,
+                    '--tw-ring-color': primaryColor,
+                  } as React.CSSProperties}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = `linear-gradient(to right, ${primaryDark}e6, ${primaryColor}e6)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = `linear-gradient(to right, ${primaryDark}, ${primaryColor})`;
+                  }}
                 >
                   Send Invitation
                 </button>

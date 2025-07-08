@@ -10,7 +10,7 @@ import { getPrimaryColor, getPrimaryLightColor, getPrimaryDarkColor } from '../.
 
 import UserSettings from './UserSettings';
 import UsersSection from './UsersSection';
-import AdminSection from './AdminSection';
+import AdminSettings from './AdminSettings';
 
 interface ExplorerSidebarProps {
   isOpen: boolean;
@@ -39,7 +39,7 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
       case 'users':
         return <UsersSection />;
       case 'admin':
-        return <AdminSection />;
+        return <AdminSettings />;
       default:
         return <UserSettings />;
     }
@@ -56,7 +56,7 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
       />
       
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl transform transition-all duration-500 ease-out ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-full max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl transform transition-all duration-500 ease-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
@@ -82,64 +82,62 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
           </div>
 
           {/* Navigation */}
-          <nav className="flex-shrink-0 px-4 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
-            <ul className="space-y-2">
-              {navigationItems.map((item, index) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => setActiveSection(item.id)}
-                    className={`relative w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 group ${
-                      activeSection === item.id
-                        ? 'text-white shadow-lg scale-105'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-102'
-                    }`}
-                    style={{
-                      background: activeSection === item.id 
-                        ? `linear-gradient(135deg, ${primaryDark}, ${primaryColor})` 
-                        : 'transparent',
-                      boxShadow: activeSection === item.id 
-                        ? `0 8px 25px ${primaryColor}25` 
-                        : 'none',
-                      animationDelay: `${index * 100}ms`
-                    }}
-                  >
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-lg mr-3 transition-all duration-200 ${
-                      activeSection === item.id
-                        ? 'bg-white/20 shadow-inner'
-                        : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
-                    }`}>
-                      <item.icon className={`w-4 h-4 transition-all duration-200 ${
+          <nav className="flex-shrink-0 px-4 sm:px-6 lg:px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
+            <div className="max-w-md mx-auto lg:max-w-lg xl:max-w-xl">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                {navigationItems.map((item, index) => (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => setActiveSection(item.id)}
+                      className={`relative w-full flex flex-col items-center justify-center p-4 lg:p-6 text-center rounded-2xl transition-all duration-200 group ${
+                        activeSection === item.id
+                          ? 'text-white shadow-lg scale-105'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-102'
+                      }`}
+                      style={{
+                        background: activeSection === item.id 
+                          ? `linear-gradient(135deg, ${primaryDark}, ${primaryColor})` 
+                          : 'transparent',
+                        boxShadow: activeSection === item.id 
+                          ? `0 10px 30px ${primaryColor}30` 
+                          : 'none',
+                        animationDelay: `${index * 100}ms`,
+                        aspectRatio: '1.2'
+                      }}
+                    >
+                      <div className={`flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-xl mb-2 lg:mb-3 transition-all duration-200 ${
+                        activeSection === item.id
+                          ? 'bg-white/20 shadow-inner'
+                          : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
+                      }`}>
+                        <item.icon className={`w-5 h-5 lg:w-6 lg:h-6 transition-all duration-200 ${
+                          activeSection === item.id
+                            ? 'text-white'
+                            : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                        }`} />
+                      </div>
+                      <span className={`font-medium text-sm lg:text-base transition-all duration-200 ${
                         activeSection === item.id
                           ? 'text-white'
-                          : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                      }`} />
-                    </div>
-                    <span className={`font-medium transition-all duration-200 ${
-                      activeSection === item.id
-                        ? 'text-white'
-                        : 'text-gray-700 dark:text-gray-300'
-                    }`}>
-                      {item.label}
-                    </span>
-                    <ChevronRightIcon className={`w-4 h-4 ml-auto transition-all duration-200 ${
-                      activeSection === item.id
-                        ? 'text-white/80 rotate-90'
-                        : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'
-                    }`} />
-                    
-                    {/* Active indicator */}
-                    {activeSection === item.id && (
-                      <div 
-                        className="absolute inset-0 rounded-xl border border-white/20"
-                        style={{
-                          background: `linear-gradient(135deg, ${primaryColor}20, ${primaryLight}20)`,
-                        }}
-                      ></div>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}>
+                        {item.label}
+                      </span>
+                      
+                      {/* Active indicator */}
+                      {activeSection === item.id && (
+                        <div 
+                          className="absolute inset-0 rounded-2xl border border-white/20"
+                          style={{
+                            background: `linear-gradient(135deg, ${primaryColor}15, ${primaryLight}15)`,
+                          }}
+                        />
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </nav>
 
           {/* Content */}

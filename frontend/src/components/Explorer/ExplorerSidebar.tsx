@@ -6,21 +6,25 @@ import {
   Cog6ToothIcon,
   ChevronRightIcon 
 } from '@heroicons/react/24/outline';
-import { getGradientClasses } from './theme';
+import { getPrimaryColor, getPrimaryLightColor, getPrimaryDarkColor } from '../../utils/theme';
 
 import UserSettings from './UserSettings';
 import UsersSection from './UsersSection';
 import AdminSection from './AdminSection';
 
-interface SettingsSidebarProps {
+interface ExplorerSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type SettingsSection = 'user' | 'users' | 'admin';
+type ExplorerSection = 'user' | 'users' | 'admin';
 
-export default function SettingsSidebar({ isOpen, onClose }: SettingsSidebarProps) {
-  const [activeSection, setActiveSection] = useState<SettingsSection>('user');
+export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProps) {
+  const [activeSection, setActiveSection] = useState<ExplorerSection>('user');
+  
+  const primaryColor = getPrimaryColor();
+  const primaryLight = getPrimaryLightColor();
+  const primaryDark = getPrimaryDarkColor();
 
   const navigationItems = [
     { id: 'user' as const, label: 'User Settings', icon: UserIcon },
@@ -56,22 +60,22 @@ export default function SettingsSidebar({ isOpen, onClose }: SettingsSidebarProp
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-[#00AA81]/10 to-[#00FFC1]/10 dark:from-[#00AA81]/20 dark:to-[#00FFC1]/20">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-r from-[#00AA81] to-[#00CC9A] rounded-lg flex items-center justify-center mr-3 shadow-lg">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                Settings
-              </h2>
-            </div>
+          {/* Header with Wristband Logo */}
+          <div 
+            className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor}10, ${primaryLight}10)`,
+            }}
+          >
+            <img 
+              src="/wristband_logo_dark.svg" 
+              alt="Wristband" 
+              className="h-8 w-auto"
+            />
+            
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105 active:scale-95 group"
+              className="absolute top-4 right-4 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105 active:scale-95 group"
             >
               <XMarkIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors" />
             </button>
@@ -86,10 +90,16 @@ export default function SettingsSidebar({ isOpen, onClose }: SettingsSidebarProp
                     onClick={() => setActiveSection(item.id)}
                     className={`relative w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 group ${
                       activeSection === item.id
-                        ? 'bg-gradient-to-r from-[#00AA81] to-[#00CC9A] text-white shadow-lg shadow-[#00AA81]/25 scale-105'
+                        ? 'text-white shadow-lg scale-105'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-102'
                     }`}
                     style={{
+                      background: activeSection === item.id 
+                        ? `linear-gradient(135deg, ${primaryDark}, ${primaryColor})` 
+                        : 'transparent',
+                      boxShadow: activeSection === item.id 
+                        ? `0 8px 25px ${primaryColor}25` 
+                        : 'none',
                       animationDelay: `${index * 100}ms`
                     }}
                   >
@@ -119,7 +129,12 @@ export default function SettingsSidebar({ isOpen, onClose }: SettingsSidebarProp
                     
                     {/* Active indicator */}
                     {activeSection === item.id && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#00AA81]/20 to-[#00CC9A]/20 rounded-xl border border-white/20"></div>
+                      <div 
+                        className="absolute inset-0 rounded-xl border border-white/20"
+                        style={{
+                          background: `linear-gradient(135deg, ${primaryColor}20, ${primaryLight}20)`,
+                        }}
+                      ></div>
                     )}
                   </button>
                 </li>

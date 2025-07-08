@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { getGradientClasses } from './theme';
+import { getGradientClasses } from '../../utils/theme';
 
 interface UserProfileData {
   firstName: string;

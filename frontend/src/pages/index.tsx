@@ -4,14 +4,14 @@ import { useWristbandAuth, redirectToLogin, redirectToLogout, useWristbandSessio
 
 import frontendApiClient from "@/client/frontend-api-client";
 import { geistMono, geistSans } from "@/utils/fonts";
-import SettingsToolbar from "@/components/Settings/SettingsToolbar";
-import SettingsSidebar from "@/components/Settings/SettingsSidebar";
+import ExplorerToolbar from "@/components/Explorer/ExplorerToolbar";
+import ExplorerSidebar from "@/components/Explorer/ExplorerSidebar";
 
 export default function HomePage() {
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isNicknameLoading, setIsNicknameLoading] = useState<boolean>(false);
   const [nickname, setNickname] = useState<string>('');
-  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isExplorerOpen, setIsExplorerOpen] = useState<boolean>(false);
 
   /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
   const { isAuthenticated, isLoading } = useWristbandAuth(); // isAdmin
@@ -74,18 +74,18 @@ export default function HomePage() {
     <div
       className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-slate-50 dark:bg-slate-900`}
     >
-      {/* Settings Toolbar - Only show when authenticated */}
+      {/* Explorer Toolbar - Only show when authenticated */}
       {isAuthenticated && (
-        <SettingsToolbar 
-          onOpenSettings={() => setIsSettingsOpen(true)} 
-          isOpen={isSettingsOpen}
+        <ExplorerToolbar 
+          onOpenExplorer={() => setIsExplorerOpen(true)} 
+          isOpen={isExplorerOpen}
         />
       )}
       
-      {/* Settings Sidebar */}
-      <SettingsSidebar 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
+      {/* Explorer Sidebar */}
+      <ExplorerSidebar 
+        isOpen={isExplorerOpen} 
+        onClose={() => setIsExplorerOpen(false)} 
       />
       <main className="flex flex-col gap-8 row-start-2 items-center w-full max-w-2xl">
         {/* Header */}

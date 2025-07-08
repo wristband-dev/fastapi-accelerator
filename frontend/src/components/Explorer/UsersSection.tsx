@@ -8,7 +8,7 @@ import {
   ShieldCheckIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
-import { getGradientClasses } from './theme';
+import { getGradientClasses } from '../../utils/theme';
 
 interface User {
   id: string;

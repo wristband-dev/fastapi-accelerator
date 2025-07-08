@@ -1,0 +1,1 @@
+- link google account (get profile pic -> save with wristband or gcloud)

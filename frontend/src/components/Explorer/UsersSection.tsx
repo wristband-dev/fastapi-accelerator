@@ -362,14 +362,14 @@ export default function UsersSection() {
                   type="submit"
                   className="px-6 py-3 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg"
                   style={{
-                    background: `linear-gradient(to right, ${primaryDark}, ${primaryColor})`,
+                    backgroundColor: primaryColor,
                     '--tw-ring-color': primaryColor,
                   } as React.CSSProperties}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = `linear-gradient(to right, ${primaryDark}e6, ${primaryColor}e6)`;
+                    e.currentTarget.style.backgroundColor = `${primaryColor}e6`;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = `linear-gradient(to right, ${primaryDark}, ${primaryColor})`;
+                    e.currentTarget.style.backgroundColor = primaryColor;
                   }}
                 >
                   Send Invitation

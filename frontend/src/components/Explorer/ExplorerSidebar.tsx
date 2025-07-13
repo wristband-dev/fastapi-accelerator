@@ -8,9 +8,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { getPrimaryColor, getPrimaryLightColor, getPrimaryDarkColor } from '../../utils/theme';
 
-import UserSettings from './UserSettings';
-import UsersSection from './UsersSection';
-import AdminSettings from './AdminSettings';
+import ItemUserSettings from './ItemUserSettings';
+import ItemUsers from './ItemUsers';
+import ItemAdmin from './ItemAdmin';
 
 interface ExplorerSidebarProps {
   isOpen: boolean;
@@ -35,13 +35,13 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
   const renderContent = () => {
     switch (activeSection) {
       case 'user':
-        return <UserSettings />;
+        return <ItemUserSettings />;
       case 'users':
-        return <UsersSection />;
+        return <ItemUsers />;
       case 'admin':
-        return <AdminSettings />;
+        return <ItemAdmin />;
       default:
-        return <UserSettings />;
+        return <ItemUserSettings />;
     }
   };
 
@@ -68,9 +68,6 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
                 alt="Wristband" 
                 className="h-8 w-auto"
               />
-              <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                Explorer
-              </span>
             </div>
             
             <button

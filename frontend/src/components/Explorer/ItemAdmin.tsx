@@ -22,7 +22,7 @@ interface OktaConfig {
   enabled: boolean;
 }
 
-export default function AdminSettings() {
+export default function ItemAdmin() {
   const [organization, setOrganization] = useState<OrganizationSettings>({
     name: 'Acme Corporation',
     logo: null

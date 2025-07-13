@@ -14,7 +14,7 @@ interface PasswordData {
   confirmPassword: string;
 }
 
-export default function UserSettings() {
+export default function ItemUserSettings() {
   const [profile, setProfile] = useState<UserProfileData>({
     firstName: 'John',
     lastName: 'Doe',

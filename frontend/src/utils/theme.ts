@@ -11,11 +11,6 @@ export const userTheme: UserTheme = {
   secondary: '#00AA81',
 };
 
-// export const userTheme: UserTheme = {
-//   primary: '#00AA81',      // Primary color
-//   primaryLight: '#00FFC1', // Primary light colo
-//   secondary: '#00AA81',
-// };
 
 // Extended theme interface for internal use
 export interface ExtendedTheme extends UserTheme {

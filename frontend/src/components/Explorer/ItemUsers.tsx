@@ -16,7 +16,7 @@ interface User {
   lastName: string;
   email: string;
   role: 'admin' | 'user' | 'viewer';
-  status: 'active' | 'inactive' | 'pending';
+  status: 'active' | 'pending';
   lastLogin: string;
   avatar?: string;
 }
@@ -46,12 +46,12 @@ const mockUsers: User[] = [
     lastName: 'Johnson',
     email: 'bob.johnson@example.com',
     role: 'viewer',
-    status: 'inactive',
+    status: 'pending',
     lastLogin: '2024-01-10T09:15:00Z'
   }
 ];
 
-export default function UsersSection() {
+export default function ItemUsers() {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -95,8 +95,6 @@ export default function UsersSection() {
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
     }
@@ -216,13 +214,13 @@ export default function UsersSection() {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3 flex-shrink-0">
-                <div className="flex flex-col space-y-1 items-end">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(user.status)}`}>
+              <div className="flex items-center space-x-3 flex-shrink-0 relative">
+                <div className="flex flex-col space-y-2 items-end mr-4">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize transition-transform duration-200 group-hover:translate-x-[-60px] ${getStatusColor(user.status)}`}>
                     {user.status}
                   </span>
                   <span 
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize"
+                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize transition-transform duration-200 group-hover:translate-x-[-60px]"
                     style={{
                       background: `linear-gradient(to right, ${primaryDark}33, ${primaryColor}33)`,
                       color: primaryColor,
@@ -232,7 +230,7 @@ export default function UsersSection() {
                   </span>
                 </div>
                 
-                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200 absolute right-0 top-1/2 transform -translate-y-1/2">
                   <button
                     onClick={() => setSelectedUser(user)}
                     className="p-2 text-gray-400 transition-colors rounded-lg"

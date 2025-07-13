@@ -63,9 +63,6 @@ npm --version  # Should show v8.x.x or higher
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install node
 ```
-<br>
-<hr>
-<br>
 
 ## Optional 
 
@@ -76,6 +73,9 @@ brew install node
 ```bash
 poetry --version # Should show v18.x.x or higher
 ```
+<br>
+<hr>
+<br>
 
 ## Getting Started
 

@@ -11,6 +11,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from pprint import pprint
 
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
@@ -75,9 +76,9 @@ Examples:
         
         # Print results
         if args.pretty:
-            print(json.dumps(user_info, indent=2, sort_keys=True))
+            pprint(user_info.model_dump())
         else:
-            print(json.dumps(user_info))
+            print(user_info.model_dump())
             
     except Exception as e:
         print(f"Error: {e}")

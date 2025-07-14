@@ -3,6 +3,8 @@ import httpx
 import logging
 import os
 
+from models.user import User, UserList
+
 logger = logging.getLogger(__name__)
 
 class WristbandApiClient:
@@ -22,7 +24,7 @@ class WristbandApiClient:
     ############################################################################################
     # User APIs
     ############################################################################################
-    async def get_user_info(self, user_id: str, access_token: str) -> dict[str, Any]:
+    async def get_user_info(self, user_id: str, access_token: str) -> User:
         # Get User API - https://docs.wristband.dev/reference/getuserv1
         response: httpx.Response = await self.client.get(
             self.base_url + f'/users/{user_id}',
@@ -35,12 +37,13 @@ class WristbandApiClient:
         if response.status_code != 200:
             raise ValueError(f'Error calling get_user_info: {response.status_code} - {response.text}')
 
-        return response.json() if response.content else {}
+        data = response.json() if response.content else {}
+        return User(**data)
 
     ############################################################################################
     # User Nickname APIs
     ############################################################################################
-    async def update_user_nickname(self, user_id: str, nickname: str, access_token: str) -> dict[str, Any]:
+    async def update_user_nickname(self, user_id: str, nickname: str, access_token: str) -> User:
         # Update User API - https://docs.wristband.dev/reference/patchuserv1
         response: httpx.Response = await self.client.patch(
             self.base_url + f'/users/{user_id}',
@@ -56,37 +59,23 @@ class WristbandApiClient:
         if response.status_code != 200:
             raise ValueError(f'Error calling update_user_nickname: {response.status_code} - {response.text}')
 
-        return response.json() if response.content else {}
+        data = response.json() if response.content else {}
+        return User(**data)
 
     async def get_user_nickname(self, user_id: str, access_token: str) -> str:
         # Get User API - https://docs.wristband.dev/reference/getuserv1
-        response: httpx.Response = await self.client.get(
-            self.base_url + f'/users/{user_id}',
-            headers={
-                **self.headers,
-                'Authorization': f'Bearer {access_token}'
-            }
-        )
-
-        if response.status_code != 200:
-            raise ValueError(f'Error calling get_user_nickname: {response.status_code} - {response.text}')
-        
-        return response.json().get('nickname', '')
+        user = await self.get_user_info(user_id, access_token)
+        return user.nickname or ''
 
     ############################################################################################
     # Tenant Users APIs
     ############################################################################################
-    async def query_tenant_users(self, tenant_id: str, access_token: str, page: int = 1, page_size: int = 10, **filters) -> dict[str, Any]:
+    async def query_tenant_users(self, tenant_id: str, access_token: str, page: int = 1, page_size: int = 10) -> UserList:
         # Query Tenant Users API - https://docs.wristband.dev/reference/querytenantusersv1
         params = {
             'page': page,
             'pageSize': page_size,
         }
-        
-        # Add any additional filters passed as kwargs
-        for key, value in filters.items():
-            if value is not None:
-                params[key] = value
         
         response: httpx.Response = await self.client.get(
             self.base_url + f'/tenants/{tenant_id}/users',
@@ -100,4 +89,5 @@ class WristbandApiClient:
         if response.status_code != 200:
             raise ValueError(f'Error calling query_tenant_users: {response.status_code} - {response.text}')
 
-        return response.json() if response.content else {}
+        data = response.json() if response.content else {}
+        return UserList(**data)

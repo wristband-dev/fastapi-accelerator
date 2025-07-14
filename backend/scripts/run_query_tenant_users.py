@@ -11,11 +11,13 @@ import json
 import os
 import sys
 from pathlib import Path
+from pprint import pprint
 
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from clients.wristband_client import WristbandApiClient
+from models.user import UserList
 
 
 async def main():
@@ -64,29 +66,6 @@ Examples:
         default=True
     )
     
-    # Additional filter arguments
-    parser.add_argument(
-        '--email',
-        help='Filter by email address'
-    )
-    parser.add_argument(
-        '--first-name',
-        help='Filter by first name'
-    )
-    parser.add_argument(
-        '--last-name',
-        help='Filter by last name'
-    )
-    parser.add_argument(
-        '--username',
-        help='Filter by username'
-    )
-    parser.add_argument(
-        '--filter',
-        action='append',
-        help='Additional filter in format key=value (can be used multiple times)'
-    )
-    
     args = parser.parse_args()
     
     # Validate required arguments
@@ -101,58 +80,33 @@ Examples:
     if not os.getenv('APPLICATION_VANITY_DOMAIN'):
         print("Error: APPLICATION_VANITY_DOMAIN environment variable is required")
         sys.exit(1)
-    
-    # Build filters dictionary
-    filters = {}
-    
-    if args.email:
-        filters['email'] = args.email
-    if args.first_name:
-        filters['firstName'] = args.first_name
-    if args.last_name:
-        filters['lastName'] = args.last_name
-    if args.username:
-        filters['username'] = args.username
-    
-    # Parse additional filters
-    if args.filter:
-        for filter_str in args.filter:
-            if '=' in filter_str:
-                key, value = filter_str.split('=', 1)
-                filters[key] = value
-            else:
-                print(f"Warning: Invalid filter format '{filter_str}', expected key=value")
-    
     try:
         # Initialize client and make API call
         client = WristbandApiClient()
         print(f"Querying users for tenant_id: {args.tenant_id}")
         print(f"Page: {args.page}, Page size: {args.page_size}")
         
-        if filters:
-            print(f"Filters: {filters}")
-        
-        result = await client.query_tenant_users(
+        result: UserList = await client.query_tenant_users(
             args.tenant_id,
             args.access_token,
             page=args.page,
-            page_size=args.page_size,
-            **filters
+            page_size=args.page_size
         )
         
         # Print results
         print("✅ Query completed successfully!")
         
         # Show summary
-        if 'items' in result:
-            print(f"Found {len(result['items'])} users on this page")
-            if 'totalResults' in result:
-                print(f"Total results: {result['totalResults']}")
+        print(f"Found {len(result.items)} users on this page")
+        print(f"Total results: {result.totalResults}")
         
         if args.pretty:
-            print(json.dumps(result, indent=2, sort_keys=True))
+            # Convert Pydantic model to dict for JSON serialization
+            result_dict = result.model_dump()
+            pprint(result_dict)
         else:
-            print(json.dumps(result))
+            result_dict = result.model_dump()
+            print(json.dumps(result_dict))
             
     except Exception as e:
         print(f"Error: {e}")

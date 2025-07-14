@@ -1,0 +1,7 @@
+project_id          = "wb-acc-demo"
+app_name            = "wb-accelerator-demo"
+billing_account_id  = "01374E-08CB2C-435A99"
+region              = "us-central1"
+firestore_location  = "us-central"
+api_name            = "api"
+api_repo_name       = "api-repo" 

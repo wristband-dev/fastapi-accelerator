@@ -1,2 +1,0 @@
-- link google account (get profile pic -> save with wristband or gcloud)
-- where do i save username? do i have a customer object outside of wristband

@@ -124,6 +124,80 @@ npm start
 <hr>
 <br>
 
+## Deployment
+
+This repository is set up to use terraform to deploy on google cloud platform for hosting of the fast api as well as using firebase for the datastore.
+
+### Prerequistes
+
+#### Terraform
+1. Visit [Terraform Install](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) 
+2. Download and install the latest 
+3. Verify the installation by opening a terminal or command prompt and running:
+```bash
+terraform --version # Should show Terraform vx.x.x
+```
+
+#### Google Cloud
+1. Visit [gcloud sdk install](https://cloud.google.com/sdk/docs/install) 
+2. Download and install the latest 
+3. Verify the installation by opening a terminal or command prompt and running:
+```bash
+gcloud --version # Should show Google Cloud SDK x.x.x
+```
+4. Init you gcloud account
+```bash
+gcloud init
+```
+
+### Update Project Configuration
+
+Before deploying, you need to configure the Terraform variables with your specific GCP project details:
+
+1. **Edit the configuration file**: Open `infrastructure/config.tfvars` and update the following values:
+
+   ```bash
+   project_id          = "your-gcp-project-id"
+   app_name            = "your-app-name"
+   billing_account_id  = "your-billing-account-id"
+   region              = "us-central1"
+   firestore_location  = "us-central"
+   api_name            = "api"
+   api_repo_name       = "api-repo"
+   ```
+
+2. **Required updates**:
+   - `project_id`: Your GCP project ID (find this in the GCP Console or run `gcloud config get-value project`)
+   - `app_name`: A unique name for your application (used in resource naming)
+   - `billing_account_id`: Your GCP billing account ID (find this in the GCP Console under Billing)
+
+3. **Optional updates**:
+   - `region`: The GCP region where resources will be deployed (default: `us-central1`)
+   - `firestore_location`: The location for your Firestore database (default: `us-central`)
+   - `api_name` and `api_repo_name`: Names for the API components (can be left as defaults)
+
+> **Note**: Make sure your GCP project has billing enabled before proceeding with deployment.
+
+### Create Project
+
+```bash
+cd infrastructure
+./terraform.sh init
+./terraform.sh plan
+./terraform.sh apply -auto-approve
+```
+
+### Get Service Accounts
+```bash
+cd infrastructure
+./export_firebase_key.sh
+./export_cloud_run_key.sh
+```
+
+<br>
+<hr>
+<br>
+
 ## How to interact with the demo app
 
 The NextJS server starts on port 3001, and the FastAPI server starts on port 6001. NextJS is configured with rewrites to forward all `/api/*` requests to the FastAPI backend at `http://localhost:6001/api/*`. This allows the frontend to make clean API calls using relative URLs like `/api/session` while keeping the backend services separate and maintainable. The FastAPI server includes CORS middleware to allow cross-origin requests from the NextJS frontend.

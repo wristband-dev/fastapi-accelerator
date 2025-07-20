@@ -1,12 +1,12 @@
 import React from 'react';
 import { getPrimaryColor, getPrimaryLightColor, getPrimaryDarkColor } from '../../utils/theme';
 
-interface ExplorerToolbarProps {
+interface ExplorerButtonProps {
   onOpenExplorer: () => void;
   isOpen: boolean;
 }
 
-export default function ExplorerToolbar({ onOpenExplorer, isOpen }: ExplorerToolbarProps) {
+export default function ExplorerButton({ onOpenExplorer, isOpen }: ExplorerButtonProps) {
   const primaryColor = getPrimaryColor();
   const primaryLight = getPrimaryLightColor();
   const primaryDark = getPrimaryDarkColor();

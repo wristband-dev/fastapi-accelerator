@@ -4,7 +4,7 @@ import { useWristbandAuth, redirectToLogin, redirectToLogout, useWristbandSessio
 
 import frontendApiClient from "@/client/frontend-api-client";
 import { geistMono, geistSans } from "@/utils/fonts";
-import ExplorerToolbar from "@/components/Explorer/ExplorerToolbar";
+import ExplorerButton from "@/components/Explorer/ExplorerButton";
 import ExplorerSidebar from "@/components/Explorer/ExplorerSidebar";
 
 export default function HomePage() {
@@ -80,17 +80,23 @@ export default function HomePage() {
       MARK: - Explorer Toolbar Button
       */}
       {isAuthenticated && (
-        <ExplorerToolbar 
+        <ExplorerButton 
           onOpenExplorer={() => setIsExplorerOpen(true)} 
           isOpen={isExplorerOpen}
         />
       )}
       
-      {/* Explorer Sidebar */}
+      {/*
+      MARK: - Explorer Sidebar
+      */} 
       <ExplorerSidebar 
         isOpen={isExplorerOpen} 
         onClose={() => setIsExplorerOpen(false)} 
       />
+
+      {/*
+      MARK: - Main Content
+      */}
       <main className="flex flex-col gap-8 row-start-2 items-center w-full max-w-2xl">
         {/* Header */}
         <div className="flex items-center">

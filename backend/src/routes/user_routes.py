@@ -10,7 +10,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 wristband_client = WristbandApiClient()
 
-@router.get('/info/{user_id}', response_model=User)
+@router.get('/{user_id}', response_model=User)
 async def get_user_info(request: Request, user_id: str) -> User:
     try:
         # Get access token from session or request

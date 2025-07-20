@@ -17,7 +17,7 @@ from pprint import pprint
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from clients.wristband_client import WristbandApiClient
-from models.user import UserList
+from models.user import User
 
 
 async def main():
@@ -59,13 +59,6 @@ Examples:
         default=10,
         help='Number of users per page (default: 10)'
     )
-    parser.add_argument(
-        '--pretty',
-        action='store_true',
-        help='Pretty print JSON output',
-        default=True
-    )
-    
     args = parser.parse_args()
     
     # Validate required arguments
@@ -86,11 +79,9 @@ Examples:
         print(f"Querying users for tenant_id: {args.tenant_id}")
         print(f"Start index: {args.start_index}, Count: {args.count}")
         
-        result: UserList = await client.query_tenant_users(
+        result: list[User] = await client.query_tenant_users(
             args.tenant_id,
             args.access_token,
-            start_index=args.start_index,
-            count=args.count,
             include_roles=True
         )
         
@@ -98,16 +89,9 @@ Examples:
         print("✅ Query completed successfully!")
         
         # Show summary
-        print(f"Found {len(result.items)} users on this page")
-        print(f"Total results: {result.totalResults}")
+        print(f"Found {len(result)} users on this page")
         
-        if args.pretty:
-            # Convert Pydantic model to dict for JSON serialization
-            result_dict = result.model_dump()
-            pprint(result_dict)
-        else:
-            result_dict = result.model_dump()
-            print(json.dumps(result_dict))
+        pprint([user.model_dump() for user in result])
             
     except Exception as e:
         print(f"Error: {e}")

@@ -8,21 +8,23 @@ import ExplorerToolbar from "@/components/Explorer/ExplorerToolbar";
 import ExplorerSidebar from "@/components/Explorer/ExplorerSidebar";
 
 export default function HomePage() {
+  // MARK: - State & Auth
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isNicknameLoading, setIsNicknameLoading] = useState<boolean>(false);
   const [nickname, setNickname] = useState<string>('');
   const [isExplorerOpen, setIsExplorerOpen] = useState<boolean>(false);
 
-  /* WRISTBAND_TOUCHPOINT - AUTHENTICATION */
-  const { isAuthenticated, isLoading } = useWristbandAuth(); // isAdmin
+  const { isAuthenticated, isLoading } = useWristbandAuth();
   const { metadata } = useWristbandSession();
 
+  // MARK: - Effects
   useEffect(() => {
     if (isAuthenticated && !isLoading && !nickname) {
       getNickname();
     }
   }, [isAuthenticated, isLoading]);
 
+  // MARK: - Handlers
   const getNickname = async () => {
     try {
       setIsNicknameLoading(true);
@@ -74,7 +76,9 @@ export default function HomePage() {
     <div
       className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-slate-50 dark:bg-slate-900`}
     >
-      {/* Explorer Toolbar - Only show when authenticated */}
+      {/*
+      MARK: - Explorer Toolbar Button
+      */}
       {isAuthenticated && (
         <ExplorerToolbar 
           onOpenExplorer={() => setIsExplorerOpen(true)} 

@@ -3,7 +3,7 @@ import httpx
 import logging
 import os
 
-from models.user import User, UserList
+from models.user import User, UsersResponse
 from models.roles import RoleList
 
 logger = logging.getLogger(__name__)
@@ -40,15 +40,8 @@ class WristbandApiClient:
 
         data = response.json() if response.content else {}
 
-        from pprint import pprint
-        print("--------------------------------")
-        pprint(data)
-        print("--------------------------------")
         return User(**data)
 
-    ############################################################################################
-    # MARK: User Nickname APIs
-    ############################################################################################
     async def update_user_nickname(self, user_id: str, nickname: str, access_token: str) -> User:
         # Update User API - https://docs.wristband.dev/reference/patchuserv1
         response: httpx.Response = await self.client.patch(
@@ -76,44 +69,54 @@ class WristbandApiClient:
     ############################################################################################
     # MARK: Tenant Users APIs
     ############################################################################################
-    async def query_tenant_users(
-        self, 
-        tenant_id: str, 
-        access_token: str, 
-        start_index: int = 0, 
-        count: int = 100,
-        include_roles: bool = False,
-    ) -> UserList:
+    async def query_tenant_users(self, tenant_id: str, access_token: str, include_roles: bool = False) -> list[User]:
         # Query Tenant Users API - https://docs.wristband.dev/reference/querytenantusersv1
-        params = {
-            'startIndex': start_index,
-            'count': count,
-        }
+        start_index = 0
+        count = 50
+        all_users = []
+        total_results = 0
         
-        response: httpx.Response = await self.client.get(
-            self.base_url + f'/tenants/{tenant_id}/users',
-            headers={
-                **self.headers,
-                'Authorization': f'Bearer {access_token}'
-            },
-            params=params
-        )
+        while True:
+            params = {
+                'startIndex': start_index,
+                'count': count,
+            }
+            
+            response: httpx.Response = await self.client.get(
+                self.base_url + f'/tenants/{tenant_id}/users',
+                headers={
+                    **self.headers,
+                    'Authorization': f'Bearer {access_token}'
+                },
+                params=params
+            )
 
-        if response.status_code != 200:
-            raise ValueError(f'Error calling query_tenant_users: {response.status_code} - {response.text}')
+            if response.status_code != 200:
+                raise ValueError(f'Error calling query_tenant_users: {response.status_code} - {response.text}')
 
-        data = response.json() if response.content else {}
-        user_list = UserList(**data)
+            data = response.json() if response.content else {}
+            user_list = UsersResponse(**data)
+            
+            # Collect users from this page
+            all_users.extend(user_list.items)
+            total_results = user_list.totalResults
+            
+            # Check if we have more pages to fetch
+            if start_index + user_list.itemsPerPage >= user_list.totalResults:
+                break
+                
+            # Move to next page
+            start_index += user_list.itemsPerPage
 
         if not include_roles:
-            return user_list
+            return all_users
         else:
             # Get user ids from user list
-            user_ids = [user.id for user in user_list.items]
+            user_ids = [user.id for user in all_users]
             # Get roles for users
             roles = await self.resolve_assigned_roles_for_users(user_ids, access_token)
             # Add roles to users
-            for user in user_list.items:
+            for user in all_users:
                 # Find the UserRoles object for this user
                 user_roles = next((ur for ur in roles.items if ur.userId == user.id), None)
                 if user_roles:
@@ -121,7 +124,7 @@ class WristbandApiClient:
                     user.roles = [role.sku for role in user_roles.roles]
                 else:
                     user.roles = []
-            return user_list
+            return all_users
 
     ############################################################################################
     # MARK: Role APIs

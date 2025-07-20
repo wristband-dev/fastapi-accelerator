@@ -5,22 +5,14 @@ from fastapi import status
 import logging
 
 from clients.wristband_client import WristbandApiClient
-from models.user import UserList
+from models.user import User
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 wristband_client = WristbandApiClient()
 
-@router.get('', response_model=UserList)
-async def get_users(
-    request: Request,
-    page_size: int = Query(10, description="Number of users per page", ge=1, le=100)
-) -> UserList:
-    """
-    Query users scoped to a tenant using the Wristband querytenantusersv1 API.
-    
-    This endpoint retrieves a list of users within the current tenant with page size support.
-    """
+@router.get('', response_model=list[User])
+async def get_users(request: Request) -> list[User]:
     try:
         # Get session data including access token and tenant ID
         session_data = request.state.session.get()
@@ -31,8 +23,7 @@ async def get_users(
         return await wristband_client.query_tenant_users(
             tenant_id=tenant_id,
             access_token=access_token,
-            start_index=0,
-            count=page_size
+            include_roles=True
         )
     
     except Exception as e:

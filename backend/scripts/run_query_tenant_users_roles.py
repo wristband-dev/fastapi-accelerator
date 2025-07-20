@@ -17,7 +17,7 @@ from pprint import pprint
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from clients.wristband_client import WristbandApiClient
-from models.user import UserList
+from models.user import User
 from models.roles import RoleList   
 
 
@@ -60,12 +60,6 @@ Examples:
         default=10,
         help='Number of users to retrieve (default: 10)'
     )
-    parser.add_argument(
-        '--pretty',
-        action='store_true',
-        help='Pretty print JSON output',
-        default=True
-    )
     
     args = parser.parse_args()
     
@@ -90,28 +84,23 @@ Examples:
         print(f"📋 Querying users for tenant_id: {args.tenant_id}")
         print(f"   Start index: {args.start_index}, Count: {args.count}")
         
-        user_list: UserList = await client.query_tenant_users(
+        user_list: list[User] = await client.query_tenant_users(
             args.tenant_id,
-            args.access_token,
-            start_index=args.start_index,
-            count=args.count
+            args.access_token
         )
         
-        print(f"✅ Found {len(user_list.items)} users on this page")
-        print(f"   Total results: {user_list.totalResults}")
+        print(f"✅ Found {len(user_list)} users on this page")
         
-        # Display user list
-        if args.pretty:
-            print("\n🔍 User List:")
-            for user in user_list.items:
-                print(f"   - {user.email} (ID: {user.id})")
+        print("\n🔍 User List:")
+        for user in user_list:
+            print(f"   - {user.email} (ID: {user.id})")
         
         # Step 2: Get user IDs and resolve roles
-        if user_list.items:
-            user_ids = [user.id for user in user_list.items]
+        if user_list:
+            user_ids = [user.id for user in user_list]
             print(f"\n🔐 Resolving roles for {len(user_ids)} users...")
             
-            roles_data = await client.resolve_assigned_roles_for_users(
+            roles_data: RoleList = await client.resolve_assigned_roles_for_users(
                 user_ids,
                 args.access_token
             )
@@ -119,22 +108,13 @@ Examples:
             print("✅ Roles resolved successfully!")
             
             # Display combined results
-            if args.pretty:
-                print("\n📊 Complete Results:")
-                print("\n--- Users ---")
-                user_dict = user_list.model_dump()
-                pprint(user_dict)
-                
-                print("\n--- Assigned Roles ---")
-                roles_dict = roles_data.model_dump()
-                pprint(roles_dict)
-            else:
-                # Combine results into a single JSON object
-                combined_results = {
-                    'users': user_list.model_dump(),
-                    'roles': roles_data.model_dump()
-                }
-                print(json.dumps(combined_results))
+            print("\n📊 Complete Results:")
+            print("\n--- Users ---")
+            pprint([user.model_dump() for user in user_list])
+            
+            print("\n--- Assigned Roles ---")
+            pprint([role.model_dump() for role in roles_data.items])
+          
         else:
             print("\n⚠️  No users found - skipping role resolution")
             

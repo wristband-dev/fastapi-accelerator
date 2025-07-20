@@ -7,9 +7,9 @@ import {
   ChevronRightIcon 
 } from '@heroicons/react/24/outline';
 
-import ItemUserSettings from './ItemUserSettings';
-import ItemUsers from './ItemUsers';
-import ItemAdmin from './ItemAdmin';
+import ItemUserSettings from './Items/UserSettings';
+import ItemUsers from './Items/Users';
+import ItemAdmin from './Items/Admin';
 
 interface ExplorerSidebarProps {
   isOpen: boolean;

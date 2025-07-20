@@ -195,47 +195,6 @@ export default function ItemUserSettings() {
           </button>
         </form>
         )}
-        
-        {/* Additional User Info */}
-        {currentUser && (
-          <div className="mt-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Account Details</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">User ID:</span>
-                <span className="text-gray-900 dark:text-white font-mono text-xs">{currentUser.id}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${currentUser.status === 'active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-                  {currentUser.status}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Email Verified:</span>
-                <span className="text-gray-900 dark:text-white">{currentUser.emailVerified ? 'Yes' : 'No'}</span>
-              </div>
-              {currentUser.nickname && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Nickname:</span>
-                  <span className="text-gray-900 dark:text-white">{currentUser.nickname}</span>
-                </div>
-              )}
-              {currentUser.roles.length > 0 && (
-                <div className="flex justify-between items-start">
-                  <span className="text-gray-600 dark:text-gray-400">Roles:</span>
-                  <div className="flex flex-wrap gap-1 justify-end">
-                    {currentUser.roles.map((role, index) => (
-                      <span key={index} className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
-                        {role}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Password Change */}

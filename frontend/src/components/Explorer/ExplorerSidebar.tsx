@@ -51,7 +51,7 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
       />
       
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl bg-white dark:bg-gray-900 shadow-2xl transform transition-all duration-300 ease-out ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transform transition-all duration-300 ease-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">

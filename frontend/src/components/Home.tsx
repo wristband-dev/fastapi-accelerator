@@ -9,7 +9,6 @@ import { useUser } from "@/contexts/UserContext";
 
 export default function Home() {
   const [isNicknameLoading, setIsNicknameLoading] = useState<boolean>(false);
-  const [nickname, setNickname] = useState<string>('');
   const [isExplorerOpen, setIsExplorerOpen] = useState<boolean>(false);
 
   const { metadata } = useWristbandSession();
@@ -17,7 +16,6 @@ export default function Home() {
 
   const handleApiError = useCallback((error: unknown) => {
     console.error(error);
-    setNickname('');
 
     if (axios.isAxiosError(error)) {
       if ([401, 403].includes(error.response?.status!)) {
@@ -31,11 +29,11 @@ export default function Home() {
 
   // Fetch current user data
   const fetchCurrentUser = useCallback(async () => {
-    if (!metadata?.sub) return;
-    
     try {
       setIsLoadingUser(true);
-      const response = await frontendApiClient.get(`/user/${metadata.sub}`);
+      console.log('Fetching current user...');
+      const response = await frontendApiClient.get('/user/me');
+      console.log('User data received:', response.data);
       setCurrentUser(response.data);
     } catch (error) {
       console.error('Error fetching current user:', error);
@@ -43,33 +41,26 @@ export default function Home() {
     } finally {
       setIsLoadingUser(false);
     }
-  }, [metadata, setCurrentUser, setIsLoadingUser, handleApiError]);
+  }, [setCurrentUser, setIsLoadingUser, handleApiError]);
 
   useEffect(() => {
-    fetchCurrentUser();
-  }, [fetchCurrentUser]);
-
-  const getNickname = useCallback(async () => {
-    try {
-      setIsNicknameLoading(true);
-      const response = await frontendApiClient.get('/nickname');
-      setNickname(response.data.nickname);
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      setIsNicknameLoading(false);
+    // Fetch user data once session is established
+    if (metadata) {
+      fetchCurrentUser();
     }
-  }, [handleApiError]);
-
-  useEffect(() => {
-    getNickname();
-  }, [getNickname]);
+  }, [metadata, fetchCurrentUser]);
 
   const generateNewNickname = async () => {
     try {
       setIsNicknameLoading(true);
       const response = await frontendApiClient.post('/nickname', null);
-      setNickname(response.data.nickname);
+      // Update only the nickname field in the current user
+      if (response.data.nickname && currentUser) {
+        setCurrentUser({
+          ...currentUser,
+          nickname: response.data.nickname
+        });
+      }
     } catch (error) {
       handleApiError(error);
     } finally {
@@ -185,13 +176,13 @@ export default function Home() {
                 )}
               </button>
 
-              {nickname && (
+              {currentUser?.nickname && (
                 <div className="mt-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Your Nickname:
                   </p>
                   <p className="text-xl font-bold text-gray-900 dark:text-white">
-                    {nickname}
+                    {currentUser.nickname}
                   </p>
                 </div>
               )}

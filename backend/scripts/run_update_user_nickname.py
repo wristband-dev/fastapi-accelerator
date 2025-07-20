@@ -11,6 +11,9 @@ import json
 import os
 import sys
 from pathlib import Path
+from pprint import pprint
+from pprint import pprint
+from models.user import User
 
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
@@ -80,14 +83,11 @@ Examples:
         client = WristbandApiClient()
         print(f"Updating nickname for user_id: {args.user_id} to: {args.nickname}")
         
-        result = await client.update_user_nickname(args.user_id, args.nickname, args.access_token)
-        
+        user = await client.update_user_nickname(args.user_id, args.nickname, args.access_token)
         # Print results
         print("✅ Nickname updated successfully!")
-        if args.pretty:
-            print(json.dumps(result, indent=2, sort_keys=True))
-        else:
-            print(json.dumps(result))
+        pprint(user.model_dump())
+       
             
     except Exception as e:
         print(f"Error: {e}")

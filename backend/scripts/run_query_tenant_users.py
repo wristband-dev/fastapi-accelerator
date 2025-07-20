@@ -32,7 +32,7 @@ Environment variables:
 
 Examples:
   python run_query_tenant_users.py --tenant-id tenant123 --access-token token456
-  python run_query_tenant_users.py --tenant-id tenant123 --access-token token456 --page 2 --page-size 20
+  python run_query_tenant_users.py --tenant-id tenant123 --access-token token456 --start-index 20 --count 20
   TENANT_ID=tenant123 ACCESS_TOKEN=token456 python run_query_tenant_users.py
         """
     )
@@ -48,13 +48,13 @@ Examples:
         default=os.getenv('ACCESS_TOKEN')
     )
     parser.add_argument(
-        '--page',
+        '--start-index',
         type=int,
-        default=1,
-        help='Page number (default: 1)'
+        default=0,
+        help='Start index (default: 0)'
     )
     parser.add_argument(
-        '--page-size',
+        '--count',
         type=int,
         default=10,
         help='Number of users per page (default: 10)'
@@ -84,13 +84,14 @@ Examples:
         # Initialize client and make API call
         client = WristbandApiClient()
         print(f"Querying users for tenant_id: {args.tenant_id}")
-        print(f"Page: {args.page}, Page size: {args.page_size}")
+        print(f"Start index: {args.start_index}, Count: {args.count}")
         
         result: UserList = await client.query_tenant_users(
             args.tenant_id,
             args.access_token,
-            page=args.page,
-            page_size=args.page_size
+            start_index=args.start_index,
+            count=args.count,
+            include_roles=True
         )
         
         # Print results

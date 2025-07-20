@@ -31,8 +31,8 @@ async def get_users(
         return await wristband_client.query_tenant_users(
             tenant_id=tenant_id,
             access_token=access_token,
-            page=1,
-            page_size=page_size
+            start_index=0,
+            count=page_size
         )
     
     except Exception as e:

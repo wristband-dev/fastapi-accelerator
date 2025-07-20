@@ -75,7 +75,7 @@ Queries users within a tenant with pagination and filtering support.
 python run_query_tenant_users.py --tenant-id "tenant123" --access-token "your-token"
 
 # With pagination
-python run_query_tenant_users.py --tenant-id "tenant123" --access-token "your-token" --page 2 --page-size 20
+python run_query_tenant_users.py --tenant-id "tenant123" --access-token "your-token" --start-index 20 --count 20
 
 # With filtering
 python run_query_tenant_users.py --tenant-id "tenant123" --access-token "your-token" --email "john@example.com"
@@ -97,6 +97,32 @@ python run_query_tenant_users.py
 python run_query_tenant_users.py --tenant-id "tenant123" --access-token "your-token" --pretty
 ```
 
+### 5. `run_query_tenant_users_roles.py`
+Queries users within a tenant and then resolves their assigned roles. This script combines the functionality of querying tenant users and resolving roles in a single operation.
+
+**Usage:**
+```bash
+# Basic usage
+python run_query_tenant_users_roles.py --tenant-id "tenant123" --access-token "your-token"
+
+# With pagination
+python run_query_tenant_users_roles.py --tenant-id "tenant123" --access-token "your-token" --start-index 20 --count 20
+
+# Environment variables
+export TENANT_ID="tenant123"
+export ACCESS_TOKEN="your-token"
+python run_query_tenant_users_roles.py
+
+# Pretty print output (default is true)
+python run_query_tenant_users_roles.py --tenant-id "tenant123" --access-token "your-token" --pretty
+```
+
+This script will:
+1. Query users in the specified tenant
+2. Extract user IDs from the results
+3. Call the resolve assigned roles API for those users
+4. Display both user information and their assigned roles
+
 ## Environment Variables
 
 All scripts require the following environment variable:
@@ -110,6 +136,7 @@ Each script also supports specific environment variables as alternatives to comm
 | `run_get_user_nickname.py` | `USER_ID`, `ACCESS_TOKEN` |
 | `run_update_user_nickname.py` | `USER_ID`, `NICKNAME`, `ACCESS_TOKEN` |
 | `run_query_tenant_users.py` | `TENANT_ID`, `ACCESS_TOKEN` |
+| `run_query_tenant_users_roles.py` | `TENANT_ID`, `ACCESS_TOKEN` |
 
 ## Examples
 
@@ -129,7 +156,10 @@ python run_get_user_nickname.py --user-id "user123"
 python run_update_user_nickname.py --user-id "user123" --nickname "John Smith" --pretty
 
 # Query tenant users
-python run_query_tenant_users.py --tenant-id "tenant456" --page 1 --page-size 10 --pretty
+python run_query_tenant_users.py --tenant-id "tenant456" --start-index 0 --count 10 --pretty
+
+# Query tenant users with their roles
+python run_query_tenant_users_roles.py --tenant-id "tenant456" --start-index 0 --count 10 --pretty
 ```
 
 ### Using environment variables for batch operations:
@@ -144,6 +174,7 @@ export TENANT_ID="tenant456"
 python run_get_user_info.py --pretty
 python run_get_user_nickname.py
 python run_query_tenant_users.py --pretty
+python run_query_tenant_users_roles.py --pretty
 ```
 
 ## Error Handling
@@ -161,6 +192,7 @@ python run_get_user_info.py --help
 python run_get_user_nickname.py --help
 python run_update_user_nickname.py --help
 python run_query_tenant_users.py --help
+python run_query_tenant_users_roles.py --help
 ```
 
 ## Development Notes

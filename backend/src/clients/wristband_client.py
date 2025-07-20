@@ -4,6 +4,7 @@ import logging
 import os
 
 from models.user import User, UserList
+from models.roles import RoleList
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class WristbandApiClient:
         self.client = httpx.AsyncClient()
 
     ############################################################################################
-    # User APIs
+    # MARK: User APIs
     ############################################################################################
     async def get_user_info(self, user_id: str, access_token: str) -> User:
         # Get User API - https://docs.wristband.dev/reference/getuserv1
@@ -38,10 +39,15 @@ class WristbandApiClient:
             raise ValueError(f'Error calling get_user_info: {response.status_code} - {response.text}')
 
         data = response.json() if response.content else {}
+
+        from pprint import pprint
+        print("--------------------------------")
+        pprint(data)
+        print("--------------------------------")
         return User(**data)
 
     ############################################################################################
-    # User Nickname APIs
+    # MARK: User Nickname APIs
     ############################################################################################
     async def update_user_nickname(self, user_id: str, nickname: str, access_token: str) -> User:
         # Update User API - https://docs.wristband.dev/reference/patchuserv1
@@ -68,13 +74,20 @@ class WristbandApiClient:
         return user.nickname or ''
 
     ############################################################################################
-    # Tenant Users APIs
+    # MARK: Tenant Users APIs
     ############################################################################################
-    async def query_tenant_users(self, tenant_id: str, access_token: str, page: int = 1, page_size: int = 10) -> UserList:
+    async def query_tenant_users(
+        self, 
+        tenant_id: str, 
+        access_token: str, 
+        start_index: int = 0, 
+        count: int = 100,
+        include_roles: bool = False,
+    ) -> UserList:
         # Query Tenant Users API - https://docs.wristband.dev/reference/querytenantusersv1
         params = {
-            'page': page,
-            'pageSize': page_size,
+            'startIndex': start_index,
+            'count': count,
         }
         
         response: httpx.Response = await self.client.get(
@@ -90,4 +103,44 @@ class WristbandApiClient:
             raise ValueError(f'Error calling query_tenant_users: {response.status_code} - {response.text}')
 
         data = response.json() if response.content else {}
-        return UserList(**data)
+        user_list = UserList(**data)
+
+        if not include_roles:
+            return user_list
+        else:
+            # Get user ids from user list
+            user_ids = [user.id for user in user_list.items]
+            # Get roles for users
+            roles = await self.resolve_assigned_roles_for_users(user_ids, access_token)
+            # Add roles to users
+            for user in user_list.items:
+                # Find the UserRoles object for this user
+                user_roles = next((ur for ur in roles.items if ur.userId == user.id), None)
+                if user_roles:
+                    # Extract role names from the roles list
+                    user.roles = [role.sku for role in user_roles.roles]
+                else:
+                    user.roles = []
+            return user_list
+
+    ############################################################################################
+    # MARK: Role APIs
+    ############################################################################################
+    async def resolve_assigned_roles_for_users(self, user_ids: list[str], access_token: str) -> RoleList:
+        # Resolve Assigned Roles For Users API - https://docs.wristband.dev/reference/resolveassignedrolesforusersv1
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/users/resolve-assigned-roles',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                'userIds': user_ids
+            }
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling resolve_assigned_roles_for_users: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        return RoleList(**data)

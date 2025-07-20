@@ -15,7 +15,7 @@ def _create_wristband_auth() -> WristbandAuth:
         login_state_secret="dummyval-ab7d-4134-9307-2dfcc52f7475",
         dangerously_disable_secure_cookies=True,
         is_application_custom_domain_active=False,
-        scopes=["openid", "offline_access", "email"],
+        scopes=["openid", "offline_access", "email", "roles"],
     )
     return WristbandAuth(auth_config)
 

@@ -40,6 +40,9 @@ class User(BaseModel):
     timeZone: Optional[str] = None
     username: Optional[str] = None
 
+    # added after user info from resolve assigned roles
+    roles: list[str] = []
+
 class UserList(BaseModel):
     items: list[User]
     itemsPerPage: int

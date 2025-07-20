@@ -1,0 +1,2 @@
+- best way to get access token for live testing
+- best way to setup live end to end testing -> backend scripts

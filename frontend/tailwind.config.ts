@@ -1,4 +1,7 @@
 import type { Config } from "tailwindcss";
+import { getTailwindColors } from "./src/utils/theme";
+
+const themeColors = getTailwindColors();
 
 export default {
   content: [
@@ -11,6 +14,14 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // Add theme colors
+        primary: themeColors.primary,
+        secondary: themeColors.secondary,
+        accent: themeColors.accent,
+        success: themeColors.success,
+        warning: themeColors.warning,
+        error: themeColors.error,
+        info: themeColors.info,
       },
     },
   },

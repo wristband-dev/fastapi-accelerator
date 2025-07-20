@@ -2,15 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
+    
+    /* Theme colors will be injected by JavaScript */
+    /* Fallback values in case JS fails */
+    --theme-primary: #00AA81;
+    --theme-primary-light: #33BBAA;
+    --theme-primary-dark: #006655;
+    --theme-primary-rgb: 0, 170, 129;
+    
+    --theme-secondary: #AA0081;
+    --theme-secondary-light: #CC33AA;
+    --theme-secondary-dark: #770055;
+    --theme-secondary-rgb: 170, 0, 129;
+    
+    --theme-accent: #00AA81;
+    --theme-accent-light: #33BBAA;
+    --theme-accent-dark: #006655;
+    --theme-accent-rgb: 0, 170, 129;
+    
+    --theme-success: #10b981;
+    --theme-warning: #f59e0b;
+    --theme-error: #ef4444;
+    --theme-info: #3b82f6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #0a0a0a;
+      --foreground: #ededed;
+    }
   }
 }
 
@@ -45,4 +69,36 @@ body {
 
 .animation-delay-4000 {
   animation-delay: 4s;
+}
+
+@layer components {
+  /* Button variants using theme colors */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary-dark text-white transition-colors;
+  }
+  
+  .btn-accent {
+    @apply bg-accent hover:bg-accent-dark text-white transition-colors;
+  }
+  
+  /* Alert variants */
+  .alert-success {
+    @apply bg-success/10 border-success/20 text-success;
+  }
+  
+  .alert-error {
+    @apply bg-error/10 border-error/20 text-error;
+  }
+  
+  .alert-warning {
+    @apply bg-warning/10 border-warning/20 text-warning;
+  }
+  
+  .alert-info {
+    @apply bg-info/10 border-info/20 text-info;
+  }
 }

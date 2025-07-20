@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
-import { getGradientClasses, getPrimaryColor, getPrimaryLightColor, getPrimaryDarkColor } from '../../utils/theme';
 import { redirectToLogout } from "@wristband/react-client-auth";
 
 interface UserProfileData {
@@ -37,10 +36,6 @@ export default function ItemUserSettings() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
-  const primaryColor = getPrimaryColor();
-  const primaryLight = getPrimaryLightColor();
-  const primaryDark = getPrimaryDarkColor();
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,12 +97,7 @@ export default function ItemUserSettings() {
       {/* Profile Information */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-6">
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center mr-3"
-            style={{
-              background: `linear-gradient(to right, ${primaryDark}, ${primaryColor})`,
-            }}
-          >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-r from-primary-dark to-primary">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
@@ -127,16 +117,7 @@ export default function ItemUserSettings() {
                 value={profile.firstName}
                 onChange={(e) => setProfile(prev => ({ ...prev, firstName: e.target.value }))}
                 placeholder="Enter your first name"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                style={{
-                  '--tw-ring-color': primaryColor,
-                } as React.CSSProperties}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = primaryColor;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '';
-                }}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="given-name"
                 required
               />
@@ -151,16 +132,7 @@ export default function ItemUserSettings() {
                 value={profile.lastName}
                 onChange={(e) => setProfile(prev => ({ ...prev, lastName: e.target.value }))}
                 placeholder="Enter your last name"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                style={{
-                  '--tw-ring-color': primaryColor,
-                } as React.CSSProperties}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = primaryColor;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '';
-                }}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="family-name"
                 required
               />
@@ -175,16 +147,7 @@ export default function ItemUserSettings() {
                 value={profile.email}
                 onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
                 placeholder="Enter your email address"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                style={{
-                  '--tw-ring-color': primaryColor,
-                } as React.CSSProperties}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = primaryColor;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '';
-                }}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="email"
                 required
               />
@@ -194,21 +157,7 @@ export default function ItemUserSettings() {
           <button
             type="submit"
             disabled={isUpdatingProfile}
-            className="w-full text-white py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-            style={{
-              backgroundColor: primaryColor,
-              '--tw-ring-color': primaryColor,
-            } as React.CSSProperties}
-            onMouseEnter={(e) => {
-              if (!isUpdatingProfile) {
-                e.currentTarget.style.backgroundColor = `${primaryColor}e6`;
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isUpdatingProfile) {
-                e.currentTarget.style.backgroundColor = primaryColor;
-              }
-            }}
+            className="w-full btn-primary py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
           >
             {isUpdatingProfile ? (
               <span className="flex items-center justify-center">
@@ -228,12 +177,7 @@ export default function ItemUserSettings() {
       {/* Password Change */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-6">
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center mr-3"
-            style={{
-              background: `linear-gradient(to right, ${primaryColor}, ${primaryLight})`,
-            }}
-          >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-r from-primary to-primary-light">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
@@ -253,16 +197,7 @@ export default function ItemUserSettings() {
                 value={password.currentPassword}
                 onChange={(e) => setPassword(prev => ({ ...prev, currentPassword: e.target.value }))}
                 placeholder="Enter your current password"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                style={{
-                  '--tw-ring-color': primaryColor,
-                } as React.CSSProperties}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = primaryColor;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '';
-                }}
+                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="current-password"
                 required
               />
@@ -290,16 +225,7 @@ export default function ItemUserSettings() {
                 value={password.newPassword}
                 onChange={(e) => setPassword(prev => ({ ...prev, newPassword: e.target.value }))}
                 placeholder="Enter your new password"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                style={{
-                  '--tw-ring-color': primaryColor,
-                } as React.CSSProperties}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = primaryColor;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '';
-                }}
+                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="new-password"
                 required
               />
@@ -327,16 +253,7 @@ export default function ItemUserSettings() {
                 value={password.confirmPassword}
                 onChange={(e) => setPassword(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 placeholder="Confirm your new password"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                style={{
-                  '--tw-ring-color': primaryColor,
-                } as React.CSSProperties}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = primaryColor;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = '';
-                }}
+                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="new-password"
                 required
               />
@@ -357,21 +274,7 @@ export default function ItemUserSettings() {
           <button
             type="submit"
             disabled={isUpdatingPassword}
-            className="w-full text-white py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-            style={{
-              backgroundColor: primaryColor,
-              '--tw-ring-color': primaryColor,
-            } as React.CSSProperties}
-            onMouseEnter={(e) => {
-              if (!isUpdatingPassword) {
-                e.currentTarget.style.backgroundColor = `${primaryColor}e6`;
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isUpdatingPassword) {
-                e.currentTarget.style.backgroundColor = primaryColor;
-              }
-            }}
+            className="w-full btn-primary py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
           >
             {isUpdatingPassword ? (
               <span className="flex items-center justify-center">

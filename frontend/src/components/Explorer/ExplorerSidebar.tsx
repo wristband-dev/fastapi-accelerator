@@ -6,7 +6,6 @@ import {
   Cog6ToothIcon,
   ChevronRightIcon 
 } from '@heroicons/react/24/outline';
-import { getPrimaryColor, getPrimaryLightColor, getPrimaryDarkColor } from '../../utils/theme';
 
 import ItemUserSettings from './ItemUserSettings';
 import ItemUsers from './ItemUsers';
@@ -21,10 +20,6 @@ type ExplorerSection = 'user' | 'users' | 'admin';
 
 export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProps) {
   const [activeSection, setActiveSection] = useState<ExplorerSection>('user');
-  
-  const primaryColor = getPrimaryColor();
-  const primaryLight = getPrimaryLightColor();
-  const primaryDark = getPrimaryDarkColor();
 
   const navigationItems = [
     { id: 'user' as const, label: 'User Settings', icon: UserIcon },
@@ -87,14 +82,9 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
                   onClick={() => setActiveSection(item.id)}
                   className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-all duration-200 group ${
                     activeSection === item.id
-                      ? 'text-white shadow-sm'
+                      ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                   }`}
-                  style={{
-                    background: activeSection === item.id 
-                      ? `linear-gradient(135deg, ${primaryColor}, ${primaryDark})` 
-                      : 'transparent',
-                  }}
                 >
                   <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
                     activeSection === item.id

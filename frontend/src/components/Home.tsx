@@ -57,21 +57,30 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Explorer Button */}
+      {/* 
+      MARK: - Explorer
+       */}
       <ExplorerButton 
         onOpenExplorer={() => setIsExplorerOpen(true)} 
         isOpen={isExplorerOpen}
       />
-      
-      {/* Explorer Sidebar */}
       <ExplorerSidebar 
         isOpen={isExplorerOpen} 
         onClose={() => setIsExplorerOpen(false)} 
       />
 
-      {/* Main Content */}
+      {/* 
+      MARK: - Main Content
+       */}
+
+
+
+
+
+      {/* 
+      MARK: - Header
+       */}
       <div className="max-w-4xl mx-auto px-6 py-12">
-        {/* Header */}
         <div className="text-center mb-12">
           <img
             src="/wristband_logo.svg"
@@ -96,11 +105,13 @@ export default function Home() {
         </div>
 
         <div className="space-y-8">
-          {/* Session Information */}
+          {/* 
+          MARK: - Session Information
+           */}
           {metadata ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="bg-green-50 dark:bg-green-900/20 px-6 py-4 border-b border-green-200 dark:border-green-800">
-                <h2 className="text-lg font-semibold text-green-900 dark:text-green-100 flex items-center gap-2">
+              <div className="bg-primary/10 px-6 py-4 border-b border-primary/20">
+                <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -117,25 +128,27 @@ export default function Home() {
             </div>
           ) : null}
 
-          {/* Mafia Nickname Generator */}
+          {/* 
+          MARK: - Nickname Generator
+           */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="bg-blue-50 dark:bg-blue-900/20 px-6 py-4 border-b border-blue-200 dark:border-blue-800">
-              <h2 className="text-lg font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+            <div className="bg-primary/10 px-6 py-4 border-b border-primary/20">
+              <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                Mafia Nickname Generator
+                Nickname Generator
               </h2>
             </div>
             <div className="p-6">
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Generate your unique mafia nickname with our advanced algorithm.
+                Generate a unique nickname to update your wristband profile.
               </p>
               
               <button
                 onClick={generateNewNickname}
                 disabled={isNicknameLoading}
-                className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow-md font-medium"
+                className="w-full sm:w-auto px-6 py-3 btn-primary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md font-medium"
               >
                 {isNicknameLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -146,14 +159,14 @@ export default function Home() {
                     Generating...
                   </span>
                 ) : (
-                  "Generate New Nickname"
+                  "Generate"
                 )}
               </button>
 
               {nickname && (
                 <div className="mt-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Your Mafia Nickname:
+                    Your Nickname:
                   </p>
                   <p className="text-xl font-bold text-gray-900 dark:text-white">
                     {nickname}
@@ -163,7 +176,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Quick Actions */}
+          {/* 
+          MARK: - Quick Actions
+           */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Quick Actions
@@ -173,8 +188,8 @@ export default function Home() {
                 onClick={() => setIsExplorerOpen(true)}
                 className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-left"
               >
-                <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -191,8 +206,8 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-left"
               >
-                <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>

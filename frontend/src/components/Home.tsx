@@ -5,6 +5,7 @@ import { redirectToLogin } from "@wristband/react-client-auth";
 import axios from "axios";
 import ExplorerButton from "@/components/Explorer/ExplorerButton";
 import ExplorerSidebar from "@/components/Explorer/ExplorerSidebar";
+import { useUser } from "@/contexts/UserContext";
 
 export default function Home() {
   const [isNicknameLoading, setIsNicknameLoading] = useState<boolean>(false);
@@ -12,6 +13,7 @@ export default function Home() {
   const [isExplorerOpen, setIsExplorerOpen] = useState<boolean>(false);
 
   const { metadata } = useWristbandSession();
+  const { currentUser, setCurrentUser, setIsLoadingUser } = useUser();
 
   const handleApiError = useCallback((error: unknown) => {
     console.error(error);
@@ -26,6 +28,26 @@ export default function Home() {
       window.alert(`Error: ${error}`);
     }
   }, []);
+
+  // Fetch current user data
+  const fetchCurrentUser = useCallback(async () => {
+    if (!metadata?.sub) return;
+    
+    try {
+      setIsLoadingUser(true);
+      const response = await frontendApiClient.get(`/user/${metadata.sub}`);
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      handleApiError(error);
+    } finally {
+      setIsLoadingUser(false);
+    }
+  }, [metadata, setCurrentUser, setIsLoadingUser, handleApiError]);
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, [fetchCurrentUser]);
 
   const getNickname = useCallback(async () => {
     try {

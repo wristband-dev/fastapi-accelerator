@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   MagnifyingGlassIcon, 
   UserPlusIcon, 
@@ -8,61 +8,62 @@ import {
   ShieldCheckIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import frontendApiClient from '@/client/frontend-api-client';
+import { redirectToLogin } from "@wristband/react-client-auth";
+import axios from "axios";
+import { User } from '@/models/user';
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: 'admin' | 'user' | 'viewer';
-  status: 'active' | 'pending';
-  lastLogin: string;
-  avatar?: string;
-}
-
-const mockUsers: User[] = [
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    role: 'admin',
-    status: 'active',
-    lastLogin: '2024-01-15T10:30:00Z'
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: 'jane.smith@example.com',
-    role: 'user',
-    status: 'active',
-    lastLogin: '2024-01-14T14:20:00Z'
-  },
-  {
-    id: '3',
-    firstName: 'Bob',
-    lastName: 'Johnson',
-    email: 'bob.johnson@example.com',
-    role: 'viewer',
-    status: 'pending',
-    lastLogin: '2024-01-10T09:15:00Z'
-  }
-];
 
 export default function ItemUsers() {
-  const [users] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<User['role']>('user');
+  const [inviteRole, setInviteRole] = useState<string>('user');
 
-  const filteredUsers = users.filter(user =>
-    user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleApiError = useCallback((error: unknown) => {
+    console.error(error);
+
+    if (axios.isAxiosError(error)) {
+      if ([401, 403].includes(error.response?.status!)) {
+        redirectToLogin('/api/auth/login');
+        window.alert('Authentication required.');
+      }
+    } else {
+      window.alert(`Error: ${error}`);
+    }
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setIsLoadingUsers(true);
+      const response = await frontendApiClient.get('/users');
+      setUsers(response.data);
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, [handleApiError]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const filteredUsers = users.filter(user => {
+    const searchLower = searchTerm.toLowerCase();
+    const firstName = user.givenName || '';
+    const lastName = user.familyName || '';
+    const fullName = user.fullName || '';
+    const email = user.email || '';
+    
+    return firstName.toLowerCase().includes(searchLower) ||
+           lastName.toLowerCase().includes(searchLower) ||
+           fullName.toLowerCase().includes(searchLower) ||
+           email.toLowerCase().includes(searchLower);
+  });
 
   const formatLastLogin = (dateString: string) => {
     const date = new Date(dateString);
@@ -73,34 +74,16 @@ export default function ItemUsers() {
     });
   };
 
-  const getRoleIcon = (role: User['role']) => {
-    switch(role) {
-      case 'admin':
-        return <ShieldCheckIcon className="w-4 h-4 text-primary" />;
-      case 'user':
-        return <UserIcon className="w-4 h-4 text-primary" />;
-      default:
-        return <UserIcon className="w-4 h-4 text-gray-400" />;
+  const getRoleIcon = (roles: string[]) => {
+    if (roles.includes('admin') || roles.includes('Admin')) {
+      return <ShieldCheckIcon className="w-4 h-4 text-primary" />;
     }
+    return <UserIcon className="w-4 h-4 text-primary" />;
   };
 
-  const getRoleBadge = (role: User['role']) => {
-    const badges = {
-      admin: 'bg-primary/10 text-primary border-primary/20',
-      user: 'bg-primary/10 text-primary border-primary/20',
-      viewer: 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
-    };
-    
-    return badges[role];
-  };
-
-  const getStatusBadge = (status: User['status']) => {
-    const badges = {
-      active: 'bg-success/10 text-success',
-      pending: 'bg-warning/10 text-warning'
-    };
-    
-    return badges[status];
+  const getStatusBadge = (status: string) => {
+    // For now, all users are shown as active
+    return 'bg-success/10 text-success';
   };
 
   return (
@@ -136,28 +119,40 @@ export default function ItemUsers() {
       */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Role
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Last Login
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredUsers.map((user) => (
+          {isLoadingUsers ? (
+            <div className="flex items-center justify-center py-12">
+              <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 dark:text-gray-400">No users found</p>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Roles
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredUsers.map((user) => (
                 <tr 
                   key={user.id} 
                   className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
@@ -166,13 +161,17 @@ export default function ItemUsers() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary-dark to-primary flex items-center justify-center text-white font-medium">
-                          {user.firstName[0]}{user.lastName[0]}
-                        </div>
+                        {user.pictureUrl ? (
+                          <img className="h-10 w-10 rounded-full" src={user.pictureUrl} alt="" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary-dark to-primary flex items-center justify-center text-white font-medium">
+                            {(user.givenName?.[0] || user.email[0]).toUpperCase()}{(user.familyName?.[0] || '').toUpperCase()}
+                          </div>
+                        )}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {user.firstName} {user.lastName}
+                          {user.fullName || user.displayName || `${user.givenName || ''} ${user.familyName || ''}`.trim() || user.email}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           {user.email}
@@ -181,18 +180,26 @@ export default function ItemUsers() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getRoleBadge(user.role)}`}>
-                      {getRoleIcon(user.role)}
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {user.roles.length > 0 ? (
+                        user.roles.map((role, index) => (
+                          <span key={index} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-primary/10 text-primary border-primary/20">
+                            {getRoleIcon(user.roles)}
+                            {role}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-500 dark:text-gray-400 text-sm">No roles</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(user.status)}`}>
-                      {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge('active')}`}>
+                      Active
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {formatLastLogin(user.lastLogin)}
+                    {formatLastLogin(user.metadata.creationTime)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button 
@@ -209,6 +216,7 @@ export default function ItemUsers() {
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
 
@@ -251,7 +259,7 @@ export default function ItemUsers() {
                         </label>
                         <select
                           value={inviteRole}
-                          onChange={(e) => setInviteRole(e.target.value as User['role'])}
+                          onChange={(e) => setInviteRole(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
                         >
                           <option value="viewer">Viewer</option>

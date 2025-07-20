@@ -5,6 +5,7 @@ import random
 
 from clients.wristband_client import WristbandApiClient
 from models.session_data import SessionData
+from models.user import User
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -42,8 +43,8 @@ async def get_nickname(request: Request) -> Response:
     try:
         # Get the Wristband user's existing nickaname
         session_data: SessionData = request.state.session.get()
-        nickname: str = await wristband_client.get_user_nickname(session_data.user_id, session_data.access_token)
-        return JSONResponse(content={ "nickname": nickname })
+        user: User = await wristband_client.get_user_info(session_data.user_id, session_data.access_token)
+        return JSONResponse(content={ "nickname": user.nickname or '' })
     except Exception as e:
         logger.exception(f"Unexpected Get Nickname Endpoint error: {str(e)}")
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

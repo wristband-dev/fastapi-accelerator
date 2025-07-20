@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 from pprint import pprint
 
+from pydantic.types import T
+
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
@@ -72,7 +74,7 @@ Examples:
         client = WristbandApiClient()
         print(f"Fetching user info for user_id: {args.user_id}")
         
-        user_info = await client.get_user_info(args.user_id, args.access_token)
+        user_info = await client.get_user_info(args.user_id, args.access_token, include_roles=True)
         
         # Print results
         if args.pretty:

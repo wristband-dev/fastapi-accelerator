@@ -25,7 +25,7 @@ class WristbandApiClient:
     ############################################################################################
     # MARK: User APIs
     ############################################################################################
-    async def get_user_info(self, user_id: str, access_token: str) -> User:
+    async def get_user_info(self, user_id: str, access_token: str, include_roles: bool = False) -> User:
         # Get User API - https://docs.wristband.dev/reference/getuserv1
         response: httpx.Response = await self.client.get(
             self.base_url + f'/users/{user_id}',
@@ -39,6 +39,10 @@ class WristbandApiClient:
             raise ValueError(f'Error calling get_user_info: {response.status_code} - {response.text}')
 
         data = response.json() if response.content else {}
+
+        if include_roles:
+            roles_list = await self.resolve_assigned_roles_for_users([user_id], access_token)
+            data['roles'] = [role.sku for role in roles_list.items[0].roles]
 
         return User(**data)
 
@@ -61,11 +65,6 @@ class WristbandApiClient:
         data = response.json() if response.content else {}
         return User(**data)
 
-    async def get_user_nickname(self, user_id: str, access_token: str) -> str:
-        # Get User API - https://docs.wristband.dev/reference/getuserv1
-        user = await self.get_user_info(user_id, access_token)
-        return user.nickname or ''
-
     ############################################################################################
     # MARK: Tenant Users APIs
     ############################################################################################
@@ -74,7 +73,6 @@ class WristbandApiClient:
         start_index = 0
         count = 50
         all_users = []
-        total_results = 0
         
         while True:
             params = {
@@ -99,7 +97,6 @@ class WristbandApiClient:
             
             # Collect users from this page
             all_users.extend(user_list.items)
-            total_results = user_list.totalResults
             
             # Check if we have more pages to fetch
             if start_index + user_list.itemsPerPage >= user_list.totalResults:

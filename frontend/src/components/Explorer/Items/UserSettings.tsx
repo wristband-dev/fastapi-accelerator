@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EyeIcon, EyeSlashIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { redirectToLogout } from "@wristband/react-client-auth";
+import { useUser } from '@/contexts/UserContext';
 
 interface UserProfileData {
   firstName: string;
@@ -15,10 +16,11 @@ interface PasswordData {
 }
 
 export default function ItemUserSettings() {
+  const { currentUser, isLoadingUser } = useUser();
   const [profile, setProfile] = useState<UserProfileData>({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com'
+    firstName: '',
+    lastName: '',
+    email: ''
   });
   
   const [password, setPassword] = useState<PasswordData>({
@@ -36,6 +38,17 @@ export default function ItemUserSettings() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Update profile when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      setProfile({
+        firstName: currentUser.givenName || '',
+        lastName: currentUser.familyName || '',
+        email: currentUser.email
+      });
+    }
+  }, [currentUser]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,22 +119,31 @@ export default function ItemUserSettings() {
             Profile Information
           </h3>
         </div>
-        <form onSubmit={handleProfileUpdate} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                First Name
-              </label>
-              <input
-                type="text"
-                value={profile.firstName}
-                onChange={(e) => setProfile(prev => ({ ...prev, firstName: e.target.value }))}
-                placeholder="Enter your first name"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                autoComplete="given-name"
-                required
-              />
-            </div>
+        {isLoadingUser ? (
+          <div className="flex items-center justify-center py-12">
+            <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        ) : (
+          <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  value={profile.firstName}
+                  onChange={(e) => setProfile(prev => ({ ...prev, firstName: e.target.value }))}
+                  placeholder="Enter your first name"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+                  autoComplete="given-name"
+                  required
+                  disabled={isLoadingUser}
+                />
+              </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -172,6 +194,48 @@ export default function ItemUserSettings() {
             )}
           </button>
         </form>
+        )}
+        
+        {/* Additional User Info */}
+        {currentUser && (
+          <div className="mt-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Account Details</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">User ID:</span>
+                <span className="text-gray-900 dark:text-white font-mono text-xs">{currentUser.id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${currentUser.status === 'active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                  {currentUser.status}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Email Verified:</span>
+                <span className="text-gray-900 dark:text-white">{currentUser.emailVerified ? 'Yes' : 'No'}</span>
+              </div>
+              {currentUser.nickname && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Nickname:</span>
+                  <span className="text-gray-900 dark:text-white">{currentUser.nickname}</span>
+                </div>
+              )}
+              {currentUser.roles.length > 0 && (
+                <div className="flex justify-between items-start">
+                  <span className="text-gray-600 dark:text-gray-400">Roles:</span>
+                  <div className="flex flex-wrap gap-1 justify-end">
+                    {currentUser.roles.map((role, index) => (
+                      <span key={index} className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20">
+                        {role}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Password Change */}

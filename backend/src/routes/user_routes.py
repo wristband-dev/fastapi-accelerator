@@ -20,7 +20,8 @@ async def get_user_info(request: Request, user_id: str) -> User:
         # Get user info using the Wristband API - returns validated User
         return await wristband_client.get_user_info(
             user_id=user_id,
-            access_token=access_token
+            access_token=access_token,
+            include_roles=True
         )
     except Exception as e:
         logger.exception(f"Error fetching user info for user {user_id}: {str(e)}")

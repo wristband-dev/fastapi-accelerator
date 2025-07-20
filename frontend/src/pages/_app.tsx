@@ -2,6 +2,7 @@ import type { AppProps } from "next/app";
 import { useEffect } from "react";
 import { WristbandAuthProvider } from "@wristband/react-client-auth";
 import { injectTheme } from "@/utils/theme";
+import { UserProvider } from "@/contexts/UserContext";
 
 import "@/styles/globals.css";
 
@@ -19,7 +20,9 @@ export default function App({ Component, pageProps }: AppProps) {
       sessionUrl={'api/session'}
       disableRedirectOnUnauthenticated={true} // Prevents automatic redirects when not authenticated
     >
-      <Component {...pageProps} />
+      <UserProvider>
+        <Component {...pageProps} />
+      </UserProvider>
     </WristbandAuthProvider>
   )
 }

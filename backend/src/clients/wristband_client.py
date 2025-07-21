@@ -5,6 +5,8 @@ import os
 
 from models.user import User, UsersResponse, UserProfileUpdate
 from models.roles import RoleList
+from models.tenant import Tenant, TenantUpdateRequest
+from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle
 
 logger = logging.getLogger(__name__)
 
@@ -169,3 +171,88 @@ class WristbandApiClient:
 
         data = response.json() if response.content else {}
         return RoleList(**data)
+
+    ############################################################################################
+    # MARK: Tenant APIs
+    ############################################################################################
+    async def get_tenant(self, tenant_id: str, access_token: str) -> Tenant:
+        # Get Tenant API - https://docs.wristband.dev/reference/gettenantv1
+        response: httpx.Response = await self.client.get(
+            self.base_url + f'/tenants/{tenant_id}',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            }
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling get_tenant: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        return Tenant(**data)
+
+    async def update_tenant(self, tenant_id: str, tenant_data: TenantUpdateRequest, access_token: str) -> Tenant:
+        # Update Tenant API - https://docs.wristband.dev/reference/patchtenantv1
+        # Build payload from only the fields that are provided (not None)
+        payload = {}
+        if tenant_data.displayName is not None:
+            payload['displayName'] = tenant_data.displayName
+        if tenant_data.logoUrl is not None:
+            payload['logoUrl'] = tenant_data.logoUrl
+        if tenant_data.description is not None:
+            payload['description'] = tenant_data.description
+
+        response: httpx.Response = await self.client.patch(
+            self.base_url + f'/tenants/{tenant_id}',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json=payload,
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling update_tenant: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        return Tenant(**data)
+
+    ############################################################################################
+    # MARK: Identity Provider APIs
+    ############################################################################################
+    async def upsert_idp_override_toggle(self, tenant_id: str, access_token: str) -> None:
+        # Upsert IDP Override Toggle API - enables tenant-level IDP override
+        payload = {
+            'ownerType': 'TENANT',
+            'ownerId': tenant_id,
+            'status': 'ENABLED'
+        }
+
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/identity-provider-override-toggles?upsert=true',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json=payload,
+        )
+
+        if response.status_code not in [200, 201, 204]:
+            raise ValueError(f'Error calling upsert_idp_override_toggle: {response.status_code} - {response.text}')
+
+    async def upsert_identity_provider(self, idp_data: IdentityProviderRequest, access_token: str) -> IdentityProvider:
+        # Upsert Identity Provider API - https://docs.wristband.dev/reference/upsertidentityproviderv1
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/identity-providers?upsert=true',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json=idp_data.model_dump(),
+        )
+
+        if response.status_code not in [200, 201]:
+            raise ValueError(f'Error calling upsert_identity_provider: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        return IdentityProvider(**data)

@@ -3,7 +3,7 @@ import httpx
 import logging
 import os
 
-from models.user import User, UsersResponse
+from models.user import User, UsersResponse, UserProfileUpdate
 from models.roles import RoleList
 
 logger = logging.getLogger(__name__)
@@ -46,41 +46,28 @@ class WristbandApiClient:
 
         return User(**data)
 
-    async def update_user_nickname(self, user_id: str, nickname: str, access_token: str) -> User:
+    async def update_user(self, user_id: str, user_data: UserProfileUpdate, access_token: str) -> User:
         # Update User API - https://docs.wristband.dev/reference/patchuserv1
+        # Build payload from only the fields that are provided (not None)
+        payload = {}
+        if user_data.givenName is not None:
+            payload['givenName'] = user_data.givenName
+        if user_data.familyName is not None:
+            payload['familyName'] = user_data.familyName
+        if user_data.nickname is not None:
+            payload['nickname'] = user_data.nickname
+
         response: httpx.Response = await self.client.patch(
             self.base_url + f'/users/{user_id}',
             headers={
                 **self.headers,
                 'Authorization': f'Bearer {access_token}'
             },
-            json={
-                'nickname': nickname
-            },
+            json=payload,
         )
 
         if response.status_code != 200:
-            raise ValueError(f'Error calling update_user_nickname: {response.status_code} - {response.text}')
-
-        data = response.json() if response.content else {}
-        return User(**data)
-
-    async def update_user_profile(self, user_id: str, given_name: str, family_name: str, access_token: str) -> User:
-        # Update User API - https://docs.wristband.dev/reference/patchuserv1
-        response: httpx.Response = await self.client.patch(
-            self.base_url + f'/users/{user_id}',
-            headers={
-                **self.headers,
-                'Authorization': f'Bearer {access_token}'
-            },
-            json={
-                'givenName': given_name,
-                'familyName': family_name
-            },
-        )
-
-        if response.status_code != 200:
-            raise ValueError(f'Error calling update_user_profile: {response.status_code} - {response.text}')
+            raise ValueError(f'Error calling update_user: {response.status_code} - {response.text}')
 
         data = response.json() if response.content else {}
         return User(**data)

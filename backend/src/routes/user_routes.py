@@ -37,10 +37,9 @@ async def update_current_user_profile(request: Request, profile_data: UserProfil
         access_token = session_data.access_token
         
         # Update user profile using the Wristband API
-        return await wristband_client.update_user_profile(
+        return await wristband_client.update_user(
             user_id=user_id,
-            given_name=profile_data.givenName,
-            family_name=profile_data.familyName,
+            user_data=profile_data,
             access_token=access_token
         )
     except Exception as e:

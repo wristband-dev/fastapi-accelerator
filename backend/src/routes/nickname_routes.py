@@ -5,7 +5,7 @@ import random
 
 from clients.wristband_client import WristbandApiClient
 from models.session_data import SessionData
-from models.user import User
+from models.user import UserProfileUpdate
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -48,7 +48,8 @@ async def generate_new_nickname(request: Request) -> Response:
 
         # Update the Wristband user with the new nickname
         session_data: SessionData = request.state.session.get()
-        await wristband_client.update_user_nickname(session_data.user_id, nickname, session_data.access_token)
+        user_update = UserProfileUpdate(nickname=nickname)
+        await wristband_client.update_user(session_data.user_id, user_update, session_data.access_token)
         
         return JSONResponse(content={ "nickname": nickname })
     except Exception as e:

@@ -44,8 +44,9 @@ class User(BaseModel):
     roles: list[str] = []
 
 class UserProfileUpdate(BaseModel):
-    givenName: str
-    familyName: str
+    givenName: Optional[str] = None
+    familyName: Optional[str] = None
+    nickname: Optional[str] = None
 
 class UsersResponse(BaseModel):
     items: list[User]

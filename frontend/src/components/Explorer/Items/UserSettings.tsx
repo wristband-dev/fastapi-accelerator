@@ -116,7 +116,9 @@ export default function ItemUserSettings() {
 
   return (
     <div className="p-6 space-y-8">
-      {/* Profile Information */}
+      {/* 
+      MARK: - Profile Information
+      */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-6">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-r from-primary-dark to-primary">
@@ -200,7 +202,9 @@ export default function ItemUserSettings() {
         )}
       </div>
 
-      {/* Password Change */}
+      {/* 
+      MARK: - Password Change
+      */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-6">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-r from-primary to-primary-light">
@@ -317,7 +321,9 @@ export default function ItemUserSettings() {
         </form>
       </div>
 
-      {/* Logout Section */}
+      {/* 
+      MARK: - Logout Section
+      */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-4">
           <div 

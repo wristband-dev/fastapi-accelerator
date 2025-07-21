@@ -4,7 +4,7 @@ import logging
 import os
 
 from models.user import User, UsersResponse, UserProfileUpdate
-from models.role import RoleList
+from models.role import Role, RoleList
 from models.tenant import Tenant, TenantUpdateRequest
 from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle
 
@@ -168,9 +168,26 @@ class WristbandApiClient:
 
         if response.status_code != 200:
             raise ValueError(f'Error calling resolve_assigned_roles_for_users: {response.status_code} - {response.text}')
-
         data = response.json() if response.content else {}
         return RoleList(**data)
+
+    async def query_tenant_roles(self, tenant_id: str, access_token: str) -> list[Role]:
+        # Query Tenant Roles API - https://docs.wristband.dev/reference/querytenantrolesv1
+        response: httpx.Response = await self.client.get(
+            self.base_url + f'/tenants/{tenant_id}/roles',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            }
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling query_tenant_roles: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        # The API returns a list with items property
+        items = data.get('items', []) if isinstance(data, dict) else data
+        return [Role(**item) for item in items]
 
     ############################################################################################
     # MARK: Tenant APIs
@@ -273,3 +290,4 @@ class WristbandApiClient:
         data = response.json() if response.content else []
         items = data.get('items', []) if isinstance(data, dict) else data
         return [IdentityProvider(**item) for item in items]
+

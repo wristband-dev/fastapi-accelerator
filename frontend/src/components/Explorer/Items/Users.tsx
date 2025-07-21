@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { 
   MagnifyingGlassIcon, 
@@ -7,12 +7,21 @@ import {
   TrashIcon,
   PencilIcon,
   ShieldCheckIcon,
-  UserIcon
+  UserIcon,
+  ChevronDownIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline';
 import frontendApiClient from '@/client/frontend-api-client';
 import { redirectToLogin } from "@wristband/react-client-auth";
 import axios from "axios";
 import { User } from '@/models/user';
+
+interface Role {
+  id: string;
+  displayName: string;
+  sku: string;
+  description?: string;
+}
 
 
 export default function ItemUsers() {
@@ -22,7 +31,12 @@ export default function ItemUsers() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<string>('user');
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleApiError = useCallback((error: unknown) => {
     console.error(error);
@@ -37,6 +51,22 @@ export default function ItemUsers() {
     }
   }, []);
 
+  const validateEmail = (email: string) => {
+    if (!email) {
+      setEmailError('Email address is required');
+      return false;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    
+    setEmailError(null);
+    return true;
+  };
+
   const fetchUsers = useCallback(async () => {
     try {
       setIsLoadingUsers(true);
@@ -49,9 +79,44 @@ export default function ItemUsers() {
     }
   }, [handleApiError]);
 
+  const fetchRoles = useCallback(async () => {
+    try {
+      setIsLoadingRoles(true);
+      const response = await frontendApiClient.get('/roles');
+      setAvailableRoles(response.data);
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      // Use default roles if fetch fails
+      setAvailableRoles([
+        { id: 'viewer', displayName: 'Viewer', sku: 'viewer', description: 'Read-only access' },
+        { id: 'user', displayName: 'User', sku: 'user', description: 'Standard access' },
+        { id: 'admin', displayName: 'Admin', sku: 'admin', description: 'Full administrative access' }
+      ]);
+    } finally {
+      setIsLoadingRoles(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+    fetchRoles();
+  }, [fetchUsers, fetchRoles]);
+
+  // Click outside handler for role dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target as Node)) {
+        setIsRoleDropdownOpen(false);
+      }
+    };
+
+    if (isRoleDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isRoleDropdownOpen]);
 
   const filteredUsers = users.filter(user => {
     const searchLower = searchTerm.toLowerCase();
@@ -224,78 +289,249 @@ export default function ItemUsers() {
       {/* 
       MARK: - Invite User Modal
       */}
-      {isInviteModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" onClick={() => setIsInviteModalOpen(false)}>
-              <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
-            </div>
+      {isInviteModalOpen && ReactDOM.createPortal(
+        <>
+          {/* Backdrop */}
+          <div 
+            className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] transition-all duration-300 ${
+              isInviteModalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+            onClick={() => {
+              setIsInviteModalOpen(false);
+              setEmailError(null);
+              setIsRoleDropdownOpen(false);
+            }}
+          />
+          
+          {/* Modal Panel - Optimized for mobile */}
+          <div className={`fixed inset-0 sm:inset-y-0 sm:right-0 z-[9999] w-full sm:max-w-md lg:max-w-lg bg-white dark:bg-gray-900 shadow-2xl transform transition-all duration-300 ease-out overflow-hidden ${
+            isInviteModalOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}>
+            <div className="flex flex-col h-full max-h-screen">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-r from-primary to-primary-dark">
+                    <UserPlusIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                    Invite New User
+                  </h3>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    setIsInviteModalOpen(false);
+                    setEmailError(null);
+                    setIsRoleDropdownOpen(false);
+                  }}
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                >
+                  <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 sm:mx-0 sm:h-10 sm:w-10">
-                    <UserPlusIcon className="h-6 w-6 text-primary" />
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto overscroll-contain">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 pb-safe">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => {
+                        setInviteEmail(e.target.value);
+                        if (e.target.value) {
+                          validateEmail(e.target.value);
+                        } else {
+                          setEmailError(null);
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          validateEmail(e.target.value);
+                        }
+                      }}
+                      className={`w-full px-4 py-3 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-800 dark:text-white transition-all duration-200 ${
+                        emailError 
+                          ? 'border-red-300 dark:border-red-600' 
+                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                      }`}
+                      placeholder="user@example.com"
+                      required
+                    />
+                    {emailError ? (
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">{emailError}</p>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        The user will receive an invitation email to join the organization
+                      </p>
+                    )}
                   </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                      Invite New User
-                    </h3>
-                    <div className="mt-4 space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Email Address
-                        </label>
-                        <input
-                          type="email"
-                          value={inviteEmail}
-                          onChange={(e) => setInviteEmail(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-                          placeholder="user@example.com"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Role
-                        </label>
-                        <select
-                          value={inviteRole}
-                          onChange={(e) => setInviteRole(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
-                        >
-                          <option value="viewer">Viewer</option>
-                          <option value="user">User</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      </div>
+
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Roles (Optional)
+                    </label>
+                    <div className="relative" ref={roleDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-800 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 flex items-center justify-between"
+                      >
+                        <span className="block truncate">
+                          {selectedRoles.length === 0 ? (
+                            <span className="text-gray-500 dark:text-gray-400">Select roles...</span>
+                          ) : (
+                            <span className="text-gray-900 dark:text-white">
+                              {selectedRoles.length} role{selectedRoles.length !== 1 ? 's' : ''} selected
+                            </span>
+                          )}
+                        </span>
+                        <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isRoleDropdownOpen ? 'transform rotate-180' : ''}`} />
+                      </button>
+
+                      {/* Dropdown Panel */}
+                      {isRoleDropdownOpen && (
+                        <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
+                          {isLoadingRoles ? (
+                            <div className="px-4 py-3 text-center">
+                              <svg className="animate-spin h-5 w-5 text-primary mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            </div>
+                          ) : availableRoles.length === 0 ? (
+                            <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                              No roles available
+                            </div>
+                          ) : (
+                            <div className="py-1">
+                              {availableRoles.map((role) => (
+                                <button
+                                  key={role.id}
+                                  type="button"
+                                  onClick={() => {
+                                    if (selectedRoles.includes(role.sku)) {
+                                      setSelectedRoles(selectedRoles.filter(r => r !== role.sku));
+                                    } else {
+                                      setSelectedRoles([...selectedRoles, role.sku]);
+                                    }
+                                  }}
+                                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150 flex items-center justify-between group"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {role.displayName}
+                                      </span>
+                                      {role.sku && (
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                                          ({role.sku})
+                                        </span>
+                                      )}
+                                    </div>
+                                    {role.description && (
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        {role.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="ml-3 flex-shrink-0">
+                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                                      selectedRoles.includes(role.sku)
+                                        ? 'bg-primary border-primary'
+                                        : 'border-gray-300 dark:border-gray-600 group-hover:border-gray-400 dark:group-hover:border-gray-500'
+                                    }`}>
+                                      {selectedRoles.includes(role.sku) && (
+                                        <CheckIcon className="w-3 h-3 text-white" />
+                                      )}
+                                    </div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
+
+                    {/* Selected Roles Pills */}
+                    {selectedRoles.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedRoles.map((roleId) => {
+                          const role = availableRoles.find(r => r.sku === roleId);
+                          return (
+                            <span
+                              key={roleId}
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                            >
+                              {role?.displayName || roleId}
+                              <button
+                                type="button"
+                                onClick={() => setSelectedRoles(selectedRoles.filter(r => r !== roleId))}
+                                className="ml-1 hover:text-primary-dark"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Optionally assign roles to the invited user. You can assign roles later if needed.
+                    </p>
                   </div>
+
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+
+              {/* Footer */}
+              <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  className="btn-primary w-full sm:w-auto px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3"
+                  disabled={!inviteEmail || !!emailError}
+                  className="btn-primary w-full sm:w-auto px-6 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                   onClick={() => {
+                    if (!validateEmail(inviteEmail)) {
+                      return;
+                    }
+                    
                     // Handle invite
+                    console.log('Inviting user:', inviteEmail, 'with roles:', selectedRoles);
                     setIsInviteModalOpen(false);
                     setInviteEmail('');
-                    setInviteRole('user');
+                    setSelectedRoles([]);
+                    setEmailError(null);
+                    setIsRoleDropdownOpen(false);
                   }}
                 >
                   Send Invite
                 </button>
                 <button
                   type="button"
-                  className="mt-3 w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:mr-3"
-                  onClick={() => setIsInviteModalOpen(false)}
+                  className="mt-3 w-full sm:w-auto px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:mr-3 transition-all duration-200"
+                  onClick={() => {
+                    setIsInviteModalOpen(false);
+                    setEmailError(null);
+                    setIsRoleDropdownOpen(false);
+                  }}
                 >
                   Cancel
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </>,
+        document.body
       )}
     </div>
   );

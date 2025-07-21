@@ -23,6 +23,37 @@ type ExplorerSection = 'user' | 'users' | 'admin' | 'secrets';
 export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProps) {
   const [activeSection, setActiveSection] = useState<ExplorerSection>('user');
 
+  // Prevent body scroll when sidebar is open
+  React.useEffect(() => {
+    if (isOpen) {
+      // Store original body overflow
+      const originalOverflow = document.body.style.overflow;
+      // Prevent body scroll but keep position static for bounce scrolling
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore body overflow
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
+  // Handle Escape key to close sidebar
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
+
   const navigationItems = [
     { id: 'user' as const, label: 'User Settings', icon: UserIcon },
     { id: 'users' as const, label: 'Users', icon: UsersIcon },
@@ -78,45 +109,46 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
             </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="space-y-1">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveSection(item.id)}
-                  className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
-                    activeSection === item.id
-                      ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                  }`}
-                >
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
-                    activeSection === item.id
-                      ? 'bg-white/20'
-                      : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
-                  }`}>
-                    <item.icon className={`w-4 h-4 transition-all duration-200 ${
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Navigation - now inside scrollable area */}
+            <nav className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="space-y-1">
+                {navigationItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveSection(item.id)}
+                    className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
+                      activeSection === item.id
+                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                    }`}
+                  >
+                    <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+                      activeSection === item.id
+                        ? 'bg-white/20'
+                        : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
+                    }`}>
+                      <item.icon className={`w-4 h-4 transition-all duration-200 ${
+                        activeSection === item.id
+                          ? 'text-white'
+                          : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                      }`} />
+                    </div>
+                    <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
                       activeSection === item.id
                         ? 'text-white'
-                        : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                    }`} />
-                  </div>
-                  <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
-                    activeSection === item.id
-                      ? 'text-white'
-                      : 'text-gray-900 dark:text-gray-100'
-                  }`}>
-                    {item.label}
-                  </span>
-                
-                </button>
-              ))}
-            </div>
-          </nav>
+                        : 'text-gray-900 dark:text-gray-100'
+                    }`}>
+                      {item.label}
+                    </span>
+                  
+                  </button>
+                ))}
+              </div>
+            </nav>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50">
+            {/* Content */}
             <div className="transform transition-all duration-300 ease-out">
               {renderContent()}
             </div>

@@ -8,6 +8,7 @@ from .users_routes import router as users_router
 from .tenant_routes import router as tenant_router
 from .idp_routes import router as idp_router
 from .secret_routes import router as secret_router
+from .role_routes import router as role_router
 
 router = APIRouter()
 router.include_router(auth_router, prefix='/api/auth')
@@ -18,3 +19,4 @@ router.include_router(users_router, prefix='/api/users')
 router.include_router(tenant_router, prefix='/api/tenant')
 router.include_router(idp_router, prefix='/api/idp')
 router.include_router(secret_router, prefix='/api/secrets')
+router.include_router(role_router, prefix='/api/roles')

@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import logging
 
 from clients.wristband_client import WristbandApiClient
-from models.user import User, UserProfileUpdate
+from models.user import User, UserProfileUpdate, PasswordChangeRequest
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -45,6 +45,46 @@ async def update_current_user_profile(request: Request, profile_data: UserProfil
     except Exception as e:
         logger.exception(f"Error updating current user profile: {str(e)}")
         raise
+
+@router.post('/me/change-password')
+async def change_current_user_password(request: Request, password_data: PasswordChangeRequest) -> Response:
+    try:
+        # Get user ID and access token from session
+        session_data = request.state.session.get()
+        user_id = session_data.user_id
+        access_token = session_data.access_token
+        
+        # Change password using the Wristband API
+        await wristband_client.change_password(
+            user_id=user_id,
+            current_password=password_data.currentPassword,
+            new_password=password_data.newPassword,
+            access_token=access_token
+        )
+        
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except ValueError as e:
+        # Wristband API error - could be wrong current password, password policy violation, or permissions
+        error_msg = str(e)
+        if "400" in error_msg:
+            logger.warning(f"Password change failed for user {session_data.user_id}: {error_msg}")
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"error": "invalid_password", "message": "Password change failed. Please check your current password or ensure your new password meets security requirements."}
+            )
+        elif "403" in error_msg:
+            logger.warning(f"Password change unauthorized for user {session_data.user_id}: {error_msg}")
+            logger.info("WRISTBAND CONFIGURATION REQUIRED: To enable password changes, go to your Wristband Dashboard > Applications > [Your App] > Permissions and ensure 'Change Password' permission is enabled for your application.")
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={"error": "permission_denied", "message": "You are not authorized to change passwords. Please contact your administrator to enable password change permissions."}
+            )
+        else:
+            logger.exception(f"Error changing password for user {session_data.user_id}: {error_msg}")
+            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        logger.exception(f"Unexpected error changing password: {str(e)}")
+        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @router.get('/{user_id}', response_model=User)
 async def get_user_info(request: Request, user_id: str) -> User:

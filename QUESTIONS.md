@@ -2,6 +2,10 @@
 
 - storage for logo and icon (replace the hard coded public images with this)
 
+- setup roles (defualt role doesnt have access to update password?)
+    - automatically setup role admin and viewer
+    - CANT UPDATE PASSWORD DONT HAVE PERMISSIONS - incorrect passwords kicking user out of app
+
 - how to set up "sign up" button 
     - create tenant
     - add user

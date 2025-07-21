@@ -38,6 +38,14 @@ export default function ItemUserSettings() {
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  // Password validation state
+  const [passwordValidation, setPasswordValidation] = useState({
+    hasCurrentPassword: false,
+    hasNewPassword: false,
+    passwordsMatch: false,
+    isNewPasswordValid: false
+  });
 
   // Update profile when currentUser changes
   useEffect(() => {
@@ -48,6 +56,21 @@ export default function ItemUserSettings() {
       });
     }
   }, [currentUser]);
+
+  // Real-time password validation
+  useEffect(() => {
+    const hasCurrentPassword = password.currentPassword.trim().length > 0;
+    const hasNewPassword = password.newPassword.trim().length >= 8;
+    const passwordsMatch = password.newPassword === password.confirmPassword && password.confirmPassword.length > 0;
+    const isNewPasswordValid = password.newPassword.length >= 8 && password.newPassword.length <= 64;
+
+    setPasswordValidation({
+      hasCurrentPassword,
+      hasNewPassword,
+      passwordsMatch,
+      isNewPasswordValid
+    });
+  }, [password.currentPassword, password.newPassword, password.confirmPassword]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,17 +100,24 @@ export default function ItemUserSettings() {
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Client-side validation
     if (password.newPassword !== password.confirmPassword) {
       alert('New passwords do not match');
+      return;
+    }
+    
+    if (password.currentPassword === password.newPassword) {
+      alert('New password must be different from current password');
       return;
     }
     
     setIsUpdatingPassword(true);
     
     try {
-      // TODO: Implement API call to update password
-      console.log('Updating password');
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await frontendApiClient.post('/user/me/change-password', {
+        currentPassword: password.currentPassword,
+        newPassword: password.newPassword
+      });
       
       // Clear password fields on success
       setPassword({
@@ -95,8 +125,23 @@ export default function ItemUserSettings() {
         newPassword: '',
         confirmPassword: ''
       });
+      
+      // Show success message
+      console.log('Password updated successfully');
     } catch (error) {
       console.error('Error updating password:', error);
+      if (axios.isAxiosError(error)) {
+        const errorData = error.response?.data;
+        if (error.response?.status === 400) {
+          alert(errorData?.message || 'Password change failed. Please check your current password or ensure your new password meets security requirements.');
+        } else if (error.response?.status === 403) {
+          alert(errorData?.message || 'You are not authorized to change passwords. Please contact your administrator to enable password change permissions.');
+        } else {
+          alert('An error occurred while updating your password. Please try again.');
+        }
+      } else {
+        alert('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -230,6 +275,8 @@ export default function ItemUserSettings() {
                 className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="current-password"
                 required
+                minLength={8}
+                maxLength={64}
               />
               <button
                 type="button"
@@ -258,6 +305,8 @@ export default function ItemUserSettings() {
                 className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
                 autoComplete="new-password"
                 required
+                minLength={8}
+                maxLength={64}
               />
               <button
                 type="button"
@@ -271,6 +320,9 @@ export default function ItemUserSettings() {
                 )}
               </button>
             </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Password must be 8-64 characters long
+            </p>
           </div>
           
           <div>
@@ -283,9 +335,17 @@ export default function ItemUserSettings() {
                 value={password.confirmPassword}
                 onChange={(e) => setPassword(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 placeholder="Confirm your new password"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+                className={`w-full px-4 py-3 pr-12 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 ${
+                  password.confirmPassword.length > 0 
+                    ? passwordValidation.passwordsMatch 
+                      ? 'border-green-300 dark:border-green-600' 
+                      : 'border-red-300 dark:border-red-600'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
                 autoComplete="new-password"
                 required
+                minLength={8}
+                maxLength={64}
               />
               <button
                 type="button"
@@ -299,11 +359,16 @@ export default function ItemUserSettings() {
                 )}
               </button>
             </div>
+            {password.confirmPassword.length > 0 && (
+              <p className={`text-xs mt-1 ${passwordValidation.passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                {passwordValidation.passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+              </p>
+            )}
           </div>
           
           <button
             type="submit"
-            disabled={isUpdatingPassword}
+            disabled={isUpdatingPassword || !passwordValidation.hasCurrentPassword || !passwordValidation.hasNewPassword || !passwordValidation.passwordsMatch || !passwordValidation.isNewPasswordValid}
             className="w-full btn-primary py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
           >
             {isUpdatingPassword ? (

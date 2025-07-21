@@ -48,6 +48,10 @@ class UserProfileUpdate(BaseModel):
     familyName: Optional[str] = None
     nickname: Optional[str] = None
 
+class PasswordChangeRequest(BaseModel):
+    currentPassword: str
+    newPassword: str
+
 class UsersResponse(BaseModel):
     items: list[User]
     itemsPerPage: int

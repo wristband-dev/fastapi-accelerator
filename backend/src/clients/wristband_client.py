@@ -72,6 +72,24 @@ class WristbandApiClient:
         data = response.json() if response.content else {}
         return User(**data)
 
+    async def change_password(self, user_id: str, current_password: str, new_password: str, access_token: str) -> None:
+        # Change Password API - https://docs.wristband.dev/reference/changepasswordv1
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/change-password',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                'userId': user_id,
+                'currentPassword': current_password,
+                'newPassword': new_password
+            },
+        )
+
+        if response.status_code != 204:
+            raise ValueError(f'Error calling change_password: {response.status_code} - {response.text}')
+
     ############################################################################################
     # MARK: Tenant Users APIs
     ############################################################################################

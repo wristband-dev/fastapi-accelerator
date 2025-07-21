@@ -46,6 +46,13 @@ export default function ItemUserSettings() {
     passwordsMatch: false,
     isNewPasswordValid: false
   });
+  
+  // Track if profile data has changed
+  const hasProfileDataChanged = () => {
+    if (!currentUser) return false;
+    return profile.firstName !== (currentUser.givenName || '') || 
+           profile.lastName !== (currentUser.familyName || '');
+  };
 
   // Update profile when currentUser changes
   useEffect(() => {
@@ -228,7 +235,7 @@ export default function ItemUserSettings() {
           
           <button
             type="submit"
-            disabled={isUpdatingProfile}
+            disabled={isUpdatingProfile || !hasProfileDataChanged()}
             className="w-full btn-primary py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
           >
             {isUpdatingProfile ? (

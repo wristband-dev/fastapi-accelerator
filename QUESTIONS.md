@@ -1,4 +1,6 @@
 - logout url redirecting to wb login even tho its set in wb
+- add google auth without client id and secret
+
 
 - storage for logo and icon (replace the hard coded public images with this)
     - can we do icon storage?

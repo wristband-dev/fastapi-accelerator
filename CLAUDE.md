@@ -234,3 +234,57 @@ users = await firestore_db.query_documents(
 - Infrastructure managed via Terraform (see infrastructure/README.md)
 - Service accounts needed for Firestore access
 - Enable secure cookies in production (remove `dangerously_disable_secure_cookies`)
+
+## Linting and Code Quality
+
+### Backend
+```bash
+# Run linting/type checking (commands TBD - check README or ask user)
+cd backend
+# Add lint commands when identified
+```
+
+### Frontend
+```bash
+# Run linting/type checking
+cd frontend
+npm run lint       # If available
+npm run typecheck  # If available
+```
+
+**Important**: When completing tasks, always run lint and typecheck commands to ensure code quality. If commands are not documented, ask the user for the correct commands and suggest adding them to this file.
+
+## Wristband API Integration
+
+### Identity Provider Management
+- Query tenant IDPs: `GET /tenants/{tenant-id}/identity-providers`
+- Upsert IDP: `POST /identity-providers?upsert=true`
+- Enable IDP override: `POST /identity-provider-override-toggles?upsert=true`
+
+### User Management
+- Get user: `GET /users/{user-id}`
+- Update user: `PATCH /users/{user-id}`
+- Change password: `POST /change-password`
+- Query tenant users: `GET /tenants/{tenant-id}/users`
+
+### Tenant Management
+- Get tenant: `GET /tenants/{tenant-id}`
+- Update tenant: `PATCH /tenants/{tenant-id}`
+
+## Key Frontend Components
+
+### Explorer Sidebar Items
+- `Admin.tsx` - Organization settings and SSO configuration
+- `UserSettings.tsx` - User profile and password management
+- `Users.tsx` - Tenant user management
+- `Dashboard.tsx` - Analytics dashboard
+
+### Change Detection Pattern
+Update buttons are disabled when no changes are detected:
+```typescript
+const hasDataChanged = () => {
+  return currentValue !== originalValue;
+};
+
+<button disabled={isLoading || !hasDataChanged()}>Update</button>
+```

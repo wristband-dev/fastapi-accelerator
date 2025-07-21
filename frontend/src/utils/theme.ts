@@ -11,6 +11,8 @@
 // - Semantic: success, warning, error, info
 // - Utilities: btn-primary, btn-secondary, btn-accent, alert-success, alert-error, etc.
 
+// MARK: - Theme Configuration
+
 // 1. Define the customizable theme configuration
 export interface CustomTheme {
   // Primary brand colors
@@ -33,6 +35,8 @@ export interface CustomTheme {
   info?: string;
 }
 
+// MARK: - User Theme Settings
+
 // 2. User's custom theme - EDIT THIS TO CUSTOMIZE YOUR THEME
 export const userTheme: CustomTheme = {
   primary: '#00AA81',  // Your brand color - this is the only required field
@@ -49,6 +53,8 @@ export const userTheme: CustomTheme = {
   // error: '#ef4444',         // Red
   // info: '#3b82f6',          // Blue
 };
+
+// MARK: - Color Utilities
 
 // 3. Color manipulation utilities
 class ColorUtils {
@@ -143,6 +149,8 @@ function generateComplementaryColor(hex: string): string {
   return ColorUtils.rgbToHex(compR, compG, compB);
 }
 
+// MARK: - Theme Types
+
 // 4. Generate complete theme with all variations
 export interface Theme {
   colors: {
@@ -177,6 +185,8 @@ export interface Theme {
   // CSS variable names for runtime injection
   cssVars: Record<string, string>;
 }
+
+// MARK: - Theme Generator
 
 // 5. Theme generator
 export function generateTheme(custom: CustomTheme): Theme {
@@ -232,14 +242,20 @@ export function generateTheme(custom: CustomTheme): Theme {
   return { colors, cssVars };
 }
 
+// MARK: - Theme Instance
+
 // 6. Current theme instance
 export const theme = generateTheme(userTheme);
+
+// MARK: - Utility Functions
 
 // 7. Utility functions for theme access
 export const colors = theme.colors;
 
 // Get theme colors for use in JavaScript when needed
 export const { primary, primaryLight, primaryDark, secondary, secondaryLight, secondaryDark, accent, success, warning, error, info } = theme.colors;
+
+// MARK: - Tailwind Integration
 
 // 8. Tailwind-compatible color palette generator
 export function getTailwindColors() {
@@ -266,10 +282,14 @@ export function getTailwindColors() {
   };
 }
 
+// MARK: - React Hook
+
 // 9. React hook for theme access (optional)
 export function useTheme() {
   return theme;
 }
+
+// MARK: - Theme Injection
 
 // 10. Theme injection function
 export function injectTheme() {

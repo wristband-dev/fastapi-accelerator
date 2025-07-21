@@ -1,41 +1,36 @@
-from typing import Any, Optional
-from fastapi import APIRouter, Request, Response, status
+
+from typing import Optional
+from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 import logging
 
-from clients.wristband_client import WristbandApiClient
-from models.identity_provider import IdentityProvider, UpsertIdpRequest
+from database.firestore_database import set_document
+from models.secret import Secret
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-wristband_client = WristbandApiClient()
 
-@router.post('/upsert', response_model=IdentityProvider)
-async def upsert_identity_provider(request: Request, idp_request: UpsertIdpRequest) -> IdentityProvider:
+@router.post('/upsert', 
+# response_model=
+)
+async def upsert_secret(request: Request, secret_request: Secret):
     """
-    Upsert (create or update) an identity provider for the current tenant
+    Upsert (create or update) a secret for the current tenant
     """
     try:
         # Get tenant ID and access token from session
         session_data = request.state.session.get()
         tenant_id = session_data.tenant_id
-        access_token = session_data.access_token
         
-        # Ensure the IDP is configured for the current tenant
-        idp_data = idp_request.idp
-        idp_data.ownerId = tenant_id
-        
-        # First, enable IDP override toggle for the tenant
-        await wristband_client.upsert_idp_override_toggle(
-            tenant_id=tenant_id,
-            access_token=access_token
+        # Update the secret in firestore
+        set_document(
+            collection_path=f"tenants/{tenant_id}/secrets",
+            doc_id=secret_request.sku,
+            data=secret_request.model_dump()
         )
+
+
         
-        # Then upsert the identity provider
-        return await wristband_client.upsert_identity_provider(
-            idp_data=idp_data,
-            access_token=access_token
-        )
     except ValueError as e:
         # Wristband API error - could be invalid data or validation errors
         error_msg = str(e)

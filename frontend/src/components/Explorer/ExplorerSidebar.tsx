@@ -42,26 +42,26 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop - only on desktop */}
       <div 
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300 ${
+        className={`hidden sm:block fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
       />
       
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transform transition-all duration-300 ease-out ${
+      <div className={`fixed inset-0 sm:inset-y-0 sm:left-0 z-50 w-full sm:max-w-md lg:max-w-xl xl:max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transform transition-all duration-300 ease-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3">
               <img 
                 src="/wristband_logo_dark.svg" 
                 alt="Wristband" 
-                className="h-8 w-auto"
+                className="h-6 sm:h-8 w-auto"
               />
             </div>
             
@@ -80,7 +80,7 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
                 <button
                   key={item.id}
                   onClick={() => setActiveSection(item.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-all duration-200 group ${
+                  className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
                     activeSection === item.id
                       ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -97,7 +97,7 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
                         : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                     }`} />
                   </div>
-                  <span className={`font-medium transition-all duration-200 ${
+                  <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
                     activeSection === item.id
                       ? 'text-white'
                       : 'text-gray-900 dark:text-gray-100'

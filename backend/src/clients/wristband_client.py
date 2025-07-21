@@ -256,3 +256,20 @@ class WristbandApiClient:
 
         data = response.json() if response.content else {}
         return IdentityProvider(**data)
+    
+    async def get_identity_providers(self, tenant_id: str, access_token: str) -> list[IdentityProvider]:
+        # Query Tenant Identity Providers API - https://docs.wristband.dev/reference/querytenantidentityprovidersv1
+        response = await self.client.get(
+            f"{self.base_url}/tenants/{tenant_id}/identity-providers",
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Accept': 'application/json',
+            }
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling get_identity_providers: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else []
+        items = data.get('items', []) if isinstance(data, dict) else data
+        return [IdentityProvider(**item) for item in items]

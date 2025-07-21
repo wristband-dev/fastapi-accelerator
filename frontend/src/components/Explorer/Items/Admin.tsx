@@ -53,6 +53,28 @@ export default function ItemAdmin() {
   const [isOktaEnabled, setIsOktaEnabled] = useState<boolean>(true);
   const [isOktaIdpInProgress, setOktaIdpInProgress] = useState<boolean>(false);
   const [showClientSecret, setShowClientSecret] = useState(false);
+  const [oktaLoadError, setOktaLoadError] = useState<string | null>(null);
+  
+  // Track if tenant data has changed
+  const hasTenantDataChanged = () => {
+    if (!tenant) return false;
+    return tenantDisplayName !== tenant.displayName || 
+           tenantLogoUrl !== (tenant.logoUrl || '');
+  };
+  
+  // Track if Okta IDP data has changed
+  const hasOktaIdpDataChanged = () => {
+    if (!currentOktaIdp) {
+      // If no current IDP, check if any fields are filled
+      return domainName.trim() !== '' || clientId.trim() !== '' || clientSecret.trim() !== '';
+    }
+    
+    // Check against current IDP values
+    return domainName !== currentOktaIdp.domainName ||
+           clientId !== currentOktaIdp.protocol.clientId ||
+           clientSecret !== currentOktaIdp.protocol.clientSecret ||
+           isOktaEnabled !== (currentOktaIdp.status === 'ENABLED');
+  };
   
   // Initialize tenant data when user loads
   useEffect(() => {
@@ -65,6 +87,7 @@ export default function ItemAdmin() {
       };
       setTenant(initialTenant);
       loadTenantData();
+      loadOktaIdpData();
     }
   }, [currentUser]);
   
@@ -79,6 +102,39 @@ export default function ItemAdmin() {
       console.error('Error loading tenant data:', error);
       if (axios.isAxiosError(error)) {
         console.error('API Error:', error.response?.data);
+      }
+    }
+  };
+  
+  const loadOktaIdpData = async () => {
+    try {
+      const response = await frontendApiClient.get('/idp/okta');
+      if (response.data) {
+        const idpData = response.data;
+        setCurrentOktaIdp(idpData);
+        setDomainName(idpData.domainName || '');
+        setClientId(idpData.protocol.clientId || '');
+        setClientSecret(idpData.protocol.clientSecret || '');
+        setIsOktaEnabled(idpData.status === 'ENABLED');
+        setOktaLoadError(null);
+      }
+    } catch (error) {
+      // 404 is expected when no Okta IDP exists yet
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // No Okta IDP configured yet - this is normal
+        setOktaLoadError(null);
+        return;
+      }
+      
+      // For other errors, set error message
+      console.error('Error loading Okta IDP data:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('API Error:', error.response?.data);
+        if (error.response?.status === 500) {
+          setOktaLoadError('Unable to retrieve existing Okta configuration. You can still create a new configuration.');
+        } else {
+          setOktaLoadError('Error loading Okta configuration. Please try again later.');
+        }
       }
     }
   };
@@ -240,7 +296,7 @@ export default function ItemAdmin() {
           
           <button
             type="submit"
-            disabled={isUpdateTenantInProgress || !tenantDisplayName.trim()}
+            disabled={isUpdateTenantInProgress || !tenantDisplayName.trim() || !hasTenantDataChanged()}
             className="w-full btn-primary py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
           >
             {isUpdateTenantInProgress ? (
@@ -379,12 +435,23 @@ export default function ItemAdmin() {
                   <li>Copy the Client ID and Client Secret from Okta to the fields above</li>
                 </ol>
               </div>
+              
+              {oktaLoadError && (
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
+                  <div className="flex items-start space-x-3">
+                    <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      {oktaLoadError}
+                    </p>
+                  </div>
+                </div>
+              )}
             </>
           )}
           
           <button
             type="submit"
-            disabled={isOktaIdpInProgress || !isOktaEnabled || (isOktaEnabled && (!domainName.trim() || !clientId.trim() || !clientSecret.trim()))}
+            disabled={isOktaIdpInProgress || !isOktaEnabled || (isOktaEnabled && (!domainName.trim() || !clientId.trim() || !clientSecret.trim())) || !hasOktaIdpDataChanged()}
             className="w-full btn-primary py-3 px-6 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
           >
             {isOktaIdpInProgress ? (

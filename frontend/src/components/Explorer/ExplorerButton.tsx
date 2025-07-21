@@ -16,7 +16,7 @@ export default function ExplorerButton({ onOpenExplorer, isOpen }: ExplorerButto
         <div className="relative w-8 h-8 flex items-center justify-center">
           {/* Wristband Symbol */}
           <img 
-            src="/wristband_symbol.svg" 
+            src="/wristband_icon.svg" 
             alt="Wristband" 
             className="w-8 h-8"
           />

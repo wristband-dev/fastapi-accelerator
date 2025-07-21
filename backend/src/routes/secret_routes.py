@@ -1,102 +1,162 @@
 
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 import logging
 
-from database.firestore_database import set_document
+from database.firestore_database import set_document, doc_exists, get_document, query_documents, delete_document
 from models.secret import Secret
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-@router.post('/upsert', 
-# response_model=
-)
+@router.post('/upsert', response_model=Secret)
 async def upsert_secret(request: Request, secret_request: Secret):
     """
     Upsert (create or update) a secret for the current tenant
     """
     try:
-        # Get tenant ID and access token from session
+        # Get tenant ID from session
         session_data = request.state.session.get()
         tenant_id = session_data.tenant_id
+        
+        # Convert Pydantic model to dict with proper serialization
+        secret_data = secret_request.model_dump()
+        # Convert HttpUrl to string if present
+        if secret_data.get('host'):
+            secret_data['host'] = str(secret_data['host'])
         
         # Update the secret in firestore
         set_document(
             collection_path=f"tenants/{tenant_id}/secrets",
             doc_id=secret_request.sku,
-            data=secret_request.model_dump()
+            data=secret_data
         )
-
-
         
-    except ValueError as e:
-        # Wristband API error - could be invalid data or validation errors
-        error_msg = str(e)
-        if "400" in error_msg:
-            logger.warning(f"IDP upsert failed for tenant {session_data.tenant_id}: {error_msg}")
-            # Check for specific validation errors
-            if "domainName" in error_msg or "domain" in error_msg.lower():
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"error": "invalid_domain_name", "message": "The provided domain name is invalid or already in use."}
-                )
-            else:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"error": "invalid_idp_data", "message": "The provided identity provider data is invalid. Please check your inputs."}
-                )
-        elif "401" in error_msg or "403" in error_msg:
-            logger.warning(f"IDP upsert unauthorized for tenant {session_data.tenant_id}: {error_msg}")
-            return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN,
-                content={"error": "permission_denied", "message": "You are not authorized to configure identity providers."}
-            )
-        else:
-            logger.exception(f"Error upserting IDP for tenant {session_data.tenant_id}: {error_msg}")
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"error": "internal_error", "message": "An unexpected error occurred while configuring the identity provider."}
-            )
+        logger.info(f"Successfully upserted secret with SKU: {secret_request.sku} for tenant: {tenant_id}")
+        return secret_request
+        
     except Exception as e:
-        logger.exception(f"Unexpected error upserting IDP: {str(e)}")
+        logger.exception(f"Unexpected error upserting secret: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"error": "internal_error", "message": "An unexpected error occurred while configuring the identity provider."}
+            content={"error": "internal_error", "message": "An unexpected error occurred while saving the secret."}
         )
 
-@router.get('/okta', response_model=Optional[IdentityProvider])
-async def get_okta_identity_provider(request: Request):
+@router.get('/check/{sku}')
+async def check_secret_exists(request: Request, sku: str):
     """
-    Get the Okta identity provider configuration for the current tenant
+    Check if a secret with the given SKU exists for the current tenant
     """
     try:
-        # Get tenant ID and access token from session
+        # Get tenant ID from session
         session_data = request.state.session.get()
         tenant_id = session_data.tenant_id
-        access_token = session_data.access_token
         
-        # Get all identity providers for the tenant
-        idps = await wristband_client.get_identity_providers(
-            tenant_id=tenant_id,
-            access_token=access_token
+        # Check if document exists
+        exists = doc_exists(
+            collection_path=f"tenants/{tenant_id}/secrets",
+            doc_id=sku
         )
         
-        # Find the Okta IDP
-        okta_idp = next((idp for idp in idps if idp.type == 'OKTA'), None)
-        
-        if not okta_idp:
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content={"error": "not_found", "message": "No Okta identity provider found for this tenant."}
-            )
-        
-        return okta_idp
+        return {"exists": exists}
         
     except Exception as e:
-        logger.exception(f"Error fetching Okta IDP: {str(e)}")
+        logger.exception(f"Error checking secret existence: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"error": "internal_error", "message": "An unexpected error occurred while fetching the identity provider."}
+            content={"error": "internal_error", "message": "An unexpected error occurred while checking the secret."}
+        )
+
+@router.get('/', response_model=List[Secret])
+async def get_secrets(request: Request):
+    """
+    Get all secrets for the current tenant
+    """
+    try:
+        # Get tenant ID from session
+        session_data = request.state.session.get()
+        tenant_id = session_data.tenant_id
+        
+        # Query all secrets for this tenant
+        secrets = query_documents(
+            collection_path=f"tenants/{tenant_id}/secrets",
+            order_by_field="displayName",
+            order_direction="ASC"
+        )
+        
+        return secrets
+        
+    except Exception as e:
+        logger.exception(f"Error fetching secrets: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "internal_error", "message": "An unexpected error occurred while fetching secrets."}
+        )
+
+@router.get('/{sku}', response_model=Secret)
+async def get_secret(request: Request, sku: str):
+    """
+    Get a specific secret by SKU for the current tenant
+    """
+    try:
+        # Get tenant ID from session
+        session_data = request.state.session.get()
+        tenant_id = session_data.tenant_id
+        
+        # Get the secret
+        secret = get_document(
+            collection_path=f"tenants/{tenant_id}/secrets",
+            doc_id=sku
+        )
+        
+        if not secret:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": "not_found", "message": f"Secret with SKU '{sku}' not found."}
+            )
+        
+        return secret
+        
+    except Exception as e:
+        logger.exception(f"Error fetching secret: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "internal_error", "message": "An unexpected error occurred while fetching the secret."}
+        )
+
+@router.delete('/{sku}')
+async def delete_secret(request: Request, sku: str):
+    """
+    Delete a secret by SKU for the current tenant
+    """
+    try:
+        # Get tenant ID from session
+        session_data = request.state.session.get()
+        tenant_id = session_data.tenant_id
+        
+        # Check if secret exists
+        if not doc_exists(
+            collection_path=f"tenants/{tenant_id}/secrets",
+            doc_id=sku
+        ):
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": "not_found", "message": f"Secret with SKU '{sku}' not found."}
+            )
+        
+        # Delete the secret
+        delete_document(
+            collection_path=f"tenants/{tenant_id}/secrets",
+            doc_id=sku
+        )
+        
+        logger.info(f"Successfully deleted secret with SKU: {sku} for tenant: {tenant_id}")
+        return {"message": "Secret deleted successfully"}
+        
+    except Exception as e:
+        logger.exception(f"Error deleting secret: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "internal_error", "message": "An unexpected error occurred while deleting the secret."}
         )

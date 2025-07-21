@@ -4,19 +4,21 @@ import {
   UserIcon, 
   UsersIcon, 
   Cog6ToothIcon,
-  ChevronRightIcon 
+  ChevronRightIcon,
+  KeyIcon 
 } from '@heroicons/react/24/outline';
 
 import ItemUserSettings from './Items/UserSettings';
 import ItemUsers from './Items/Users';
 import ItemAdmin from './Items/Admin';
+import ItemSecrets from './Items/Secrets';
 
 interface ExplorerSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type ExplorerSection = 'user' | 'users' | 'admin';
+type ExplorerSection = 'user' | 'users' | 'admin' | 'secrets';
 
 export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProps) {
   const [activeSection, setActiveSection] = useState<ExplorerSection>('user');
@@ -25,6 +27,7 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
     { id: 'user' as const, label: 'User Settings', icon: UserIcon },
     { id: 'users' as const, label: 'Users', icon: UsersIcon },
     { id: 'admin' as const, label: 'Admin', icon: Cog6ToothIcon },
+    { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
   ];
 
   const renderContent = () => {
@@ -35,6 +38,8 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
         return <ItemUsers />;
       case 'admin':
         return <ItemAdmin />;
+      case 'secrets':
+        return <ItemSecrets />;
       default:
         return <ItemUserSettings />;
     }

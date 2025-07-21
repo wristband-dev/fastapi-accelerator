@@ -4,7 +4,7 @@ import logging
 import os
 
 from models.user import User, UsersResponse, UserProfileUpdate
-from models.roles import RoleList
+from models.role import RoleList
 from models.tenant import Tenant, TenantUpdateRequest
 from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle
 

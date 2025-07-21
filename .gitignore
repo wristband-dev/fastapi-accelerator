@@ -1,3 +1,5 @@
+perk-party-demo-app-copy/*
+
 __pycache__
 .env
 *.DS_Store

@@ -65,6 +65,26 @@ class WristbandApiClient:
         data = response.json() if response.content else {}
         return User(**data)
 
+    async def update_user_profile(self, user_id: str, given_name: str, family_name: str, access_token: str) -> User:
+        # Update User API - https://docs.wristband.dev/reference/patchuserv1
+        response: httpx.Response = await self.client.patch(
+            self.base_url + f'/users/{user_id}',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                'givenName': given_name,
+                'familyName': family_name
+            },
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling update_user_profile: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        return User(**data)
+
     ############################################################################################
     # MARK: Tenant Users APIs
     ############################################################################################

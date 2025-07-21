@@ -43,6 +43,10 @@ class User(BaseModel):
     # added after user info from resolve assigned roles
     roles: list[str] = []
 
+class UserProfileUpdate(BaseModel):
+    givenName: str
+    familyName: str
+
 class UsersResponse(BaseModel):
     items: list[User]
     itemsPerPage: int

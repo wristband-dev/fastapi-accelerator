@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { EyeIcon, EyeSlashIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { redirectToLogout } from "@wristband/react-client-auth";
 import { useUser } from '@/contexts/UserContext';
+import frontendApiClient from '@/client/frontend-api-client';
+import axios from 'axios';
 
 interface UserProfileData {
   firstName: string;
   lastName: string;
-  email: string;
 }
 
 interface PasswordData {
@@ -16,11 +17,10 @@ interface PasswordData {
 }
 
 export default function ItemUserSettings() {
-  const { currentUser, isLoadingUser } = useUser();
+  const { currentUser, isLoadingUser, setCurrentUser } = useUser();
   const [profile, setProfile] = useState<UserProfileData>({
     firstName: '',
-    lastName: '',
-    email: ''
+    lastName: ''
   });
   
   const [password, setPassword] = useState<PasswordData>({
@@ -44,8 +44,7 @@ export default function ItemUserSettings() {
     if (currentUser) {
       setProfile({
         firstName: currentUser.givenName || '',
-        lastName: currentUser.familyName || '',
-        email: currentUser.email
+        lastName: currentUser.familyName || ''
       });
     }
   }, [currentUser]);
@@ -55,11 +54,21 @@ export default function ItemUserSettings() {
     setIsUpdatingProfile(true);
     
     try {
-      // TODO: Implement API call to update profile
-      console.log('Updating profile:', profile);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      const response = await frontendApiClient.patch('/user/me', {
+        givenName: profile.firstName,
+        familyName: profile.lastName
+      });
+      
+      // Update the current user in context with the updated data
+      setCurrentUser(response.data);
+      
+      // Show success message (you can implement a toast system later)
+      console.log('Profile updated successfully');
     } catch (error) {
       console.error('Error updating profile:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('API Error:', error.response?.data);
+      }
     } finally {
       setIsUpdatingProfile(false);
     }
@@ -164,15 +173,9 @@ export default function ItemUserSettings() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email Address
               </label>
-              <input
-                type="email"
-                value={profile.email}
-                onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="Enter your email address"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-                autoComplete="email"
-                required
-              />
+              <div className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                {currentUser?.email || 'Loading...'}
+              </div>
             </div>
           </div>
           

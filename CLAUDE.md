@@ -6,6 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Wristband Multi-Tenant Demo Application showcasing enterprise authentication with FastAPI (Python) backend and Next.js (React) frontend. The application demonstrates the Backend for Frontend (BFF) pattern with session-based authentication, CSRF protection, and true multi-tenant data isolation.
 
+**Key Features:**
+- OAuth2 authorization code flow with Wristband
+- Session-based authentication with encrypted cookies
+- Automatic token refresh before expiration
+- CSRF protection using synchronizer token pattern
+- Multi-tenant data isolation with Firestore
+- Enterprise SSO support (Okta, Google, etc.)
+- User and tenant management
+
 ## Essential Commands
 
 ### Development

@@ -64,24 +64,23 @@ async def change_current_user_password(request: Request, password_data: Password
         
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except ValueError as e:
-        # Wristband API error - could be wrong current password, password policy violation, or permissions
+        # Wristband API error - just return the error message itself with the status code
         error_msg = str(e)
         if "400" in error_msg:
-            logger.warning(f"Password change failed for user {session_data.user_id}: {error_msg}")
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"error": "invalid_password", "message": "Password change failed. Please check your current password or ensure your new password meets security requirements."}
+                content={"error": error_msg}
             )
         elif "403" in error_msg:
-            logger.warning(f"Password change unauthorized for user {session_data.user_id}: {error_msg}")
-            logger.info("WRISTBAND CONFIGURATION REQUIRED: To enable password changes, go to your Wristband Dashboard > Applications > [Your App] > Permissions and ensure 'Change Password' permission is enabled for your application.")
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
-                content={"error": "permission_denied", "message": "You are not authorized to change passwords. Please contact your administrator to enable password change permissions."}
+                content={"error": error_msg}
             )
         else:
-            logger.exception(f"Error changing password for user {session_data.user_id}: {error_msg}")
-            return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"error": error_msg}
+            )
     except Exception as e:
         logger.exception(f"Unexpected error changing password: {str(e)}")
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -9,7 +9,7 @@ class Role(BaseModel):
     name: str
     ownerId: str
     ownerType: str
-    permissionBoundaryId: str
+    permissionBoundaryId: Optional[str] = None
     tenantVisibility: str
     tenantVisibilityInclusionList: list[str]
     type: str

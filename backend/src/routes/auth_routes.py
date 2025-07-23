@@ -68,6 +68,7 @@ async def logout(request: Request) -> Response:
             refresh_token=session_data.refresh_token if session_data else None,
             tenant_custom_domain=session_data.tenant_custom_domain if session_data else None,
             tenant_domain_name=session_data.tenant_domain_name if session_data else None,
+            redirect_url="http://localhost:3001"
         )
     )
 

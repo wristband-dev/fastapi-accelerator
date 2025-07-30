@@ -89,8 +89,8 @@ class WristbandApiClient:
             },
         )
 
-        if response.status_code != 204:
-            raise ValueError(f'Error calling change_password: {response.status_code} - {response.text}')
+        if response.status_code != 200:
+            raise ValueError(f'Error changing password: {response.status_code} - {response.text}')
 
     ############################################################################################
     # MARK: Tenant Users APIs

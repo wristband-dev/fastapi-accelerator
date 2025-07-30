@@ -55,35 +55,15 @@ async def change_current_user_password(request: Request, password_data: Password
         access_token = session_data.access_token
         
         # Change password using the Wristband API
-        await wristband_client.change_password(
+        return await wristband_client.change_password(
             user_id=user_id,
             current_password=password_data.currentPassword,
             new_password=password_data.newPassword,
             access_token=access_token
         )
-        
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-    except ValueError as e:
-        # Wristband API error - just return the error message itself with the status code
-        error_msg = str(e)
-        if "400" in error_msg:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"error": error_msg}
-            )
-        elif "403" in error_msg:
-            return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN,
-                content={"error": error_msg}
-            )
-        else:
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"error": error_msg}
-            )
     except Exception as e:
-        logger.exception(f"Unexpected error changing password: {str(e)}")
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.exception(f"Error updating current user profile: {str(e)}")
+        raise
 
 @router.get('/{user_id}', response_model=User)
 async def get_user_info(request: Request, user_id: str) -> User:

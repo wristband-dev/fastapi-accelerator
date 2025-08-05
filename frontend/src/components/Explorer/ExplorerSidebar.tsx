@@ -25,33 +25,37 @@ type ExplorerSection = 'user' | 'users' | 'admin' | 'secrets';
 
 export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProps) {
   const [activeSection, setActiveSection] = useState<ExplorerSection>('user');
-  const { setCurrentTenant, setTenantOptions, setIsLoadingTenants } = useUser();
+  const { setCurrentTenant, setTenantOptions, setIsLoadingTenants, setUserRoles, setIsLoadingRoles, hasAdminRole } = useUser();
 
-  // Fetch tenant data when sidebar opens
+  // Fetch tenant data and user roles when sidebar opens
   useEffect(() => {
     if (!isOpen) return;
 
-    const fetchTenantData = async () => {
+    const fetchUserData = async () => {
       try {
         setIsLoadingTenants(true);
+        setIsLoadingRoles(true);
         
-        // Fetch current tenant and tenant options in parallel
-        const [tenantResponse, optionsResponse] = await Promise.all([
+        // Fetch current tenant, tenant options, and user roles in parallel
+        const [tenantResponse, optionsResponse, rolesResponse] = await Promise.all([
           frontendApiClient.get('/tenant/me'),
-          frontendApiClient.get('/tenant/options')
+          frontendApiClient.get('/tenant/options'),
+          frontendApiClient.get('/user/me/roles')
         ]);
         
         setCurrentTenant(tenantResponse.data);
         setTenantOptions(optionsResponse.data);
+        setUserRoles(rolesResponse.data);
       } catch (error) {
-        console.error('Error fetching tenant data:', error);
+        console.error('Error fetching user data:', error);
       } finally {
         setIsLoadingTenants(false);
+        setIsLoadingRoles(false);
       }
     };
 
-    fetchTenantData();
-  }, [isOpen, setCurrentTenant, setTenantOptions, setIsLoadingTenants]);
+    fetchUserData();
+  }, [isOpen, setCurrentTenant, setTenantOptions, setIsLoadingTenants, setUserRoles, setIsLoadingRoles]);
 
   // Prevent body scroll when sidebar is open
   React.useEffect(() => {
@@ -87,9 +91,16 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
   const navigationItems = [
     { id: 'user' as const, label: 'User Settings', icon: UserIcon },
     { id: 'users' as const, label: 'Users', icon: UsersIcon },
-    { id: 'admin' as const, label: 'Admin', icon: Cog6ToothIcon },
+    ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: Cog6ToothIcon }] : []),
     { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
   ];
+
+  // Reset active section to 'user' if user doesn't have admin role and is on admin section
+  useEffect(() => {
+    if (!hasAdminRole && activeSection === 'admin') {
+      setActiveSection('user');
+    }
+  }, [hasAdminRole, activeSection]);
 
   const renderContent = () => {
     switch (activeSection) {

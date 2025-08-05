@@ -5,6 +5,7 @@ import logging
 
 from clients.wristband_client import WristbandApiClient
 from models.user import User, UserProfileUpdate, PasswordChangeRequest
+from models.role import Role
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -62,8 +63,35 @@ async def change_current_user_password(request: Request, password_data: Password
             access_token=access_token
         )
     except Exception as e:
-        logger.exception(f"Error updating current user profile: {str(e)}")
+        logger.exception(f"Error changing user password: {str(e)}")
         raise
+
+@router.get('/me/roles', response_model=list[Role])
+async def get_current_user_roles(request: Request) -> list[Role]:
+    """
+    Get the current user's assigned roles
+    """
+    try:
+        # Get session data
+        session_data = request.state.session.get()
+        user_id = session_data.user_id
+        access_token = session_data.access_token
+        
+        # Get user's assigned roles using the Wristband API
+        roles = await wristband_client.get_user_assigned_roles(
+            user_id=user_id,
+            access_token=access_token
+        )
+        
+        logger.info(f"Successfully fetched {len(roles)} roles for user: {user_id}")
+        return roles
+        
+    except Exception as e:
+        logger.exception(f"Error fetching user roles: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "internal_error", "message": "An unexpected error occurred while fetching user roles."}
+        )
 
 @router.get('/{user_id}', response_model=User)
 async def get_user_info(request: Request, user_id: str) -> User:

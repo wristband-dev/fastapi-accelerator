@@ -172,6 +172,30 @@ class WristbandApiClient:
         data = response.json() if response.content else {}
         return RoleList(**data)
 
+    async def resolve_assignable_roles_for_user(self, user_id: str, access_token: str) -> list[Role]:
+        # Resolve Assignable Roles for a User API - https://docs.wristband.dev/reference/resolveassignablerolesforuserv1
+        response: httpx.Response = await self.client.post(
+            self.base_url + f'/users/{user_id}/resolve-assignable-roles',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            }
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling resolve_assignable_roles_for_user: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        # The API returns a list with items property
+        items = data.get('items', []) if isinstance(data, dict) else data
+        return [Role(**item) for item in items]
+
+    async def get_user_assigned_roles(self, user_id: str, access_token: str) -> list[Role]:
+        # Get user's currently assigned roles using the existing resolve_assigned_roles_for_users method
+        roles_response = await self.resolve_assigned_roles_for_users([user_id], access_token)
+        user_roles = next((user_role for user_role in roles_response.items if user_role.userId == user_id), None)
+        return user_roles.roles if user_roles else []
+
     async def query_tenant_roles(self, tenant_id: str, access_token: str) -> list[Role]:
         # Query Tenant Roles API - https://docs.wristband.dev/reference/querytenantrolesv1
         response: httpx.Response = await self.client.get(

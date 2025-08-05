@@ -6,6 +6,7 @@ import os
 from models.user import User, UsersResponse, UserProfileUpdate
 from models.role import Role, RoleList
 from models.tenant import Tenant, TenantUpdateRequest
+from models.tenant_option import TenantOption
 from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle
 
 logger = logging.getLogger(__name__)
@@ -290,4 +291,29 @@ class WristbandApiClient:
         data = response.json() if response.content else []
         items = data.get('items', []) if isinstance(data, dict) else data
         return [IdentityProvider(**item) for item in items]
+
+    ############################################################################################
+    # MARK: Tenant Options APIs
+    ############################################################################################
+    async def fetch_tenants(self, access_token: str, application_id: str, email: str) -> list[TenantOption]:
+        # Fetch Tenants API - https://docs.wristband.dev/reference/fetchtenantsv1
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/tenant-discovery/fetch-tenants',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                'applicationId': application_id,
+                'email': email,
+                'clientId': os.getenv("CLIENT_ID")
+            }
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error calling fetch_tenants: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        items = data.get('items', [])
+        return [TenantOption(**item) for item in items]
 

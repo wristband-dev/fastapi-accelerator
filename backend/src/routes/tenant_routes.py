@@ -2,9 +2,11 @@ from typing import Any
 from fastapi import APIRouter, Request, Response, status
 from fastapi.responses import JSONResponse
 import logging
+import os
 
 from clients.wristband_client import WristbandApiClient
 from models.tenant import Tenant, TenantUpdateRequest
+from models.tenant_option import TenantOption
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -74,4 +76,42 @@ async def update_current_tenant(request: Request, tenant_data: TenantUpdateReque
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"error": "internal_error", "message": "An unexpected error occurred while updating the tenant."}
+        )
+
+@router.get('/options', response_model=list[TenantOption])
+async def get_tenant_options(request: Request) -> list[TenantOption]:
+    """
+    Get all tenant options available for the current user
+    """
+    try:
+        # Get session data
+        session_data = request.state.session.get()
+        access_token = session_data.access_token
+        
+        # Get application ID from environment
+        application_id = os.getenv("APPLICATION_ID")
+        if not application_id:
+            raise ValueError("APPLICATION_ID environment variable is required")
+        
+        # Get current user to get email
+        current_user = await wristband_client.get_user_info(
+            user_id=session_data.user_id,
+            access_token=access_token
+        )
+        
+        # Fetch tenant options from Wristband
+        tenant_options = await wristband_client.fetch_tenants(
+            access_token=access_token,
+            application_id=application_id,
+            email=current_user.email
+        )
+        
+        logger.info(f"Successfully fetched {len(tenant_options)} tenant options for user: {current_user.email}")
+        return tenant_options
+        
+    except Exception as e:
+        logger.exception(f"Error fetching tenant options: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "internal_error", "message": "An unexpected error occurred while fetching tenant options."}
         )

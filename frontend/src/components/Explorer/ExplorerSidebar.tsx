@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   XMarkIcon, 
   UserIcon, 
@@ -12,6 +12,9 @@ import ItemUserSettings from './Items/UserSettings';
 import ItemUsers from './Items/Users';
 import ItemAdmin from './Items/Admin';
 import ItemSecrets from './Items/Secrets';
+import TenantSwitcher from '@/components/TenantSwitcher';
+import { useUser } from '@/contexts/UserContext';
+import frontendApiClient from '@/client/frontend-api-client';
 
 interface ExplorerSidebarProps {
   isOpen: boolean;
@@ -22,6 +25,33 @@ type ExplorerSection = 'user' | 'users' | 'admin' | 'secrets';
 
 export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProps) {
   const [activeSection, setActiveSection] = useState<ExplorerSection>('user');
+  const { setCurrentTenant, setTenantOptions, setIsLoadingTenants } = useUser();
+
+  // Fetch tenant data when sidebar opens
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchTenantData = async () => {
+      try {
+        setIsLoadingTenants(true);
+        
+        // Fetch current tenant and tenant options in parallel
+        const [tenantResponse, optionsResponse] = await Promise.all([
+          frontendApiClient.get('/tenant/me'),
+          frontendApiClient.get('/tenant/options')
+        ]);
+        
+        setCurrentTenant(tenantResponse.data);
+        setTenantOptions(optionsResponse.data);
+      } catch (error) {
+        console.error('Error fetching tenant data:', error);
+      } finally {
+        setIsLoadingTenants(false);
+      }
+    };
+
+    fetchTenantData();
+  }, [isOpen, setCurrentTenant, setTenantOptions, setIsLoadingTenants]);
 
   // Prevent body scroll when sidebar is open
   React.useEffect(() => {
@@ -101,12 +131,15 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
               />
             </div>
             
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            >
-              <XMarkIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            </button>
+            <div className="flex items-center space-x-3">
+              <TenantSwitcher />
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+              >
+                <XMarkIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
           </div>
 
           {/* Scrollable content area */}

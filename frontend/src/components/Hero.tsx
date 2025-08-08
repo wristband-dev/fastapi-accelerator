@@ -1,8 +1,9 @@
 import React from 'react';
 import { redirectToLogin } from "@wristband/react-client-auth";
-import { ChevronRightIcon, ShieldCheckIcon, BoltIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon, ShieldCheckIcon, BoltIcon, UserGroupIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function Hero() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const handleLogin = () => {
     redirectToLogin('/api/auth/login');
   };
@@ -14,7 +15,7 @@ export default function Hero() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-gray-900 dark:to-blue-950">
       {/* Navigation */}
-      <nav className="z-10 p-6 md:absolute md:top-0 md:left-0 md:right-0">
+      <nav className="relative z-10 p-4 md:absolute md:top-0 md:left-0 md:right-0 md:p-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <img
             src="/wristband_logo.svg"
@@ -31,7 +32,7 @@ export default function Hero() {
             className="hidden dark:block"
           />
           
-          <div className="flex items-center gap-4">
+          <div className="hidden xs:flex items-center gap-4">
             <button
               onClick={handleLogin}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
@@ -45,7 +46,43 @@ export default function Hero() {
               Sign Up
             </button>
           </div>
+
+          <div className="xs:hidden">
+            <button
+              aria-label="Toggle menu"
+              aria-expanded={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {isMobileMenuOpen ? (
+                <XMarkIcon className="w-6 h-6" />
+              ) : (
+                <Bars3Icon className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {isMobileMenuOpen && (
+          <div id="mobile-menu" className="xs:hidden absolute left-0 right-0 top-full z-20">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg ring-1 ring-black/5 p-3 flex flex-col gap-2">
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); handleLogin(); }}
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md text-center font-medium"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); handleSignUp(); }}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                >
+                  Sign Up
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Content */}

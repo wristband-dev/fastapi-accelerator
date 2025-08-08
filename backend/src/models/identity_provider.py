@@ -36,6 +36,7 @@ class IdentityProviderRequest(BaseModel):
     protocol: IdpProtocol
     jitProvisioningEnabled: bool = True
     status: str = "ENABLED"
+    
 
 class IdpOverrideToggle(BaseModel):
     ownerType: str

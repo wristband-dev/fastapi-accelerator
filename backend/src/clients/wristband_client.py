@@ -290,7 +290,7 @@ class WristbandApiClient:
                 **self.headers,
                 'Authorization': f'Bearer {access_token}'
             },
-            json=idp_data.model_dump(),
+            json=idp_data.model_dump(exclude_none=True),
         )
 
         if response.status_code not in [200, 201]:

@@ -77,7 +77,6 @@ async def get_okta_identity_provider(request: Request):
     Get the Okta identity provider configuration for the current tenant
     """
     try:
-        # Get tenant ID and access token from session
         session_data = request.state.session.get()
         tenant_id = session_data.tenant_id
         access_token = session_data.access_token
@@ -87,7 +86,6 @@ async def get_okta_identity_provider(request: Request):
             tenant_id=tenant_id,
             access_token=access_token
         )
-        
         # Find the Okta IDP
         okta_idp = next((idp for idp in idps if idp.type == 'OKTA'), None)
         
@@ -98,10 +96,40 @@ async def get_okta_identity_provider(request: Request):
             )
         
         return okta_idp
-        
     except Exception as e:
         logger.exception(f"Error fetching Okta IDP: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"error": "internal_error", "message": "An unexpected error occurred while fetching the identity provider."}
+        )
+
+@router.get('/okta/redirect-url')
+async def get_okta_redirect_url(request: Request):
+    """
+    Resolve the Okta redirect URL from Wristband for the current tenant
+    """
+    try:
+        session_data = request.state.session.get()
+        tenant_id = session_data.tenant_id
+        access_token = session_data.access_token
+
+        results = await wristband_client.resolve_idp_redirect_url_overrides(
+            tenant_id=tenant_id,
+            access_token=access_token,
+        )
+
+        okta_config = next((cfg for cfg in results if cfg.identityProviderType == 'OKTA' and cfg.redirectUrls), None)
+        if not okta_config:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": "not_found", "message": "No Okta redirect URL found for this tenant."},
+            )
+
+        return {"redirectUrl": okta_config.redirectUrls[0].redirectUrl}
+
+    except Exception as e:
+        logger.exception(f"Error resolving Okta redirect URL: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "internal_error", "message": "An unexpected error occurred while resolving redirect URL."},
         )

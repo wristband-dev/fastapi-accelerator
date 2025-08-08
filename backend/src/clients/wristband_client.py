@@ -7,7 +7,7 @@ from models.user import User, UsersResponse, UserProfileUpdate
 from models.role import Role, RoleList
 from models.tenant import Tenant, TenantUpdateRequest
 from models.tenant_option import TenantOption
-from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle
+from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle, IdpRedirectUrlConfig
 
 logger = logging.getLogger(__name__)
 
@@ -315,6 +315,27 @@ class WristbandApiClient:
         data = response.json() if response.content else []
         items = data.get('items', []) if isinstance(data, dict) else data
         return [IdentityProvider(**item) for item in items]
+
+    async def resolve_idp_redirect_url_overrides(self, tenant_id: str, access_token: str) -> list[IdpRedirectUrlConfig]:
+        # Resolve IDP Redirect URL Overrides - returns configured redirect URLs for IDPs in tenant
+        response = await self.client.post(
+            f"{self.base_url}/tenants/{tenant_id}/identity-providers/resolve-redirect-urls",
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            json={'identityProviderTypes': ['OKTA']},
+        )
+
+        if response.status_code != 200:
+            raise ValueError(
+                f'Error calling resolve_idp_redirect_url_overrides: {response.status_code} - {response.text}'
+            )
+
+        data = response.json() if response.content else {}
+        items = data.get('items', [])
+        return [IdpRedirectUrlConfig(**item) for item in items]
 
     ############################################################################################
     # MARK: Tenant Options APIs

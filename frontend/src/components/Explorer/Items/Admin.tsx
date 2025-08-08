@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { 
   BuildingOfficeIcon, 
   PhotoIcon, 
@@ -54,6 +55,9 @@ export default function ItemAdmin() {
   const [isOktaIdpInProgress, setOktaIdpInProgress] = useState<boolean>(false);
   const [showClientSecret, setShowClientSecret] = useState(false);
   const [oktaLoadError, setOktaLoadError] = useState<string | null>(null);
+  // Okta redirect URL display/copy state
+  const [oktaRedirectUrl, setOktaRedirectUrl] = useState<string>('');
+  const [copiedRedirectUrl, setCopiedRedirectUrl] = useState<boolean>(false);
   
   // Track if tenant data has changed
   const hasTenantDataChanged = () => {
@@ -90,6 +94,39 @@ export default function ItemAdmin() {
       loadOktaIdpData();
     }
   }, [currentUser]);
+
+  // Load Okta Redirect URL from backend (resolved from Wristband)
+  useEffect(() => {
+    const loadOktaRedirectUrl = async () => {
+      try {
+        const response = await frontendApiClient.get('/idp/okta/redirect-url');
+        const { redirectUrl } = response.data || {};
+        setOktaRedirectUrl(redirectUrl || '');
+        setOktaLoadError(null);
+      } catch (error) {
+        console.error('Error loading Okta redirect URL:', error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 404) {
+            setOktaRedirectUrl('');
+            setOktaLoadError(null);
+          } else {
+            setOktaLoadError('Unable to resolve Okta Redirect URL.');
+          }
+        }
+      }
+    };
+    loadOktaRedirectUrl();
+  }, []);
+
+  const handleCopyOktaRedirectUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(oktaRedirectUrl);
+      setCopiedRedirectUrl(true);
+      setTimeout(() => setCopiedRedirectUrl(false), 1500);
+    } catch (err) {
+      console.error('Failed to copy redirect URL:', err);
+    }
+  };
   
   const loadTenantData = async () => {
     try {
@@ -332,6 +369,38 @@ export default function ItemAdmin() {
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Configure Okta SSO for seamless enterprise authentication
             </p>
+          </div>
+        </div>
+
+        {/* Okta Redirect URL helper */}
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded-xl">
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+            Use this Redirect URL in your Okta application configuration.
+          </p>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={oktaRedirectUrl}
+              readOnly
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            />
+            <button
+              type="button"
+              onClick={handleCopyOktaRedirectUrl}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              {copiedRedirectUrl ? (
+                <>
+                  <CheckIcon className="w-5 h-5" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <ClipboardIcon className="w-5 h-5" />
+                  Copy
+                </>
+              )}
+            </button>
           </div>
         </div>
 

@@ -45,3 +45,14 @@ class IdpOverrideToggle(BaseModel):
 
 class UpsertIdpRequest(BaseModel):
     idp: IdentityProviderRequest
+
+
+class IdpRedirectUrl(BaseModel):
+    protocolType: Optional[str] = None
+    redirectUrl: str
+    redirectDomainName: Optional[str] = None
+
+
+class IdpRedirectUrlConfig(BaseModel):
+    identityProviderType: str
+    redirectUrls: List[IdpRedirectUrl]

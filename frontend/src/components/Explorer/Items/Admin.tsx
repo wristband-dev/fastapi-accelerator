@@ -314,14 +314,14 @@ export default function ItemAdmin() {
         </form>
       </div>
 
-      {/* SSO Configuration */}
+      {/* Okta SSO Configuration */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-6">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-r from-primary to-primary-light">
             <KeyIcon className="w-5 h-5 text-white" />
           </div>
           <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-            SSO Configuration
+            Okta SSO Configuration
           </h3>
         </div>
         

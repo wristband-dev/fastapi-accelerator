@@ -337,10 +337,6 @@ class WristbandApiClient:
             'status': 'ENABLED',
         }
 
-        print('--------------------------------')
-        print(payload)
-        print('--------------------------------')
-
         response: httpx.Response = await self.client.post(
             self.base_url + '/identity-providers?upsert=true',
             headers={

@@ -10,6 +10,18 @@ class IdpProtocol(BaseModel):
     keyId: Optional[str] = None
     privateKey: Optional[str] = None
     scopes: Optional[List[str]] = None
+    # OAuth2 extras
+    redirectUrl: Optional[str] = None
+    redirectDomainName: Optional[str] = None
+    # SAML2 extras
+    idpEntityId: Optional[str] = None
+    idpSsoUrl: Optional[str] = None
+    idpSigningCerts: Optional[List[str]] = None
+    idpMetadataUrl: Optional[str] = None
+    allowIdpInitiatedSso: Optional[bool] = None
+    spDomainName: Optional[str] = None
+    spEntityId: Optional[str] = None
+    acsUrl: Optional[str] = None
 
 class IdentityProvider(BaseModel):
     id: Optional[str] = None

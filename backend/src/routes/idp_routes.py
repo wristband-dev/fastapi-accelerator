@@ -14,6 +14,26 @@ from models.identity_provider import IdentityProvider, UpsertIdpRequest, UpsertG
 router = APIRouter()
 logger = logging.getLogger(__name__)
 wristband_client = WristbandApiClient()
+# MARK: - Get All IDPs
+@router.get('/providers', response_model=list[IdentityProvider])
+async def get_identity_providers(request: Request) -> list[IdentityProvider]:
+    try:
+        session_data = request.state.session.get()
+        tenant_id = session_data.tenant_id
+        access_token = session_data.access_token
+
+        idps = await wristband_client.get_identity_providers(
+            tenant_id=tenant_id,
+            access_token=access_token,
+        )
+        return idps
+    except Exception as e:
+        logger.exception(f"Error fetching identity providers: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "internal_error", "message": "An unexpected error occurred while fetching identity providers."}
+        )
+
 
 # MARK: - Upsert IDP
 @router.post('/upsert', response_model=IdentityProvider)

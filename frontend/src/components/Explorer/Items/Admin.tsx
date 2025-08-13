@@ -59,6 +59,11 @@ export default function ItemAdmin() {
   // Okta redirect URL display/copy state
   const [oktaRedirectUrl, setOktaRedirectUrl] = useState<string>('');
   const [copiedRedirectUrl, setCopiedRedirectUrl] = useState<boolean>(false);
+  // Google SSO resolved info display
+  const [googleSpEntityId, setGoogleSpEntityId] = useState<string>('');
+  const [googleAcsUrl, setGoogleAcsUrl] = useState<string>('');
+  const [copiedGoogleSpEntityId, setCopiedGoogleSpEntityId] = useState<boolean>(false);
+  const [copiedGoogleAcsUrl, setCopiedGoogleAcsUrl] = useState<boolean>(false);
 
   // Google SSO (SAML) upload state
   const [googleMetadataFile, setGoogleMetadataFile] = useState<File | null>(null);
@@ -134,6 +139,37 @@ export default function ItemAdmin() {
     } catch (err) {
       console.error('Failed to copy redirect URL:', err);
     }
+  };
+  
+  // Load IDPs and extract Google Workspace SAML details
+  useEffect(() => {
+    const loadIdentityProviders = async () => {
+      try {
+        const resp = await frontendApiClient.get('/idp/providers');
+        const providers = Array.isArray(resp.data) ? resp.data : [];
+        const google = providers.find((p: any) => p?.type === 'GOOGLE_WORKSPACE' && p?.protocol?.type === 'SAML2');
+        if (google?.protocol) {
+          setGoogleSpEntityId(google.protocol.spEntityId || '');
+          setGoogleAcsUrl(google.protocol.acsUrl || '');
+        } else {
+          setGoogleSpEntityId('');
+          setGoogleAcsUrl('');
+        }
+      } catch (e) {
+        // Silent: not critical
+        setGoogleSpEntityId('');
+        setGoogleAcsUrl('');
+      }
+    };
+    loadIdentityProviders();
+  }, []);
+
+  const handleCopy = async (value: string, setCopied: (v: boolean) => void) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
   };
   
   const loadTenantData = async () => {
@@ -479,6 +515,54 @@ export default function ItemAdmin() {
               </div>
             </div>
           )}
+
+          {(googleSpEntityId || googleAcsUrl) && (
+            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Use these Google SAML Service Provider URLs in your Google Admin configuration.
+              </p>
+              {googleSpEntityId && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SP Entity ID</label>
+                  <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={googleSpEntityId}
+                    readOnly
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(googleSpEntityId, setCopiedGoogleSpEntityId)}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  >
+                    {copiedGoogleSpEntityId ? (<><CheckIcon className="w-5 h-5" />Copied</>) : (<><ClipboardIcon className="w-5 h-5" />Copy</>)}
+                  </button>
+                  </div>
+                </div>
+              )}
+              {googleAcsUrl && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ACS URL</label>
+                  <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={googleAcsUrl}
+                    readOnly
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(googleAcsUrl, setCopiedGoogleAcsUrl)}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  >
+                    {copiedGoogleAcsUrl ? (<><CheckIcon className="w-5 h-5" />Copied</>) : (<><ClipboardIcon className="w-5 h-5" />Copy</>)}
+                  </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -508,6 +592,9 @@ export default function ItemAdmin() {
           <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
             Use this Redirect URL in your Okta application configuration.
           </p>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Redirect URL
+          </label>
           <div className="flex items-center gap-2">
             <input
               type="text"

@@ -1,4 +1,6 @@
 perk-party-demo-app-copy/*
+wristband-okta.md
+wristband-google-sso.xml
 
 __pycache__
 .env

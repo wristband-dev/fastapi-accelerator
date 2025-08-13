@@ -256,12 +256,20 @@ export default function ItemAdmin() {
 
   const testOktaConnection = async () => {
     try {
-      // TODO: Implement connection test API call
-      console.log('Testing Okta connection...');
-      alert('Connection test feature coming soon!');
+      const response = await frontendApiClient.post('/idp/okta/test-connection', {
+        domainName,
+        clientId,
+      });
+      const { ok } = response.data || {};
+      if (ok) {
+        alert('Okta connection successful.');
+      } else {
+        alert('Okta connection failed. Please verify domain, client ID, and client secret.');
+      }
     } catch (error) {
+      // Backend now always returns 200 with ok:false for errors, but keep a fallback
       console.error('Error testing Okta connection:', error);
-      alert('Connection test failed. Please check your configuration.');
+      alert('Unexpected error during connection test.');
     }
   };
 

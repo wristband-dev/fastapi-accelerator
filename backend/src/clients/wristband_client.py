@@ -337,6 +337,25 @@ class WristbandApiClient:
         items = data.get('items', [])
         return [IdpRedirectUrlConfig(**item) for item in items]
 
+    async def test_idp_connection(self, tenant_id: str, access_token: str, idp_type: str = 'OKTA') -> bool:
+        """Ping the Wristband test-connection endpoint for the given IDP type."""
+        response = await self.client.post(
+            f"{self.base_url}/tenants/{tenant_id}/identity-providers/test-connection",
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            json={'identityProviderType': idp_type},
+        )
+
+        if response.status_code != 200:
+            raise ValueError(
+                f'Error calling test_idp_connection: {response.status_code} - {response.text}'
+            )
+        data = response.json() if response.content else {}
+        return bool(data.get('ok', True))
+
     ############################################################################################
     # MARK: Tenant Options APIs
     ############################################################################################

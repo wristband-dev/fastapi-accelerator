@@ -9,7 +9,7 @@ export default function Hero() {
   };
 
   const handleSignUp = () => {
-    // TODO: Implement signup flow
+    window.location.href = 'https://pythonaccelator-donato.us.wristband.dev/signup';
   };
 
   return (

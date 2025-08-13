@@ -52,7 +52,7 @@ export default function ItemAdmin() {
   const [domainName, setDomainName] = useState<string>('');
   const [clientId, setClientId] = useState<string>('');
   const [clientSecret, setClientSecret] = useState<string>('');
-  const [isOktaEnabled, setIsOktaEnabled] = useState<boolean>(true);
+  const [isOktaEnabled, setIsOktaEnabled] = useState<boolean>(false);
   const [isOktaIdpInProgress, setOktaIdpInProgress] = useState<boolean>(false);
   const [showClientSecret, setShowClientSecret] = useState(false);
   const [oktaLoadError, setOktaLoadError] = useState<string | null>(null);
@@ -196,14 +196,16 @@ export default function ItemAdmin() {
         setDomainName(idpData.domainName || '');
         setClientId(idpData.protocol.clientId || '');
         setClientSecret(idpData.protocol.clientSecret || '');
-        setIsOktaEnabled(idpData.status === 'ENABLED');
+        // If an Okta IDP exists, enable the toggle to show the configuration info
+        setIsOktaEnabled(true);
         setOktaLoadError(null);
       }
     } catch (error) {
       // 404 is expected when no Okta IDP exists yet
       if (axios.isAxiosError(error) && error.response?.status === 404) {
-        // No Okta IDP configured yet - this is normal
+        // No Okta IDP configured yet - keep disabled
         setOktaLoadError(null);
+        setIsOktaEnabled(false);
         return;
       }
       

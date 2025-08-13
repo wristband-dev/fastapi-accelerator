@@ -7,7 +7,7 @@ from models.user import User, UsersResponse, UserProfileUpdate
 from models.role import Role, RoleList
 from models.tenant import Tenant, TenantUpdateRequest
 from models.tenant_option import TenantOption
-from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle, IdpRedirectUrlConfig
+from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle, IdpRedirectUrlConfig, UpsertGoogleSamlMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -295,6 +295,63 @@ class WristbandApiClient:
 
         if response.status_code not in [200, 201]:
             raise ValueError(f'Error calling upsert_identity_provider: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        return IdentityProvider(**data)
+    
+    async def upsert_google_saml_identity_provider(self, tenant_id: str, access_token: str, metadata: UpsertGoogleSamlMetadata) -> IdentityProvider:
+        """Upsert a Google SSO (SAML) identity provider using Wristband API (upsert=true).
+        Reference: https://docs.wristband.dev/reference/createidentityprovidersv1
+        """
+        protocol: dict[str, Any] = {
+            'type': 'SAML2',
+            'idpEntityId': metadata.idpEntityId,
+            'idpSsoUrl': metadata.idpSsoUrl,
+        }
+        # Optional fields: only include when provided
+        def ensure_pem_certificate(cert_value: str) -> str:
+            value = cert_value.strip()
+            if 'BEGIN CERTIFICATE' in value:
+                return value
+            # Remove all whitespace and wrap at 64 chars
+            b64 = ''.join(value.split())
+            wrapped = '\n'.join([b64[i:i+64] for i in range(0, len(b64), 64)])
+            return f"-----BEGIN CERTIFICATE-----\n{wrapped}\n-----END CERTIFICATE-----"
+
+        signing_certs_raw = [metadata.idpSigningCert01, metadata.idpSigningCert02]
+        signing_certs_clean = [c for c in signing_certs_raw if c and c.strip()]
+        if signing_certs_clean:
+            protocol['idpSigningCerts'] = [ensure_pem_certificate(c) for c in signing_certs_clean]
+        if metadata.idpMetadataUrl:
+            protocol['idpMetadataUrl'] = metadata.idpMetadataUrl
+
+        payload: dict[str, Any] = {
+            'ownerType': 'TENANT',
+            'ownerId': tenant_id,
+            'type': 'GOOGLE_WORKSPACE',
+            'name': 'google-workspace',
+            'displayName': 'Google Workspace',
+            'domainName': metadata.idpEntityId,
+            'protocol': protocol,
+            'jitProvisioningEnabled': True,
+            'status': 'ENABLED',
+        }
+
+        print('--------------------------------')
+        print(payload)
+        print('--------------------------------')
+
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/identity-providers?upsert=true',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json=payload,
+        )
+
+        if response.status_code not in [200, 201]:
+            raise ValueError(f'Error calling upsert_google_saml_identity_provider: {response.status_code} - {response.text}')
 
         data = response.json() if response.content else {}
         return IdentityProvider(**data)

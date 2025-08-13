@@ -9,7 +9,7 @@ import secrets
 from urllib.parse import urlencode
 
 from clients.wristband_client import WristbandApiClient
-from models.identity_provider import IdentityProvider, UpsertIdpRequest
+from models.identity_provider import IdentityProvider, UpsertIdpRequest, UpsertGoogleSamlMetadata, IdentityProviderRequest, IdpProtocol
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -76,6 +76,40 @@ async def upsert_identity_provider(request: Request, idp_request: UpsertIdpReque
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"error": "internal_error", "message": "An unexpected error occurred while configuring the identity provider."}
         )
+
+# MARK: - Upsert Google SSO (SAML)
+@router.post('/google/saml/upsert', response_model=IdentityProvider)
+async def upsert_google_sso(request: Request, payload: dict[str, Any]):
+    """
+    Receive parsed Google SAML metadata fields from the frontend and upsert a Google SSO IDP
+    using Wristband upsert API with upsert=true.
+    """
+    try:
+        session_data = request.state.session.get()
+        tenant_id = session_data.tenant_id
+        access_token = session_data.access_token
+
+        # Parse payload into pydantic model
+        metadata = UpsertGoogleSamlMetadata(**(payload.get('metadata') or {}))
+
+        # Enable tenant-level IDP override toggle
+        await wristband_client.upsert_idp_override_toggle(tenant_id=tenant_id, access_token=access_token)
+
+        # Use the client helper to upsert Google SAML
+        result = await wristband_client.upsert_google_saml_identity_provider(
+            tenant_id=tenant_id,
+            access_token=access_token,
+            metadata=metadata,
+        )
+        return result
+
+    except ValueError as e:
+        error_msg = str(e)
+        logger.warning(f"Google SSO upsert failed for tenant {session_data.tenant_id if 'session_data' in locals() else '?'}: {error_msg}")
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"error": "invalid_google_saml", "message": "Invalid Google SAML metadata or configuration."})
+    except Exception as e:
+        logger.exception(f"Unexpected error upserting Google SSO: {str(e)}")
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"error": "internal_error", "message": "An unexpected error occurred while configuring Google SSO."})
 
 # MARK: - Get Okta IDP
 @router.get('/okta', response_model=Optional[IdentityProvider])

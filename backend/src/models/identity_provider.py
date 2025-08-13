@@ -56,3 +56,11 @@ class IdpRedirectUrl(BaseModel):
 class IdpRedirectUrlConfig(BaseModel):
     identityProviderType: str
     redirectUrls: List[IdpRedirectUrl]
+
+
+class UpsertGoogleSamlMetadata(BaseModel):
+    idpEntityId: str
+    idpSsoUrl: str
+    idpSigningCert01: str | None = None
+    idpSigningCert02: str | None = None
+    idpMetadataUrl: str | None = None

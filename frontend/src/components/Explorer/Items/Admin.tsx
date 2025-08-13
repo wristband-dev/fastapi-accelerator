@@ -13,6 +13,7 @@ import {
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
 import axios from 'axios';
+import { parseSamlMetadataXml, UpdateSamlMetadataXmlFormState } from '@/models/idp';
 
 interface TenantData {
   id: string;
@@ -200,23 +201,16 @@ export default function ItemAdmin() {
     setGoogleUploadMessage(null);
     setGoogleUploadError(null);
     try {
-      const formData = new FormData();
-      formData.append('file', googleMetadataFile);
-      // Placeholder endpoint - backend TBD
-      await frontendApiClient.post('/idp/google/saml/metadata', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setGoogleUploadMessage('Metadata uploaded successfully.');
+      const text = await googleMetadataFile.text();
+      const parsed: UpdateSamlMetadataXmlFormState = parseSamlMetadataXml(text);
+      await frontendApiClient.post('/idp/google/saml/upsert', { metadata: parsed });
+      setGoogleUploadMessage('Google SSO configuration saved.');
     } catch (error) {
       console.error('Google SAML metadata upload error:', error);
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          setGoogleUploadError('Upload endpoint not available yet. Backend TBD.');
-        } else {
-          setGoogleUploadError('Failed to upload XML file.');
-        }
+        setGoogleUploadError(error.response?.data?.message || 'Failed to save configuration.');
       } else {
-        setGoogleUploadError('Unexpected error during upload.');
+        setGoogleUploadError('Unexpected error during save.');
       }
     } finally {
       setGoogleUploadInProgress(false);

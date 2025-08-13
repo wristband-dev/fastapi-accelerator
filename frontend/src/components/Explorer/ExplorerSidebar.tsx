@@ -89,7 +89,7 @@ export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProp
   }, [isOpen, onClose]);
 
   const navigationItems = [
-    { id: 'user' as const, label: 'User Settings', icon: UserIcon },
+    { id: 'user' as const, label: 'Settings', icon: UserIcon },
     { id: 'users' as const, label: 'Users', icon: UsersIcon },
     ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: Cog6ToothIcon }] : []),
     { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },

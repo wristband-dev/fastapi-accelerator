@@ -208,7 +208,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">User Settings</p>
+                  <p className="font-medium text-gray-900 dark:text-white">Settings</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Manage your profile</p>
                 </div>
               </button>

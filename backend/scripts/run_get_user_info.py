@@ -12,7 +12,7 @@ import os
 import sys
 from pathlib import Path
 from pprint import pprint
-
+from dotenv import load_dotenv
 from pydantic.types import T
 
 # Add the src directory to Python path
@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from clients.wristband_client import WristbandApiClient
 
+load_dotenv()
 
 async def main():
     parser = argparse.ArgumentParser(

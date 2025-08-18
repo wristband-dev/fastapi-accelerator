@@ -417,6 +417,9 @@ export default function ItemSecrets() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Secrets
           </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            This is a demonstration for saving data to Firebase Firestore. Store and manage your API keys, tokens, and other sensitive information securely.
+          </p>
         </div>
         
         <div className="space-y-6">

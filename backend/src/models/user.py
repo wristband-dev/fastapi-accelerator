@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 class UserMetadata(BaseModel):
-    activationTime: datetime
+    activationTime: Optional[datetime] = None
     creationTime: datetime
     deactivationTime: Optional[datetime] = None
     lastModifiedTime: datetime

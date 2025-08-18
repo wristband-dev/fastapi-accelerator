@@ -15,6 +15,7 @@ import frontendApiClient from '@/client/frontend-api-client';
 import { redirectToLogin } from "@wristband/react-client-auth";
 import axios from "axios";
 import { User } from '@/models/user';
+import { useUser } from '@/contexts/UserContext';
 
 interface Role {
   id: string;
@@ -25,6 +26,7 @@ interface Role {
 
 
 export default function ItemUsers() {
+  const { hasAdminRole } = useUser();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,6 +39,9 @@ export default function ItemUsers() {
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
+  const [activeDropdownUserId, setActiveDropdownUserId] = useState<string | null>(null);
+  const [isDeactivating, setIsDeactivating] = useState<string | null>(null);
+  const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
 
   const handleApiError = useCallback((error: unknown) => {
     console.error(error);
@@ -113,18 +118,22 @@ export default function ItemUsers() {
 
   useEffect(() => {
     fetchUsers();
-    fetchRoles();
-  }, [fetchUsers, fetchRoles]);
+    if (hasAdminRole) {
+      fetchRoles();
+    }
+  }, [fetchUsers, fetchRoles, hasAdminRole]);
 
   // Initialize with default roles immediately to ensure something is always available
   useEffect(() => {
-    console.log('Initializing default roles...');
-    setAvailableRoles([
-      { id: 'viewer', displayName: 'Viewer', sku: 'viewer', description: 'Read-only access' },
-      { id: 'user', displayName: 'User', sku: 'user', description: 'Standard access' },
-      { id: 'admin', displayName: 'Admin', sku: 'admin', description: 'Full administrative access' }
-    ]);
-  }, []);
+    if (hasAdminRole) {
+      console.log('Initializing default roles...');
+      setAvailableRoles([
+        { id: 'viewer', displayName: 'Viewer', sku: 'viewer', description: 'Read-only access' },
+        { id: 'user', displayName: 'User', sku: 'user', description: 'Standard access' },
+        { id: 'admin', displayName: 'Admin', sku: 'admin', description: 'Full administrative access' }
+      ]);
+    }
+  }, [hasAdminRole]);
 
   // Click outside handler for role dropdown
   useEffect(() => {
@@ -141,6 +150,25 @@ export default function ItemUsers() {
       };
     }
   }, [isRoleDropdownOpen]);
+
+  // Click outside handler for user action dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (activeDropdownUserId) {
+        const dropdownRef = dropdownRefs.current[activeDropdownUserId];
+        if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
+          setActiveDropdownUserId(null);
+        }
+      }
+    };
+
+    if (activeDropdownUserId) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [activeDropdownUserId]);
 
   const filteredUsers = users.filter(user => {
     const searchLower = searchTerm.toLowerCase();
@@ -176,6 +204,34 @@ export default function ItemUsers() {
     return 'bg-success/10 text-success';
   };
 
+  const handleDeactivateUser = async (userId: string) => {
+    if (!hasAdminRole) {
+      window.alert('You do not have permission to deactivate users.');
+      return;
+    }
+
+    const confirmDeactivate = window.confirm('Are you sure you want to deactivate this user? They will no longer be able to access the application.');
+    if (!confirmDeactivate) {
+      return;
+    }
+
+    try {
+      setIsDeactivating(userId);
+      await frontendApiClient.patch(`/users/${userId}/deactivate`);
+      
+      // Refresh the users list
+      await fetchUsers();
+      
+      window.alert('User has been deactivated successfully.');
+      setActiveDropdownUserId(null);
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      handleApiError(error);
+    } finally {
+      setIsDeactivating(null);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="mb-6">
@@ -202,13 +258,15 @@ export default function ItemUsers() {
           />
         </div>
         
-        <button
-          onClick={() => setIsInviteModalOpen(true)}
-          className="btn-primary px-6 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-2 whitespace-nowrap"
-        >
-          <UserPlusIcon className="w-5 h-5" />
-          Invite
-        </button>
+        {hasAdminRole && (
+          <button
+            onClick={() => setIsInviteModalOpen(true)}
+            className="btn-primary px-6 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-2 whitespace-nowrap"
+          >
+            <UserPlusIcon className="w-5 h-5" />
+            Invite
+          </button>
+        )}
       </div>
 
       {/* 
@@ -299,15 +357,43 @@ export default function ItemUsers() {
                     {formatLastLogin(user.metadata.creationTime)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                      className="text-gray-400 hover:text-primary transition-colors p-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Handle menu toggle
-                      }}
-                    >
-                      <EllipsisVerticalIcon className="h-5 w-5" />
-                    </button>
+                    {hasAdminRole && (
+                      <div className="relative" ref={(el) => { dropdownRefs.current[user.id] = el; }}>
+                        <button 
+                          className="text-gray-400 hover:text-primary transition-colors p-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveDropdownUserId(activeDropdownUserId === user.id ? null : user.id);
+                          }}
+                        >
+                          <EllipsisVerticalIcon className="h-5 w-5" />
+                        </button>
+                        
+                        {/* Dropdown Menu */}
+                        {activeDropdownUserId === user.id && (
+                          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 min-w-[140px]">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeactivateUser(user.id);
+                              }}
+                              disabled={isDeactivating === user.id}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isDeactivating === user.id ? (
+                                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              ) : (
+                                <TrashIcon className="w-4 h-4" />
+                              )}
+                              {isDeactivating === user.id ? 'Deactivating...' : 'Deactivate User'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -320,7 +406,7 @@ export default function ItemUsers() {
       {/* 
       MARK: - Invite User Modal
       */}
-      {isInviteModalOpen && ReactDOM.createPortal(
+      {hasAdminRole && isInviteModalOpen && ReactDOM.createPortal(
         <>
           {/* Backdrop */}
           <div 
@@ -331,6 +417,7 @@ export default function ItemUsers() {
               setIsInviteModalOpen(false);
               setEmailError(null);
               setIsRoleDropdownOpen(false);
+              setActiveDropdownUserId(null);
             }}
           />
           
@@ -355,6 +442,7 @@ export default function ItemUsers() {
                     setIsInviteModalOpen(false);
                     setEmailError(null);
                     setIsRoleDropdownOpen(false);
+                    setActiveDropdownUserId(null);
                   }}
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
                 >
@@ -570,6 +658,7 @@ export default function ItemUsers() {
                     setIsInviteModalOpen(false);
                     setEmailError(null);
                     setIsRoleDropdownOpen(false);
+                    setActiveDropdownUserId(null);
                   }}
                 >
                   Cancel

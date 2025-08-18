@@ -92,6 +92,25 @@ class WristbandApiClient:
         if response.status_code != 200:
             raise ValueError(f'Error changing password: {response.status_code} - {response.text}')
 
+    async def deactivate_user(self, user_id: str, access_token: str) -> User:
+        # Deactivate User API - https://docs.wristband.dev/reference/patchuserv1
+        response: httpx.Response = await self.client.patch(
+            self.base_url + f'/users/{user_id}',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                'status': 'INACTIVE'
+            },
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f'Error deactivating user: {response.status_code} - {response.text}')
+
+        data = response.json() if response.content else {}
+        return User(**data)
+
     ############################################################################################
     # MARK: User Invitation APIs
     ############################################################################################

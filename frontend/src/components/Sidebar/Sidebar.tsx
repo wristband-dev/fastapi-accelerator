@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   XMarkIcon, 
-  UserIcon, 
   UsersIcon, 
-  Cog6ToothIcon,
   ChevronRightIcon,
-  KeyIcon 
+  KeyIcon,
+  CogIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 import ItemUserSettings from './Items/UserSettings';
@@ -89,9 +89,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   }, [isOpen, onClose]);
 
   const navigationItems = [
-    { id: 'user' as const, label: 'Settings', icon: UserIcon },
+    { id: 'user' as const, label: 'Settings', icon: CogIcon },
     { id: 'users' as const, label: 'Users', icon: UsersIcon },
-    ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: Cog6ToothIcon }] : []),
+    ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: ShieldCheckIcon }] : []),
     { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
   ];
 

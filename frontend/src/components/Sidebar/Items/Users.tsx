@@ -82,10 +82,24 @@ export default function ItemUsers() {
   const fetchRoles = useCallback(async () => {
     try {
       setIsLoadingRoles(true);
+      console.log('Fetching roles from /api/roles...');
       const response = await frontendApiClient.get('/roles');
-      setAvailableRoles(response.data);
+      console.log('Roles fetched successfully:', response.data);
+      
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        setAvailableRoles(response.data);
+      } else {
+        console.log('No roles returned from API, using default roles');
+        // Use default roles if API returns empty or invalid data
+        setAvailableRoles([
+          { id: 'viewer', displayName: 'Viewer', sku: 'viewer', description: 'Read-only access' },
+          { id: 'user', displayName: 'User', sku: 'user', description: 'Standard access' },
+          { id: 'admin', displayName: 'Admin', sku: 'admin', description: 'Full administrative access' }
+        ]);
+      }
     } catch (error) {
       console.error('Error fetching roles:', error);
+      console.log('Using fallback default roles due to error');
       // Use default roles if fetch fails
       setAvailableRoles([
         { id: 'viewer', displayName: 'Viewer', sku: 'viewer', description: 'Read-only access' },
@@ -101,6 +115,16 @@ export default function ItemUsers() {
     fetchUsers();
     fetchRoles();
   }, [fetchUsers, fetchRoles]);
+
+  // Initialize with default roles immediately to ensure something is always available
+  useEffect(() => {
+    console.log('Initializing default roles...');
+    setAvailableRoles([
+      { id: 'viewer', displayName: 'Viewer', sku: 'viewer', description: 'Read-only access' },
+      { id: 'user', displayName: 'User', sku: 'user', description: 'Standard access' },
+      { id: 'admin', displayName: 'Admin', sku: 'admin', description: 'Full administrative access' }
+    ]);
+  }, []);
 
   // Click outside handler for role dropdown
   useEffect(() => {

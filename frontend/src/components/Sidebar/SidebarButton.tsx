@@ -1,17 +1,17 @@
 import React from 'react';
 
-interface ExplorerButtonProps {
-  onOpenExplorer: () => void;
+interface SidebarButtonProps {
+  onOpenSidebar: () => void;
   isOpen: boolean;
 }
 
-export default function ExplorerButton({ onOpenExplorer, isOpen }: ExplorerButtonProps) {
+export default function SidebarButton({ onOpenSidebar, isOpen }: SidebarButtonProps) {
   return (
     <div className="fixed top-3 sm:top-6 left-3 sm:left-6 z-50">
       <button
-        onClick={onOpenExplorer}
+        onClick={onOpenSidebar}
         className="relative p-2.5 sm:p-3 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 hover:border-primary/50 group hover:scale-105 active:scale-95"
-        title="Open Explorer"
+        title="Open Sidebar"
       >
         <div className="relative w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center">
           {/* Wristband Symbol */}

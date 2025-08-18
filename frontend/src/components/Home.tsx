@@ -3,13 +3,13 @@ import { useWristbandSession } from "@wristband/react-client-auth";
 import frontendApiClient from "@/client/frontend-api-client";
 import { redirectToLogin } from "@wristband/react-client-auth";
 import axios from "axios";
-import ExplorerButton from "@/components/Explorer/ExplorerButton";
-import ExplorerSidebar from "@/components/Explorer/ExplorerSidebar";
+import SidebarButton from "@/components/Sidebar/SidebarButton";
+import Sidebar from "@/components/Sidebar/Sidebar";
 import { useUser } from "@/contexts/UserContext";
 
 export default function Home() {
   const [isNicknameLoading, setIsNicknameLoading] = useState<boolean>(false);
-  const [isExplorerOpen, setIsExplorerOpen] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   const { metadata } = useWristbandSession();
   const { currentUser, setCurrentUser, setIsLoadingUser } = useUser();
@@ -71,15 +71,15 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* 
-      MARK: - Explorer
+      MARK: - Sidebar
        */}
-      <ExplorerButton 
-        onOpenExplorer={() => setIsExplorerOpen(true)} 
-        isOpen={isExplorerOpen}
+      <SidebarButton 
+        onOpenSidebar={() => setIsSidebarOpen(true)} 
+        isOpen={isSidebarOpen}
       />
-      <ExplorerSidebar 
-        isOpen={isExplorerOpen} 
-        onClose={() => setIsExplorerOpen(false)} 
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
       />
 
       {/* 
@@ -198,7 +198,7 @@ export default function Home() {
             </h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <button
-                onClick={() => setIsExplorerOpen(true)}
+                onClick={() => setIsSidebarOpen(true)}
                 className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-left"
               >
                 <div className="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">

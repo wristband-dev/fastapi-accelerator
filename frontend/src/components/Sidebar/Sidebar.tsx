@@ -16,15 +16,15 @@ import TenantSwitcher from '@/components/TenantSwitcher';
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
 
-interface ExplorerSidebarProps {
+interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type ExplorerSection = 'user' | 'users' | 'admin' | 'secrets';
+type SidebarSection = 'user' | 'users' | 'admin' | 'secrets';
 
-export default function ExplorerSidebar({ isOpen, onClose }: ExplorerSidebarProps) {
-  const [activeSection, setActiveSection] = useState<ExplorerSection>('user');
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const [activeSection, setActiveSection] = useState<SidebarSection>('user');
   const { setCurrentTenant, setTenantOptions, setIsLoadingTenants, setUserRoles, setIsLoadingRoles, hasAdminRole } = useUser();
 
   // Fetch tenant data and user roles when sidebar opens

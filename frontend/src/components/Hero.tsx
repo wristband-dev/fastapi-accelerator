@@ -41,7 +41,7 @@ export default function Hero() {
             </button>
             <button
               onClick={handleSignUp}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md"
+              className="px-4 py-2 btn-primary rounded-lg transition-colors shadow-sm hover:shadow-md"
             >
               Sign Up
             </button>
@@ -52,7 +52,7 @@ export default function Hero() {
               aria-label="Toggle menu"
               aria-expanded={isMobileMenuOpen}
               onClick={() => setIsMobileMenuOpen((open) => !open)}
-              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {isMobileMenuOpen ? (
                 <XMarkIcon className="w-6 h-6" />
@@ -75,7 +75,7 @@ export default function Hero() {
                 </button>
                 <button
                   onClick={() => { setIsMobileMenuOpen(false); handleSignUp(); }}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                  className="w-full px-4 py-2 btn-primary rounded-md font-medium"
                 >
                   Sign Up
                 </button>
@@ -90,7 +90,7 @@ export default function Hero() {
         <div className="max-w-7xl mx-auto px-6 py-12 w-full">
           <div className="text-center max-w-3xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/20 text-primary-dark dark:text-primary-light px-4 py-2 rounded-full text-sm font-medium mb-8">
               <BoltIcon className="w-4 h-4" />
               Wristband + FastAPI Accelerator
             </div>
@@ -98,7 +98,7 @@ export default function Hero() {
             {/* Headline */}
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
               Launch Your SaaS in{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark">
                 Minutes, Not Months
               </span>
             </h1>
@@ -113,7 +113,7 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <button
                 onClick={handleSignUp}
-                className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl text-lg font-medium flex items-center justify-center gap-2 group"
+                className="px-8 py-4 btn-primary rounded-lg transition-all shadow-lg hover:shadow-xl text-lg font-medium flex items-center justify-center gap-2 group"
               >
                 Get Started Free
                 <ChevronRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -131,8 +131,8 @@ export default function Hero() {
             {/* Features */}
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                  <ShieldCheckIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <ShieldCheckIcon className="w-6 h-6 text-primary dark:text-primary-light" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   Enterprise Security
@@ -171,9 +171,9 @@ export default function Hero() {
 
         {/* Background decoration */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/60 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/60 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-accent/60 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
       </div>
     </div>

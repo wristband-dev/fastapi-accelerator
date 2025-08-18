@@ -93,6 +93,27 @@ class WristbandApiClient:
             raise ValueError(f'Error changing password: {response.status_code} - {response.text}')
 
     ############################################################################################
+    # MARK: User Invitation APIs
+    ############################################################################################
+    async def invite_user(self, tenant_id: str, email: str, roles_to_assign: list[str], access_token: str) -> None:
+        # Invite New User API - https://docs.wristband.dev/reference/inviteuserv1
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/new-user-invitation/invite-user',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                'tenantId': tenant_id,
+                'email': email,
+                'rolesToAssign': roles_to_assign
+            }
+        )
+
+        if response.status_code not in [200, 201, 204]:
+            raise ValueError(f'Error calling invite_user: {response.status_code} - {response.text}')
+
+    ############################################################################################
     # MARK: Tenant Users APIs
     ############################################################################################
     async def query_tenant_users(self, tenant_id: str, access_token: str, include_roles: bool = False) -> list[User]:

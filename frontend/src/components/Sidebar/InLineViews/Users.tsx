@@ -531,18 +531,34 @@ export default function ItemUsers() {
                   type="button"
                   disabled={!inviteEmail || !!emailError}
                   className="btn-primary w-full sm:w-auto px-6 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                  onClick={() => {
+                  onClick={async () => {
                     if (!validateEmail(inviteEmail)) {
                       return;
                     }
                     
-                    // Handle invite
-                    console.log('Inviting user:', inviteEmail, 'with roles:', selectedRoles);
-                    setIsInviteModalOpen(false);
-                    setInviteEmail('');
-                    setSelectedRoles([]);
-                    setEmailError(null);
-                    setIsRoleDropdownOpen(false);
+                    try {
+                      // Call the backend API to invite the user
+                      const response = await frontendApiClient.post('/users/invite', {
+                        email: inviteEmail,
+                        roles: selectedRoles
+                      });
+                      
+                      console.log('User invited successfully:', response.data);
+                      
+                      // Show success message
+                      window.alert(`Invitation sent successfully to ${inviteEmail}`);
+                      
+                      // Close modal and reset form
+                      setIsInviteModalOpen(false);
+                      setInviteEmail('');
+                      setSelectedRoles([]);
+                      setEmailError(null);
+                      setIsRoleDropdownOpen(false);
+                      
+                    } catch (error) {
+                      console.error('Error inviting user:', error);
+                      handleApiError(error);
+                    }
                   }}
                 >
                   Send Invite

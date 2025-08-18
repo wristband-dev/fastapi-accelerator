@@ -129,7 +129,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       
       {/* Sidebar */}
       <div 
-        className={`fixed inset-0 sm:inset-y-0 sm:left-0 z-50 w-full sm:max-w-md lg:max-w-xl xl:max-w-2xl shadow-2xl transform transition-all duration-300 ease-out ${
+        className={`fixed inset-0 sm:inset-y-0 sm:left-0 z-50 w-full sm:max-w-lg lg:max-w-2xl xl:max-w-4xl shadow-2xl transform transition-all duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{ 

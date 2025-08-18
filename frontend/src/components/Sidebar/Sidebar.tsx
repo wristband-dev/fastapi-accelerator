@@ -12,7 +12,7 @@ import ItemUserSettings from './Items/UserSettings';
 import ItemUsers from './Items/Users';
 import ItemAdmin from './Items/Admin';
 import ItemSecrets from './Items/Secrets';
-import TenantSwitcher from '@/components/TenantSwitcher';
+import TenantSwitcher from '@/components/Sidebar/TenantSwitcher';
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
 
@@ -127,7 +127,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         onClick={onClose}
       />
       
-      {/* Sidebar */}
+      {/* 
+      MARK: - Sidebar 
+      */}
       <div 
         className={`fixed inset-0 sm:inset-y-0 sm:left-0 z-50 w-full sm:max-w-lg lg:max-w-2xl xl:max-w-4xl shadow-2xl transform transition-all duration-300 ease-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'

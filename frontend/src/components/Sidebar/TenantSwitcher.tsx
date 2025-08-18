@@ -4,7 +4,7 @@ import { useUser } from '@/contexts/UserContext';
 import { truncateDisplayString } from '@/utils/helpers';
 
 const TenantSwitcher = () => {
-  const { currentTenant, tenantOptions } = useUser();
+  const { currentTenant, tenantOptions, isLoadingTenants } = useUser();
 
   // Tenant Switcher State
   const [tenantDropdownOpen, setTenantDropdownOpen] = useState<boolean>(false);
@@ -29,6 +29,17 @@ const TenantSwitcher = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [tenantDropdownOpen]);
+
+  // Show loading state while tenants are loading
+  if (isLoadingTenants) {
+    return (
+      <div className="flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 animate-pulse">
+        <div className="w-4 h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+        <div className="hidden sm:block w-20 h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+        <div className="w-3 h-3 bg-gray-300 dark:bg-gray-600 rounded"></div>
+      </div>
+    );
+  }
 
   // Don't render if there are no tenant options or only one option
   if (!tenantOptions || tenantOptions.length <= 1) {

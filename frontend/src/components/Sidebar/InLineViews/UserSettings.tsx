@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EyeIcon, EyeSlashIcon, ArrowRightOnRectangleIcon, SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/react/24/outline';
-import { redirectToLogout } from "@wristband/react-client-auth";
+import { redirectToLogout, useWristbandSession } from "@wristband/react-client-auth";
 import { useUser } from '@/contexts/UserContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import frontendApiClient from '@/client/frontend-api-client';
@@ -20,6 +20,7 @@ interface PasswordData {
 export default function ItemUserSettings() {
   const { currentUser, isLoadingUser, setCurrentUser } = useUser();
   const { theme, effectiveTheme, setTheme } = useTheme();
+  const { metadata } = useWristbandSession();
   
   // Get system theme for display
   const getSystemTheme = (): 'light' | 'dark' => {
@@ -511,6 +512,29 @@ export default function ItemUserSettings() {
 
 
       </div>
+
+      {/* 
+      MARK: - Wristband Session
+      */}
+      {metadata ? (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="bg-primary/10 px-6 py-4 border-b border-primary/20">
+            <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Wristband Session
+            </h2>
+          </div>
+          <div className="p-6">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-60 overflow-auto">
+              <pre className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-all font-mono">
+                {JSON.stringify(metadata, null, 2)}
+              </pre>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* 
       MARK: - Logout Section

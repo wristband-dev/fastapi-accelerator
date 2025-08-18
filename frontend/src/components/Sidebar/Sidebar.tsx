@@ -31,7 +31,16 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
   const [activeInlineView, setActiveInlineView] = useState<InlineViewSection>('user');
   const [lastSelectedInlineView, setLastSelectedInlineView] = useState<InlineViewSection>('user');
   const [selectedContentItem, setSelectedContentItem] = useState<ContentSection>('home');
-  const { setCurrentTenant, setTenantOptions, setIsLoadingTenants, setUserRoles, setIsLoadingRoles, hasAdminRole } = useUser();
+  const { 
+    setCurrentTenant, 
+    setTenantOptions, 
+    setIsLoadingTenants, 
+    setUserRoles, 
+    setIsLoadingRoles, 
+    hasAdminRole,
+    isLoadingRoles,
+    isLoadingTenants 
+  } = useUser();
 
   // Restore last selected inline view when sidebar opens
   useEffect(() => {
@@ -106,11 +115,39 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
     { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
   ];
 
-  const inlineViewItems = [
-    { id: 'user' as const, label: 'Settings', icon: CogIcon },
-    { id: 'users' as const, label: 'Users', icon: UsersIcon },
-    ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: ShieldCheckIcon }] : []),
-  ];
+  const getInlineViewItems = () => {
+    const baseItems = [
+      { id: 'user' as const, label: 'Settings', icon: CogIcon },
+      { id: 'users' as const, label: 'Users', icon: UsersIcon },
+    ];
+    
+    if (isLoadingRoles) {
+      // Show skeleton for potential admin item while loading
+      return [
+        ...baseItems,
+        { id: 'loading' as const, label: '', icon: null, isLoading: true }
+      ];
+    }
+    
+    return [
+      ...baseItems,
+      ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: ShieldCheckIcon }] : []),
+    ];
+  };
+
+  const inlineViewItems = getInlineViewItems();
+
+  // Loading skeleton component for navigation items
+  const renderLoadingSkeleton = () => (
+    <div className="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg animate-pulse">
+      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gray-200 dark:bg-gray-700">
+        <div className="w-5 h-5 bg-gray-300 dark:bg-gray-600 rounded"></div>
+      </div>
+      <div className="flex-1">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+      </div>
+    </div>
+  );
 
   // Reset active inline view to 'user' if user doesn't have admin role and is on admin section
   useEffect(() => {
@@ -145,36 +182,47 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
     </button>
   );
 
-  const renderInlineViewButton = (item: { id: InlineViewSection; label: string; icon: any }) => (
-    <button
-      key={item.id}
-      onClick={() => handleInlineViewClick(item.id)}
-      className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
-        activeInlineView === item.id
-          ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
-          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-      }`}
-    >
-      <div className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
-        activeInlineView === item.id
-          ? 'bg-white/20'
-          : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
-      }`}>
-        <item.icon className={`w-5 h-5 transition-all duration-200 ${
+  const renderInlineViewButton = (item: { id: InlineViewSection | 'loading'; label: string; icon: any; isLoading?: boolean }) => {
+    // Render loading skeleton if this is a loading item
+    if (item.isLoading) {
+      return (
+        <div key={item.id} className="w-full">
+          {renderLoadingSkeleton()}
+        </div>
+      );
+    }
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleInlineViewClick(item.id as InlineViewSection)}
+        className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
+          activeInlineView === item.id
+            ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
+            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+        }`}
+      >
+        <div className={`flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 ${
+          activeInlineView === item.id
+            ? 'bg-white/20'
+            : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
+        }`}>
+          <item.icon className={`w-5 h-5 transition-all duration-200 ${
+            activeInlineView === item.id
+              ? 'text-white'
+              : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+          }`} />
+        </div>
+        <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
           activeInlineView === item.id
             ? 'text-white'
-            : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-        }`} />
-      </div>
-      <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
-        activeInlineView === item.id
-          ? 'text-white'
-          : 'text-gray-900 dark:text-gray-100'
-      }`}>
-        {item.label}
-      </span>
-    </button>
-  );
+            : 'text-gray-900 dark:text-gray-100'
+        }`}>
+          {item.label}
+        </span>
+      </button>
+    );
+  };
 
   const renderInlineViewContent = () => {
     switch (activeInlineView) {
@@ -210,30 +258,41 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
   );
 
   // Collapsed sidebar icon for inline view items
-  const renderCollapsedInlineViewIcon = (item: { id: InlineViewSection; label: string; icon: any }) => (
-    <button
-      key={item.id}
-      onClick={() => {
-        handleInlineViewClick(item.id);
-        // Auto-open sidebar when clicking inline view in collapsed state
-        if (!isOpen) {
-          onOpen();
-        }
-      }}
-      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 mb-2 group ${
-        lastSelectedInlineView === item.id
-          ? 'bg-white/20 shadow-lg'
-          : 'hover:bg-white/10'
-      }`}
-      title={item.label}
-    >
-      <item.icon className={`w-5 h-5 transition-all duration-200 ${
-        lastSelectedInlineView === item.id
-          ? 'text-white'
-          : 'text-white/70 group-hover:text-white'
-      }`} />
-    </button>
-  );
+  const renderCollapsedInlineViewIcon = (item: { id: InlineViewSection | 'loading'; label: string; icon: any; isLoading?: boolean }) => {
+    // Render loading skeleton for collapsed view
+    if (item.isLoading) {
+      return (
+        <div key={item.id} className="w-10 h-10 flex items-center justify-center rounded-lg mb-2 animate-pulse">
+          <div className="w-5 h-5 bg-white/30 rounded"></div>
+        </div>
+      );
+    }
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => {
+          handleInlineViewClick(item.id as InlineViewSection);
+          // Auto-open sidebar when clicking inline view in collapsed state
+          if (!isOpen) {
+            onOpen();
+          }
+        }}
+        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 mb-2 group ${
+          lastSelectedInlineView === item.id
+            ? 'bg-white/20 shadow-lg'
+            : 'hover:bg-white/10'
+        }`}
+        title={item.label}
+      >
+        <item.icon className={`w-5 h-5 transition-all duration-200 ${
+          lastSelectedInlineView === item.id
+            ? 'text-white'
+            : 'text-white/70 group-hover:text-white'
+        }`} />
+      </button>
+    );
+  };
 
   return (
     <>
@@ -303,7 +362,21 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
 
               {/* Inline View Content */}
               <div className="transform transition-all duration-300 ease-out">
-                {renderInlineViewContent()}
+                {(isLoadingRoles || isLoadingTenants) ? (
+                  <div className="p-4 sm:p-6">
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+                      <div className="space-y-2 mt-6">
+                        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  renderInlineViewContent()
+                )}
               </div>
             </div>
           </div>

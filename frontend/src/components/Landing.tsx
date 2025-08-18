@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { useWristbandSession } from "@wristband/react-client-auth";
 import { redirectToLogin } from "@wristband/react-client-auth";
 import axios from "axios";
-import SidebarButton from "@/components/Sidebar/SidebarButton";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { useUser } from "@/contexts/UserContext";
 import Home from "@/components/Content/Home";
@@ -56,20 +55,19 @@ export default function Landing() {
       {/* 
       MARK: - Sidebar
        */}
-      <SidebarButton 
-        onOpenSidebar={() => setIsSidebarOpen(true)} 
-        isOpen={isSidebarOpen}
-      />
       <Sidebar 
         isOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)} 
+        onOpen={() => setIsSidebarOpen(true)}
         onContentSelect={handleContentSelect}
       />
 
       {/* 
       MARK: - Main Content
        */}
-      {renderMainContent()}
+      <div className="sm:pl-16">
+        {renderMainContent()}
+      </div>
     </div>
   );
 }

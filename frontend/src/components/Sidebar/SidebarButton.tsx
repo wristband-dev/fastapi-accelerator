@@ -7,7 +7,7 @@ interface SidebarButtonProps {
 
 export default function SidebarButton({ onOpenSidebar, isOpen }: SidebarButtonProps) {
   return (
-    <div className="fixed top-3 sm:top-6 left-3 sm:left-6 z-50">
+    <div className="fixed top-3 sm:top-6 left-3 sm:left-20 z-50">
       <button
         onClick={onOpenSidebar}
         className="relative p-2.5 sm:p-3 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 hover:border-primary/50 group hover:scale-105 active:scale-95"

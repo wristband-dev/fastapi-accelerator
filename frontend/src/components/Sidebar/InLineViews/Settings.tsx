@@ -17,7 +17,7 @@ interface PasswordData {
   confirmPassword: string;
 }
 
-export default function ItemUserSettings() {
+export default function ItemSettings() {
   const { currentUser, isLoadingUser, setCurrentUser } = useUser();
   const { theme, effectiveTheme, setTheme } = useTheme();
   const { metadata } = useWristbandSession();
@@ -178,7 +178,14 @@ export default function ItemUserSettings() {
   };
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Settings
+        </h1>
+      </div>
+      
+      <div className="space-y-8">
       {/* 
       MARK: - Profile Information
       */}
@@ -570,6 +577,7 @@ export default function ItemUserSettings() {
             'Sign Out'
           )}
         </button>
+      </div>
       </div>
     </div>
   );

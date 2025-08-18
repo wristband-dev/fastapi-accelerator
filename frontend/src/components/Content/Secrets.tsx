@@ -412,7 +412,14 @@ export default function ItemSecrets() {
 
   return (
     <>
-      <div className="p-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Secrets
+          </h1>
+        </div>
+        
+        <div className="space-y-6">
         {/* Search and Add */}
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
@@ -542,15 +549,16 @@ export default function ItemSecrets() {
           )}
         </div>
       </div>
-    </div>
+        </div>
+      </div>
 
-    {/* Secret Modal - Rendered outside of main container */}
-    <SecretModal
-      isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-      onSave={fetchSecrets}
-      editingSecret={editingSecret}
-    />
-  </>
+      {/* Secret Modal - Rendered outside of main container */}
+      <SecretModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={fetchSecrets}
+        editingSecret={editingSecret}
+      />
+    </>
   );
 }

@@ -66,24 +66,10 @@ export default function Home() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <div className="text-center mb-12">
-        <img
-          src="/wristband_logo.svg"
-          alt="Wristband Logo"
-          width={180}
-          height={38}
-          className="mx-auto block dark:hidden mb-8"
-        />
-        <img
-          src="/wristband_logo_dark.svg"
-          alt="Wristband Logo"
-          width={180}
-          height={38}
-          className="mx-auto hidden dark:block mb-8"
-        />
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Welcome to Your Dashboard
+    <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Home
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           You're successfully authenticated with Wristband

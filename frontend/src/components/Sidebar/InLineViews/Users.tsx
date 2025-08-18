@@ -177,7 +177,14 @@ export default function ItemUsers() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Users
+        </h1>
+      </div>
+      
+      <div className="space-y-6">
       {/* 
       MARK: - Search and Invite
       */}
@@ -557,6 +564,7 @@ export default function ItemUsers() {
         </>,
         document.body
       )}
+      </div>
     </div>
   );
 }

@@ -353,7 +353,14 @@ export default function ItemAdmin() {
   };
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Admin
+        </h1>
+      </div>
+      
+      <div className="space-y-8">
       {/* Organization Settings */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-6">
@@ -756,6 +763,7 @@ export default function ItemAdmin() {
             )}
           </button>
         </form>
+      </div>
       </div>
     </div>
   );

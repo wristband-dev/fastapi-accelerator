@@ -9,7 +9,7 @@ import {
   HomeIcon
 } from '@heroicons/react/24/outline';
 
-import ItemUserSettings from './InLineViews/UserSettings';
+import ItemSettings from './InLineViews/Settings';
 import ItemUsers from './InLineViews/Users';
 import ItemAdmin from './InLineViews/Admin';
 import TenantSwitcher from '@/components/Sidebar/TenantSwitcher';
@@ -227,13 +227,13 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
   const renderInlineViewContent = () => {
     switch (activeInlineView) {
       case 'user':
-        return <ItemUserSettings />;
+        return <ItemSettings />;
       case 'users':
         return <ItemUsers />;
       case 'admin':
         return <ItemAdmin />;
       default:
-        return <ItemUserSettings />;
+        return <ItemSettings />;
     }
   };
 

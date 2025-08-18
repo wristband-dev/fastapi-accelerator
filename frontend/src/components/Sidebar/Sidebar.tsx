@@ -11,7 +11,7 @@ import {
 import ItemUserSettings from './Items/UserSettings';
 import ItemUsers from './Items/Users';
 import ItemAdmin from './Items/Admin';
-import ItemSecrets from './Items/Secrets';
+import ItemSecrets from '../Content/Secrets';
 import TenantSwitcher from '@/components/Sidebar/TenantSwitcher';
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
@@ -88,11 +88,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     };
   }, [isOpen, onClose]);
 
-  const navigationItems = [
+  const primaryItems = [
+    { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
+  ];
+
+  const secondaryItems = [
     { id: 'user' as const, label: 'Settings', icon: CogIcon },
     { id: 'users' as const, label: 'Users', icon: UsersIcon },
     ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: ShieldCheckIcon }] : []),
-    { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
   ];
 
   // Reset active section to 'user' if user doesn't have admin role and is on admin section
@@ -101,6 +104,37 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       setActiveSection('user');
     }
   }, [hasAdminRole, activeSection]);
+
+  const renderNavigationButton = (item: { id: SidebarSection; label: string; icon: any }) => (
+    <button
+      key={item.id}
+      onClick={() => setActiveSection(item.id)}
+      className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
+        activeSection === item.id
+          ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
+          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+      }`}
+    >
+      <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+        activeSection === item.id
+          ? 'bg-white/20'
+          : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
+      }`}>
+        <item.icon className={`w-4 h-4 transition-all duration-200 ${
+          activeSection === item.id
+            ? 'text-white'
+            : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+        }`} />
+      </div>
+      <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
+        activeSection === item.id
+          ? 'text-white'
+          : 'text-gray-900 dark:text-gray-100'
+      }`}>
+        {item.label}
+      </span>
+    </button>
+  );
 
   const renderContent = () => {
     switch (activeSection) {
@@ -165,38 +199,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Navigation - now inside scrollable area */}
             <nav className="p-4 border-b border-gray-200 dark:border-gray-700">
+              {/* Primary Items (Secrets) */}
+              <div className="space-y-1 mb-4">
+                {primaryItems.map((item) => renderNavigationButton(item))}
+              </div>
+
+              {/* Separator */}
+              <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+
+              {/* Secondary Items (Settings, Users, Admin) */}
               <div className="space-y-1">
-                {navigationItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id)}
-                    className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
-                      activeSection === item.id
-                        ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                    }`}
-                  >
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
-                      activeSection === item.id
-                        ? 'bg-white/20'
-                        : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
-                    }`}>
-                      <item.icon className={`w-4 h-4 transition-all duration-200 ${
-                        activeSection === item.id
-                          ? 'text-white'
-                          : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                      }`} />
-                    </div>
-                    <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
-                      activeSection === item.id
-                        ? 'text-white'
-                        : 'text-gray-900 dark:text-gray-100'
-                    }`}>
-                      {item.label}
-                    </span>
-                  
-                  </button>
-                ))}
+                {secondaryItems.map((item) => renderNavigationButton(item))}
               </div>
             </nav>
 

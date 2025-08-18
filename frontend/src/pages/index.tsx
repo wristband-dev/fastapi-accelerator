@@ -1,7 +1,7 @@
 import { useWristbandAuth } from "@wristband/react-client-auth";
 import { geistMono, geistSans } from "@/utils/fonts";
 import Hero from "@/components/Hero";
-import Home from "@/components/Home";
+import Home from "@/components/Content/Home";
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useWristbandAuth();

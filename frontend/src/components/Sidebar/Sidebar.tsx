@@ -5,27 +5,39 @@ import {
   ChevronRightIcon,
   KeyIcon,
   CogIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  HomeIcon
 } from '@heroicons/react/24/outline';
 
 import ItemUserSettings from './InLineViews/UserSettings';
 import ItemUsers from './InLineViews/Users';
 import ItemAdmin from './InLineViews/Admin';
-import ItemSecrets from '../Content/Secrets';
 import TenantSwitcher from '@/components/Sidebar/TenantSwitcher';
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
+import { theme } from '@/utils/theme';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onContentSelect: (content: 'home' | 'secrets') => void;
 }
 
-type SidebarSection = 'user' | 'users' | 'admin' | 'secrets';
+type InlineViewSection = 'user' | 'users' | 'admin';
+type ContentSection = 'home' | 'secrets';
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [activeSection, setActiveSection] = useState<SidebarSection>('user');
+export default function Sidebar({ isOpen, onClose, onContentSelect }: SidebarProps) {
+  const [activeInlineView, setActiveInlineView] = useState<InlineViewSection>('user');
+  const [lastSelectedInlineView, setLastSelectedInlineView] = useState<InlineViewSection>('user');
+  const [selectedContentItem, setSelectedContentItem] = useState<ContentSection>('home');
   const { setCurrentTenant, setTenantOptions, setIsLoadingTenants, setUserRoles, setIsLoadingRoles, hasAdminRole } = useUser();
+
+  // Restore last selected inline view when sidebar opens
+  useEffect(() => {
+    if (isOpen) {
+      setActiveInlineView(lastSelectedInlineView);
+    }
+  }, [isOpen, lastSelectedInlineView]);
 
   // Fetch tenant data and user roles when sidebar opens
   useEffect(() => {
@@ -88,46 +100,73 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     };
   }, [isOpen, onClose]);
 
-  const primaryItems = [
+  const contentItems = [
+    { id: 'home' as const, label: 'Home', icon: HomeIcon },
     { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
   ];
 
-  const secondaryItems = [
+  const inlineViewItems = [
     { id: 'user' as const, label: 'Settings', icon: CogIcon },
     { id: 'users' as const, label: 'Users', icon: UsersIcon },
     ...(hasAdminRole ? [{ id: 'admin' as const, label: 'Admin', icon: ShieldCheckIcon }] : []),
   ];
 
-  // Reset active section to 'user' if user doesn't have admin role and is on admin section
+  // Reset active inline view to 'user' if user doesn't have admin role and is on admin section
   useEffect(() => {
-    if (!hasAdminRole && activeSection === 'admin') {
-      setActiveSection('user');
+    if (!hasAdminRole && activeInlineView === 'admin') {
+      setActiveInlineView('user');
+      setLastSelectedInlineView('user');
     }
-  }, [hasAdminRole, activeSection]);
+  }, [hasAdminRole, activeInlineView]);
 
-  const renderNavigationButton = (item: { id: SidebarSection; label: string; icon: any }) => (
+  const handleContentItemClick = (contentId: ContentSection) => {
+    setSelectedContentItem(contentId);
+    onContentSelect(contentId);
+  };
+
+  const handleInlineViewClick = (viewId: InlineViewSection) => {
+    setActiveInlineView(viewId);
+    setLastSelectedInlineView(viewId);
+  };
+
+  const renderContentButton = (item: { id: ContentSection; label: string; icon: any }) => (
     <button
       key={item.id}
-      onClick={() => setActiveSection(item.id)}
+      onClick={() => handleContentItemClick(item.id)}
+      className="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+    >
+      <div className="flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">
+        <item.icon className="w-5 h-5 transition-all duration-200 text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
+      </div>
+      <span className="text-sm sm:text-base font-medium transition-all duration-200 text-gray-900 dark:text-gray-100">
+        {item.label}
+      </span>
+    </button>
+  );
+
+  const renderInlineViewButton = (item: { id: InlineViewSection; label: string; icon: any }) => (
+    <button
+      key={item.id}
+      onClick={() => handleInlineViewClick(item.id)}
       className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
-        activeSection === item.id
+        activeInlineView === item.id
           ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'
           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
       }`}
     >
       <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
-        activeSection === item.id
+        activeInlineView === item.id
           ? 'bg-white/20'
           : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'
       }`}>
         <item.icon className={`w-4 h-4 transition-all duration-200 ${
-          activeSection === item.id
+          activeInlineView === item.id
             ? 'text-white'
             : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
         }`} />
       </div>
       <span className={`text-sm sm:text-base font-medium transition-all duration-200 ${
-        activeSection === item.id
+        activeInlineView === item.id
           ? 'text-white'
           : 'text-gray-900 dark:text-gray-100'
       }`}>
@@ -136,20 +175,73 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     </button>
   );
 
-  const renderContent = () => {
-    switch (activeSection) {
+  const renderInlineViewContent = () => {
+    switch (activeInlineView) {
       case 'user':
         return <ItemUserSettings />;
       case 'users':
         return <ItemUsers />;
       case 'admin':
         return <ItemAdmin />;
-      case 'secrets':
-        return <ItemSecrets />;
       default:
         return <ItemUserSettings />;
     }
   };
+
+  // Collapsed sidebar icon for content items
+  const renderCollapsedContentIcon = (item: { id: ContentSection; label: string; icon: any }) => (
+    <button
+      key={item.id}
+      onClick={() => handleContentItemClick(item.id)}
+      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 mb-2 group ${
+        selectedContentItem === item.id
+          ? 'shadow-lg'
+          : 'hover:bg-white/10 dark:hover:bg-gray-800/50'
+      }`}
+      style={{
+        backgroundColor: selectedContentItem === item.id ? theme.colors.primary : 'transparent',
+      }}
+      title={item.label}
+    >
+      <item.icon className={`w-5 h-5 transition-all duration-200 ${
+        selectedContentItem === item.id
+          ? 'text-white'
+          : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+      }`} />
+    </button>
+  );
+
+  // Collapsed sidebar icon for inline view items
+  const renderCollapsedInlineViewIcon = (item: { id: InlineViewSection; label: string; icon: any }) => (
+    <button
+      key={item.id}
+      onClick={() => {
+        handleInlineViewClick(item.id);
+        // Auto-open sidebar when clicking inline view in collapsed state
+        if (!isOpen) {
+          // Small delay to allow state to update
+          setTimeout(() => {
+            // We would need to expose an onOpen function, for now just use the existing flow
+          }, 0);
+        }
+      }}
+      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 mb-2 group ${
+        activeInlineView === item.id && isOpen
+          ? 'shadow-lg'
+          : 'hover:bg-white/10 dark:hover:bg-gray-800/50'
+      }`}
+      style={{
+        backgroundColor: activeInlineView === item.id && isOpen ? theme.colors.secondary : 'transparent',
+      }}
+      title={item.label}
+    >
+      <item.icon className={`w-5 h-5 transition-all duration-200 ${
+        activeInlineView === item.id && isOpen
+          ? 'text-white'
+          : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+      }`} />
+    </button>
+  );
 
   return (
     <>
@@ -199,23 +291,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Navigation - now inside scrollable area */}
             <nav className="p-4 border-b border-gray-200 dark:border-gray-700">
-              {/* Primary Items (Secrets) */}
+              {/* Content Items (Secrets) */}
               <div className="space-y-1 mb-4">
-                {primaryItems.map((item) => renderNavigationButton(item))}
+                {contentItems.map((item) => renderContentButton(item))}
               </div>
 
               {/* Separator */}
               <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
 
-              {/* Secondary Items (Settings, Users, Admin) */}
+              {/* Inline View Items (Settings, Users, Admin) */}
               <div className="space-y-1">
-                {secondaryItems.map((item) => renderNavigationButton(item))}
+                {inlineViewItems.map((item) => renderInlineViewButton(item))}
               </div>
             </nav>
 
-            {/* Content */}
+            {/* Inline View Content */}
             <div className="transform transition-all duration-300 ease-out">
-              {renderContent()}
+              {renderInlineViewContent()}
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useWristbandAuth } from "@wristband/react-client-auth";
 import { geistMono, geistSans } from "@/utils/fonts";
 import Hero from "@/components/Hero";
-import Home from "@/components/Content/Home";
+import Landing from "@/components/Landing";
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useWristbandAuth();
@@ -18,10 +18,10 @@ export default function HomePage() {
     );
   }
 
-  // Show Hero for unauthenticated users, Home for authenticated users
+  // Show Hero for unauthenticated users, Landing for authenticated users
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} font-[family-name:var(--font-geist-sans)]`}>
-      {isAuthenticated ? <Home /> : <Hero />}
+      {isAuthenticated ? <Landing /> : <Hero />}
     </div>
   );
 }

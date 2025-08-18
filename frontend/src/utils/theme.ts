@@ -225,7 +225,7 @@ export function generateTheme(custom: CustomTheme): Theme {
     info: custom.info || '#3b82f6',
     
     // Neutral colors that work with any theme
-    background: '#ffffff',
+    background: 'var(--background)',
     surface: '#f9fafb',
     border: '#e5e7eb',
     text: '#111827',

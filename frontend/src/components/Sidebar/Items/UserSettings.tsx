@@ -408,7 +408,7 @@ export default function ItemUserSettings() {
       */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center mb-6">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-r from-yellow-500 to-orange-500">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 bg-gradient-to-r from-primary to-primary-light">
             {effectiveTheme === 'dark' ? (
               <MoonIcon className="w-5 h-5 text-white" />
             ) : (

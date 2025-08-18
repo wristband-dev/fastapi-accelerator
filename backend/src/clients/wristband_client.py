@@ -5,9 +5,8 @@ import os
 
 from models.user import User, UsersResponse, UserProfileUpdate
 from models.role import Role, RoleList
-from models.tenant import Tenant, TenantUpdateRequest
-from models.tenant_option import TenantOption
-from models.identity_provider import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle, IdpRedirectUrlConfig, UpsertGoogleSamlMetadata
+from models.tenant import Tenant, TenantUpdateRequest, TenantOption
+from models.idp import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle, IdpRedirectUrlConfig, UpsertGoogleSamlMetadata
 
 logger = logging.getLogger(__name__)
 

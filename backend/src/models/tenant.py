@@ -29,3 +29,11 @@ class TenantUpdateRequest(BaseModel):
     displayName: Optional[str] = Field(None, max_length=60)
     logoUrl: Optional[str] = Field(None, max_length=2000)
     description: Optional[str] = None
+
+class TenantOption(BaseModel):
+    tenantId: str
+    tenantVanityDomain: str
+    tenantDomainName: str
+    tenantDisplayName: str
+    tenantLoginUrl: str
+    tenantLogoUrl: Optional[str] = None

@@ -5,8 +5,7 @@ import logging
 import os
 
 from clients.wristband_client import WristbandApiClient
-from models.tenant import Tenant, TenantUpdateRequest
-from models.tenant_option import TenantOption
+from models.tenant import Tenant, TenantUpdateRequest, TenantOption
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

@@ -128,9 +128,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       />
       
       {/* Sidebar */}
-      <div className={`fixed inset-0 sm:inset-y-0 sm:left-0 z-50 w-full sm:max-w-md lg:max-w-xl xl:max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transform transition-all duration-300 ease-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div 
+        className={`fixed inset-0 sm:inset-y-0 sm:left-0 z-50 w-full sm:max-w-md lg:max-w-xl xl:max-w-2xl shadow-2xl transform transition-all duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={{ 
+          backgroundColor: 'var(--background)',
+          color: 'var(--foreground)'
+        }}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">

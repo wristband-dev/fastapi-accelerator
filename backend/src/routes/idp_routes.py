@@ -9,7 +9,7 @@ import secrets
 from urllib.parse import urlencode
 
 from clients.wristband_client import WristbandApiClient
-from models.identity_provider import IdentityProvider, UpsertIdpRequest, UpsertGoogleSamlMetadata, IdentityProviderRequest, IdpProtocol
+from models.idp import IdentityProvider, UpsertIdpRequest, UpsertGoogleSamlMetadata, IdentityProviderRequest, IdpProtocol
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

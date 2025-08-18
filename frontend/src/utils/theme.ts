@@ -39,8 +39,9 @@ export interface CustomTheme {
 
 // 2. User's custom theme - EDIT THIS TO CUSTOMIZE YOUR THEME
 export const userTheme: CustomTheme = {
-  primary: '#00AA81',  // Your brand color - this is the only required field
-  
+  primary: '#a7589d',  // Your brand color - this is the only required field
+  // #00AA81
+
   // Optional overrides (uncomment to customize):
   // primaryLight: '#33BBAA',  // Auto-generated if not provided
   // primaryDark: '#006655',   // Auto-generated if not provided

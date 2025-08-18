@@ -8,9 +8,9 @@ import {
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
-import ItemUserSettings from './Items/UserSettings';
-import ItemUsers from './Items/Users';
-import ItemAdmin from './Items/Admin';
+import ItemUserSettings from './InLineViews/UserSettings';
+import ItemUsers from './InLineViews/Users';
+import ItemAdmin from './InLineViews/Admin';
 import ItemSecrets from '../Content/Secrets';
 import TenantSwitcher from '@/components/Sidebar/TenantSwitcher';
 import { useUser } from '@/contexts/UserContext';

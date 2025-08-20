@@ -278,18 +278,10 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
             onOpen();
           }
         }}
-        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 mb-2 group ${
-          lastSelectedInlineView === item.id
-            ? 'bg-white/20 shadow-lg'
-            : 'hover:bg-white/10'
-        }`}
+        className="w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 mb-2 group hover:bg-white/10"
         title={item.label}
       >
-        <item.icon className={`w-5 h-5 transition-all duration-200 ${
-          lastSelectedInlineView === item.id
-            ? 'text-white'
-            : 'text-white/70 group-hover:text-white'
-        }`} />
+        <item.icon className="w-5 h-5 transition-all duration-200 text-white/70 group-hover:text-white" />
       </button>
     );
   };

@@ -385,7 +385,7 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
           <div className="flex flex-col items-center py-4 h-full">
             {/* Brand Icon */}
             <div className="mb-6 cursor-pointer" onClick={() => onOpen()}>
-              <div className="w-10 h-10 flex items-center justify-center">
+              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/80 dark:bg-gray-100/10 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/30 shadow-sm transition-all duration-200 hover:bg-white/90 dark:hover:bg-gray-100/20 hover:shadow-md hover:scale-105">
                 <img 
                   src="/wristband_icon.svg" 
                   alt="Wristband" 

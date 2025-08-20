@@ -111,6 +111,19 @@ class WristbandApiClient:
         data = response.json() if response.content else {}
         return User(**data)
 
+    async def delete_user(self, user_id: str, access_token: str) -> None:
+        # Delete User API - https://docs.wristband.dev/reference/deleteuserv1
+        response: httpx.Response = await self.client.delete(
+            self.base_url + f'/users/{user_id}',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            }
+        )
+
+        if response.status_code != 204:
+            raise ValueError(f'Error deleting user: {response.status_code} - {response.text}')
+
     ############################################################################################
     # MARK: User Invitation APIs
     ############################################################################################

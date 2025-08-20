@@ -97,25 +97,33 @@ async def invite_user(request: Request, invite_request: InviteUserRequest) -> In
         logger.exception(f"Error inviting user: {str(e)}")
         raise
 
-@router.patch('/{user_id}/deactivate', response_model=User)
-async def deactivate_user(request: Request, user_id: str) -> User:
+@router.delete('/{user_id}', status_code=204)
+async def delete_user(request: Request, user_id: str) -> None:
     """
-    Deactivate a user by setting their status to INACTIVE
+    Permanently delete a user from the system
     """
     try:
         # Get session data including access token
         session_data = request.state.session.get()
         access_token = session_data.access_token
         
-        # Deactivate the user using the Wristband API
-        deactivated_user = await wristband_client.deactivate_user(
+        # Delete the user using the Wristband API
+        await wristband_client.delete_user(
             user_id=user_id,
             access_token=access_token
         )
         
-        logger.info(f"Successfully deactivated user: {user_id}")
-        return deactivated_user
+        logger.info(f"Successfully deleted user: {user_id}")
         
+    except ValueError as e:
+        error_str = str(e)
+        # Handle 403 Forbidden errors gracefully - user doesn't have admin permissions
+        if "403" in error_str and "unauthorized" in error_str.lower():
+            logger.warning(f"User {session_data.user_id} attempted to delete user without admin permissions")
+            raise HTTPException(status_code=403, detail="Insufficient permissions to delete users")
+        else:
+            logger.exception(f"Error deleting user: {error_str}")
+            raise
     except Exception as e:
-        logger.exception(f"Error deactivating user {user_id}: {str(e)}")
+        logger.exception(f"Error deleting user {user_id}: {str(e)}")
         raise

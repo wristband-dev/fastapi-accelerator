@@ -40,7 +40,7 @@ export default function ItemUsers() {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement>(null);
   const [activeDropdownUserId, setActiveDropdownUserId] = useState<string | null>(null);
-  const [isDeactivating, setIsDeactivating] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
 
   const handleApiError = useCallback((error: unknown) => {
@@ -204,31 +204,31 @@ export default function ItemUsers() {
     return 'bg-success/10 text-success';
   };
 
-  const handleDeactivateUser = async (userId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     if (!hasAdminRole) {
-      window.alert('You do not have permission to deactivate users.');
+      window.alert('You do not have permission to delete users.');
       return;
     }
 
-    const confirmDeactivate = window.confirm('Are you sure you want to deactivate this user? They will no longer be able to access the application.');
-    if (!confirmDeactivate) {
+    const confirmDelete = window.confirm('Are you sure you want to permanently delete this user? This action cannot be undone.');
+    if (!confirmDelete) {
       return;
     }
 
     try {
-      setIsDeactivating(userId);
-      await frontendApiClient.patch(`/users/${userId}/deactivate`);
+      setIsDeleting(userId);
+      await frontendApiClient.delete(`/users/${userId}`);
       
       // Refresh the users list
       await fetchUsers();
       
-      window.alert('User has been deactivated successfully.');
+      window.alert('User has been deleted successfully.');
       setActiveDropdownUserId(null);
     } catch (error) {
-      console.error('Error deactivating user:', error);
+      console.error('Error deleting user:', error);
       handleApiError(error);
     } finally {
-      setIsDeactivating(null);
+      setIsDeleting(null);
     }
   };
 
@@ -375,12 +375,12 @@ export default function ItemUsers() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeactivateUser(user.id);
+                                handleDeleteUser(user.id);
                               }}
-                              disabled={isDeactivating === user.id}
+                              disabled={isDeleting === user.id}
                               className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {isDeactivating === user.id ? (
+                              {isDeleting === user.id ? (
                                 <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -388,7 +388,7 @@ export default function ItemUsers() {
                               ) : (
                                 <TrashIcon className="w-4 h-4" />
                               )}
-                              {isDeactivating === user.id ? 'Deactivating...' : 'Deactivate User'}
+                              {isDeleting === user.id ? 'Deleting...' : 'Delete User'}
                             </button>
                           </div>
                         )}

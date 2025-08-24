@@ -1,5 +1,5 @@
-project_id          = "wb-acc-demo"
-app_name            = "wb-accelerator-demo"
+project_id          = "metric-layer-ai"
+app_name            = "metric-layer-ai"
 billing_account_id  = "01374E-08CB2C-435A99"
 region              = "us-central1"
 firestore_location  = "us-central"

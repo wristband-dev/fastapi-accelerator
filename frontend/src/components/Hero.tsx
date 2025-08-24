@@ -9,7 +9,7 @@ export default function Hero() {
   };
 
   const handleSignUp = () => {
-    window.location.href = 'https://pythonaccelator-donato.us.wristband.dev/signup';
+    window.location.href = process.env.NEXT_PUBLIC_APPLICATION_SIGNUP_URL || '';
   };
 
   return (

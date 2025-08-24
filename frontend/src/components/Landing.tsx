@@ -1,50 +1,30 @@
-import React, { useState, useCallback } from 'react';
-import { useWristbandSession } from "@wristband/react-client-auth";
-import { redirectToLogin } from "@wristband/react-client-auth";
-import axios from "axios";
+import React, { useState } from 'react';
 import Sidebar from "@/components/Sidebar/Sidebar";
-import { useUser } from "@/contexts/UserContext";
 import Home from "@/components/Content/Home";
 import ItemSecrets from "@/components/Content/Secrets";
 
-type ContentView = 'dashboard' | 'home' | 'secrets';
+// -------Set your content views here-------
+const contentViews = [
+  'home', 
+  'secrets'
+] as const;
+type ContentView = typeof contentViews[number];
 
 export default function Landing() {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [currentContent, setCurrentContent] = useState<ContentView>('dashboard');
+  const [currentContent, setCurrentContent] = useState<ContentView>(contentViews[0]);
 
-  const { metadata } = useWristbandSession();
-  const { setCurrentUser, setIsLoadingUser } = useUser();
-
-  const handleApiError = useCallback((error: unknown) => {
-    console.error(error);
-
-    if (axios.isAxiosError(error)) {
-      if ([401, 403].includes(error.response?.status!)) {
-        redirectToLogin('/api/auth/login');
-        window.alert('Authentication required.');
-      }
-    } else {
-      window.alert(`Error: ${error}`);
-    }
-  }, []);
-
-  const handleContentSelect = (content: 'home' | 'secrets') => {
-    // Map sidebar content selections to our internal content view
-    const contentMap: { [K in 'home' | 'secrets']: ContentView } = {
-      home: 'dashboard',
-      secrets: 'secrets'
-    };
-    setCurrentContent(contentMap[content]);
-    setIsSidebarOpen(false); // Close sidebar when content item is selected
+  const handleContentSelect = (content: ContentView) => {
+    setCurrentContent(content);
+    setIsSidebarOpen(false);
   };
 
   const renderMainContent = () => {
     switch (currentContent) {
+      case 'home':
+        return <Home />;
       case 'secrets':
         return <ItemSecrets />;
-      case 'home':
-      case 'dashboard':
       default:
         return <Home />;
     }

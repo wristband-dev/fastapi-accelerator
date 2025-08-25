@@ -19,24 +19,27 @@
 
 ---
 
-# Wristband Multi-Tenant Demo App for FastAPI (Python)
+# Wristband Multi-Tenant App Accelerator
 
-This demo app consists of:
+This app consists of:
 
 - **FastAPI Backend**: A Python backend with Wristband authentication integration
 - **Next.js Frontend**: A React-based frontend with authentication context
+- **GCP Firebase DocStore (Optional)**: Integration to GCP Firebase for document storage
+- **GCP Cloud Run (Optional)**: Integration to GCP Cloud Run to host your fast api application 
+- **Cloud Flare (Optional)**: Integration to Cloud Flare to host the front end
 
-The backend handles all authentication flows, including:
-- Storing client ID and secret
-- Handling OAuth2 authorization code flow redirections
-- Managing session cookies
-- Token refresh
-- API orchestration
 
-When an unauthenticated user attempts to access the frontend, it will redirect to the FastAPI backend's Login Endpoint, which in turn redirects the user to Wristband to authenticate. Wristband then redirects the user back to your application's Callback Endpoint which sets a session cookie before returning the user's browser to the frontend project.
+## Table of Contents
+
+1. Requirements
+2. Optional Requirements
+3. Getting Started
+4. Deployment
+5. Questions
 
 <br>
-<hr />
+<hr>
 <br>
 
 ## Requirements
@@ -64,15 +67,43 @@ npm --version  # Should show v8.x.x or higher
 brew install node
 ```
 
-## Optional 
+<br>
+<hr>
+<br>
+
+## Optional Requirements
 
 ### Poetry
+Poetry is used for python project and dependency management. The `package.json` already has pip install shortcuts built in but this can help with future development.
 1. Visit [Poetry Downloads](https://python-poetry.org/docs/)
 2. Download and install the appropriate version for your OS
 3. Verify the installation by opening a terminal or command prompt and running:
 ```bash
 poetry --version # Should show v18.x.x or higher
 ```
+
+### Terraform
+Terraform is used to manage the GCP infrastructure as code if you are intending on using firebase for documenent storeage.
+1. Visit [Terraform Install](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) 
+2. Download and install the latest 
+3. Verify the installation by opening a terminal or command prompt and running:
+```bash
+terraform --version # Should show Terraform vx.x.x
+```
+
+### Google Cloud
+GCP is used for firebase integration for the purposes of document storage
+1. Visit [gcloud sdk install](https://cloud.google.com/sdk/docs/install) 
+2. Download and install the latest 
+3. Verify the installation by opening a terminal or command prompt and running:
+```bash
+gcloud --version # Should show Google Cloud SDK x.x.x
+```
+4. Init you gcloud account
+```bash
+gcloud init
+```
+
 <br>
 <hr>
 <br>
@@ -128,28 +159,6 @@ npm start
 
 This repository is set up to use terraform to deploy on google cloud platform for hosting of the fast api as well as using firebase for the datastore.
 
-### Prerequistes
-
-#### Terraform
-1. Visit [Terraform Install](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) 
-2. Download and install the latest 
-3. Verify the installation by opening a terminal or command prompt and running:
-```bash
-terraform --version # Should show Terraform vx.x.x
-```
-
-#### Google Cloud
-1. Visit [gcloud sdk install](https://cloud.google.com/sdk/docs/install) 
-2. Download and install the latest 
-3. Verify the installation by opening a terminal or command prompt and running:
-```bash
-gcloud --version # Should show Google Cloud SDK x.x.x
-```
-4. Init you gcloud account
-```bash
-gcloud init
-```
-
 ### Update Project Configuration
 
 Before deploying, you need to configure the Terraform variables with your specific GCP project details:
@@ -178,7 +187,7 @@ Before deploying, you need to configure the Terraform variables with your specif
 
 > **Note**: Make sure your GCP project has billing enabled before proceeding with deployment.
 
-### Create Project
+### Apply Infrastructure
 
 ```bash
 cd infrastructure
@@ -187,7 +196,8 @@ cd infrastructure
 ./terraform.sh apply -auto-approve
 ```
 
-### Get Service Accounts
+### Collect Service Accounts
+This will collect the services accounts for `cloud run` and `firebase` which are used locally and for deployment and place them in the `backend/service_accounts` folder
 ```bash
 cd infrastructure
 ./export_firebase_key.sh
@@ -198,84 +208,6 @@ cd infrastructure
 <hr>
 <br>
 
-## How to interact with the demo app
-
-The NextJS server starts on port 3001, and the FastAPI server starts on port 6001. NextJS is configured with rewrites to forward all `/api/*` requests to the FastAPI backend at `http://localhost:6001/api/*`. This allows the frontend to make clean API calls using relative URLs like `/api/session` while keeping the backend services separate and maintainable. The FastAPI server includes CORS middleware to allow cross-origin requests from the NextJS frontend.
-
-### Signup Users
-
-You can sign up your first customer on the Signup Page at the following location:
-
-- `https://{application_vanity_domain}/signup`, where `{application_vanity_domain}` should be replaced with the value of the "Application Vanity Domain" value of the application (found in the Wristband Dashboard).
-
-This signup page is hosted by Wristband. Completing the signup form will provision both a new tenant with the specified tenant domain name and a new user that is assigned to that tenant.
-
-### Application-level Login (Tenant Discovery)
-
-Users of this app can access the Application-level Login Page at the following location:
-
-- `https://{application_vanity_domain}/login`, where `{application_vanity_domain}` should be replaced with the value of the "Application Vanity Domain" value of the application.
-
-This login page is hosted by Wristband. Here, the user will be prompted to enter either their email or their tenant's domain name, redirecting them to the Tenant-level Login Page for their specific tenant.
-
-### Tenant-level Login
-
-If users wish to directly access the Tenant-level Login Page without going through the Application-level Login Page, they can do so at:
-
-- `https://localhost:6001/api/auth/login?tenant_domain={tenant_domain}`, where `{tenant_domain}` should be replaced with the desired tenant's domain name.
-
-This login page is hosted by Wristband. Here, the user will be prompted to enter their credentials to login to the application.
-
-### Home Page
-
-The home page of the app can be accessed at `http://localhost:3001`. When the user is not authenticated, they will only see a Login button that will take them to the Application-level Login/Tenant Discovery page.
-
-### Architecture
-
-The application in this repository utilizes the Backend for Frontend (BFF) pattern, where FastAPI is the backend for the NextJS/React frontend. The server is responsible for:
-
-- Storing the client ID and secret.
-- Handling the OAuth2 authorization code flow redirections to and from Wristband during user login.
-- Creating the application session cookie to be sent back to the browser upon successful login.  The application session cookie contains the access and refresh tokens as well as some basic user info.
-- Refreshing the access token if the access token is expired.
-- Orchestrating all API calls from the frontend to Wristband.
-- Destroying the application session cookie and revoking the refresh token when a user logs out.
-
-API calls made from NextJS/React to FastAPI pass along the application session cookie and a [CSRF token header](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie) (parsed from the CSRF cookie) with every request.  The server has an auth middleware for all protected routes responsbile for:
-
-- Validating the session and refreshing the access token (if necessary)
-- Validating the CSRF token
-
-Wristband hosts all onboarding workflow pages (signup, login, etc), and the FastAPI server will redirect to Wristband in order to show users those pages.
-
-<br>
-<hr>
-<br>
-
-## Wristband FastAPI Auth SDK
-
-This demo app is leveraging the [Wristband fastapi-auth SDK](https://github.com/wristband-dev/fastapi-auth) for all authentication interaction in the FastAPI server. Refer to that GitHub repository for more information.
-
-<br>
-
-## Wristband React Client Auth SDK
-
-This demo app is leveraging the [Wristband react-client-auth SDK](https://github.com/wristband-dev/react-client-auth) for any authenticated session interaction in the NextJS/React frontend. Refer to that GitHub repository for more information.
-
-<br/>
-
-## CSRF Protection
-
-Cross Site Request Forgery (CSRF) is a security vulnerability where attackers trick authenticated users into unknowingly submitting malicious requests to your application. This demo app is leveraging a technique called the Syncrhonizer Token Pattern to mitigate CSRF attacks by employing two cookies: a session cookie for user authentication and a CSRF token cookie containing a unique token. With each request, the CSRF token is included both in the cookie and the request payload, enabling server-side validation to prevent CSRF attacks.
-
-Refer to the [OWASP CSRF Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) for more information about this topic.
-
-> [!WARNING]
-> Your own application should take effort to mitigate CSRF attacks in addition to any Wristband authentication, and it is highly recommended to take a similar approach as this demo app to protect against thse types of attacks.
-
-Within the demo app code base, you can search in your IDE of choice for the text `CSRF_TOUCHPOINT`.  This will show the various places in both the NextJS/React frontend code and FastAPI backend code where CSRF is involved.
-
-<br/>
 
 ## Questions
 

@@ -36,5 +36,7 @@ OAuth2 Client
 
 Authorization -> Role Assignment Policies
 
-Enable Self Sign Up
-    Application - enable self sign up
+Application Settings
+    - Enable Self Sign Up
+    - login url -> http://localhost:6001/api/auth/login
+    - logout urls -> http://localhost:3001 

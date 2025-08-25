@@ -10,6 +10,7 @@ __pycache__
 .venv
 *egg-info*
 
+backend/service_accounts/*
 backend/poetry.lock
 
 node_modules

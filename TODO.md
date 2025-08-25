@@ -1,27 +1,16 @@
+To Do
+- Basic Role permissions issue
+- Check on user invite? Think it works
+- test forking the repo
+- link cloud flare
+- complete CICD
+- add all to README
 
-- self sign up tenant
-    - application settings -> applications urls -> sign up urls
+Questions
+- David
+    - What level of detail to abstract into SDKs
+    - What level of automation can be applied for the wristband setup for the accelerator
 
-- on tenant create
-    - in tenant sign up flow - upsert google social IDP
-
-    - add google social to tenant level so adding okta doenst override application social idp
-    1. upsert copy the google social over (google creds as env vars)
-        - use terraform to get client id and secret
-    2. upsert the okta
-
-
-
-- google social auth - Terraform?
-    - what wb info is provided to know that you cant change password
-        - idp_name in session == google
-
-- google enterprise auth - Terraform?
-    - go into tenant -> hit api from app
-    - enable JIT provisioning 
-        - which fields you want to map from google to wristband for sign u
-
-
-
-- user invite
-    - perk party'
+On Hold
+- Google Social Auth
+    - Pending change from David -> Once done look into add integration to terraform 

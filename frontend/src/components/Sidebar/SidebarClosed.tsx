@@ -1,34 +1,36 @@
 import React from 'react';
-import WristbandSidebar, { type InlineViewSection, type ContentSection } from './wristband/WristbandSidebar';
+import WristbandSidebar, { type InlineViewSection, type NavigationItem } from './wristband/WristbandSidebar';
 import { theme } from '@/utils/theme';
 
 interface SidebarClosedProps {
   onOpen: () => void;
-  onContentSelect: (content: 'home' | 'secrets') => void;
+  navigationItems: NavigationItem[];
+  onNavigate: (itemId: string) => void;
   onInlineViewChange: (view: InlineViewSection) => void;
 }
 
 export default function SidebarClosed({ 
   onOpen, 
-  onContentSelect, 
+  navigationItems,
+  onNavigate, 
   onInlineViewChange 
 }: SidebarClosedProps) {
-  const wristbandSidebar = WristbandSidebar({ onContentSelect });
+  const wristbandSidebar = WristbandSidebar({ navigationItems, onNavigate });
 
-  // Collapsed sidebar icon for content items
-  const renderCollapsedContentIcon = (item: { id: ContentSection; label: string; icon: any }) => (
+  // Collapsed sidebar icon for navigation items
+  const renderCollapsedNavigationIcon = (item: NavigationItem) => (
     <button
       key={item.id}
-      onClick={() => wristbandSidebar.handleContentItemClick(item.id)}
+      onClick={() => wristbandSidebar.handleNavigationItemClick(item.id)}
       className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 mb-2 group ${
-        wristbandSidebar.selectedContentItem === item.id
+        wristbandSidebar.selectedNavigationItem === item.id
           ? 'bg-white/20 shadow-lg'
           : 'hover:bg-white/10'
       }`}
       title={item.label}
     >
       <item.icon className={`w-5 h-5 transition-all duration-200 ${
-        wristbandSidebar.selectedContentItem === item.id
+        wristbandSidebar.selectedNavigationItem === item.id
           ? 'text-white'
           : 'text-white/70 group-hover:text-white'
       }`} />
@@ -87,9 +89,9 @@ export default function SidebarClosed({
           </div>
         </div>
 
-        {/* Content Items */}
+        {/* Navigation Items */}
         <div className="flex flex-col items-center mb-4">
-          {wristbandSidebar.contentItems.map((item) => renderCollapsedContentIcon(item))}
+          {wristbandSidebar.navigationItems.map((item) => renderCollapsedNavigationIcon(item))}
         </div>
 
         {/* Separator */}

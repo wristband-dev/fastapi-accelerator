@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import SidebarOpen from './SidebarOpen';
 import SidebarClosed from './SidebarClosed';
-import type { InlineViewSection } from './wristband/WristbandSidebar';
+import type { InlineViewSection, NavigationItem } from './wristband/WristbandSidebar';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onOpen: () => void;
-  onContentSelect: (content: 'home' | 'secrets') => void;
+  navigationItems: NavigationItem[];
+  onNavigate: (itemId: string) => void;
 }
 
-export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onOpen, navigationItems, onNavigate }: SidebarProps) {
   const [lastSelectedInlineView, setLastSelectedInlineView] = useState<InlineViewSection>('user');
 
   const handleInlineViewChange = (view: InlineViewSection) => {
@@ -45,7 +46,8 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
           // EXPANDED STATE - Full Sidebar Content
           <SidebarOpen 
             onClose={onClose}
-            onContentSelect={onContentSelect}
+            navigationItems={navigationItems}
+            onNavigate={onNavigate}
             isOpen={isOpen}
             lastSelectedInlineView={lastSelectedInlineView}
             onInlineViewChange={handleInlineViewChange}
@@ -54,7 +56,8 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
           // COLLAPSED STATE - Icon Bar
           <SidebarClosed 
             onOpen={onOpen}
-            onContentSelect={onContentSelect}
+            navigationItems={navigationItems}
+            onNavigate={onNavigate}
             onInlineViewChange={handleInlineViewChange}
           />
         )}

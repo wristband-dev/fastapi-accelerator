@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import WristbandSidebar, { type InlineViewSection, type ContentSection } from './wristband/WristbandSidebar';
+import WristbandSidebar, { type InlineViewSection, type NavigationItem } from './wristband/WristbandSidebar';
 import TenantSwitcher from './wristband/TenantSwitcher';
 
 interface SidebarOpenProps {
   onClose: () => void;
-  onContentSelect: (content: 'home' | 'secrets') => void;
+  navigationItems: NavigationItem[];
+  onNavigate: (itemId: string) => void;
   isOpen: boolean;
   lastSelectedInlineView: InlineViewSection;
   onInlineViewChange: (view: InlineViewSection) => void;
@@ -13,26 +14,16 @@ interface SidebarOpenProps {
 
 export default function SidebarOpen({ 
   onClose, 
-  onContentSelect, 
+  navigationItems,
+  onNavigate, 
   isOpen,
   lastSelectedInlineView,
   onInlineViewChange 
 }: SidebarOpenProps) {
-  const wristbandSidebar = WristbandSidebar({ onContentSelect });
+  const wristbandSidebar = WristbandSidebar({ navigationItems, onNavigate });
 
-  // Restore last selected inline view when sidebar opens
-  useEffect(() => {
-    if (isOpen && lastSelectedInlineView !== wristbandSidebar.activeInlineView) {
-      wristbandSidebar.setActiveInlineView(lastSelectedInlineView);
-    }
-  }, [isOpen, lastSelectedInlineView, wristbandSidebar]);
-
-  // Sync changes back to parent
-  useEffect(() => {
-    if (wristbandSidebar.activeInlineView !== lastSelectedInlineView) {
-      onInlineViewChange(wristbandSidebar.activeInlineView);
-    }
-  }, [wristbandSidebar.activeInlineView, lastSelectedInlineView, onInlineViewChange]);
+  // Note: Removed problematic useEffect hooks that were causing infinite loops
+  // The sidebar state management should work without these synchronization effects
 
   // Prevent body scroll when sidebar is open
   useEffect(() => {
@@ -74,10 +65,10 @@ export default function SidebarOpen({
     </div>
   );
 
-  const renderContentButton = (item: { id: ContentSection; label: string; icon: any }) => (
+  const renderNavigationButton = (item: NavigationItem) => (
     <button
       key={item.id}
-      onClick={() => wristbandSidebar.handleContentItemClick(item.id)}
+      onClick={() => wristbandSidebar.handleNavigationItemClick(item.id)}
       className="w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
     >
       <div className="flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">
@@ -158,9 +149,9 @@ export default function SidebarOpen({
       <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Navigation */}
         <nav className="p-4 border-b border-gray-200 dark:border-gray-700">
-          {/* Content Items */}
+          {/* Navigation Items */}
           <div className="space-y-1 mb-4">
-            {wristbandSidebar.contentItems.map((item) => renderContentButton(item))}
+            {wristbandSidebar.navigationItems.map((item) => renderNavigationButton(item))}
           </div>
 
           {/* Separator */}

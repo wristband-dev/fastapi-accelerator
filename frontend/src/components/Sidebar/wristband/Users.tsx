@@ -121,7 +121,7 @@ export default function ItemUsers() {
     if (hasAdminRole) {
       fetchRoles();
     }
-  }, [fetchUsers, fetchRoles, hasAdminRole]);
+  }, [hasAdminRole]); // Remove fetchUsers and fetchRoles from deps to prevent infinite loop
 
   // Initialize with default roles immediately to ensure something is always available
   useEffect(() => {

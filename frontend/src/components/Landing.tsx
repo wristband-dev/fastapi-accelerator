@@ -4,6 +4,8 @@ import Home from "@/pages/Home";
 import ItemSecrets from "@/pages/Secrets";
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
+import { HomeIcon, KeyIcon } from '@heroicons/react/24/outline';
+import type { NavigationItem } from '@/components/sidebar/wristband/WristbandSidebar';
 
 // -------Set your content views here-------
 const contentViews = [
@@ -11,6 +13,12 @@ const contentViews = [
   'secrets'
 ] as const;
 type ContentView = typeof contentViews[number];
+
+// Navigation configuration - add new pages here
+const navigationItems: NavigationItem[] = [
+  { id: 'home', label: 'Home', icon: HomeIcon },
+  { id: 'secrets', label: 'Secrets', icon: KeyIcon },
+];
 
 export default function Landing() {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
@@ -52,9 +60,12 @@ export default function Landing() {
     fetchUserData();
   }, [setCurrentTenant, setTenantOptions, setIsLoadingTenants, setUserRoles, setIsLoadingRoles]);
 
-  const handleContentSelect = (content: ContentView) => {
-    setCurrentContent(content);
-    setIsSidebarOpen(false);
+  const handleNavigate = (itemId: string) => {
+    // Map navigation item ID to content view
+    if (itemId === 'home' || itemId === 'secrets') {
+      setCurrentContent(itemId as ContentView);
+      setIsSidebarOpen(false);
+    }
   };
 
   const renderMainContent = () => {
@@ -77,7 +88,8 @@ export default function Landing() {
         isOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)} 
         onOpen={() => setIsSidebarOpen(true)}
-        onContentSelect={handleContentSelect}
+        navigationItems={navigationItems}
+        onNavigate={handleNavigate}
       />
 
       {/* 

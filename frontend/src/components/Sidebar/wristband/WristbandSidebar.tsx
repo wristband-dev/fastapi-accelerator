@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   UsersIcon, 
   CogIcon,
-  ShieldCheckIcon,
-  HomeIcon,
-  KeyIcon
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 import ItemSettings from './Settings';
@@ -13,26 +11,27 @@ import SidebarAdmin from './Admin';
 import { useUser } from '@/contexts/UserContext';
 
 export type InlineViewSection = 'user' | 'users' | 'admin';
-export type ContentSection = 'home' | 'secrets';
 
-interface WristbandSidebarProps {
-  onContentSelect: (content: 'home' | 'secrets') => void;
+export interface NavigationItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
-export default function WristbandSidebar({ onContentSelect }: WristbandSidebarProps) {
+interface WristbandSidebarProps {
+  navigationItems: NavigationItem[];
+  onNavigate: (itemId: string) => void;
+}
+
+export default function WristbandSidebar({ navigationItems, onNavigate }: WristbandSidebarProps) {
   const [activeInlineView, setActiveInlineView] = useState<InlineViewSection>('user');
   const [lastSelectedInlineView, setLastSelectedInlineView] = useState<InlineViewSection>('user');
-  const [selectedContentItem, setSelectedContentItem] = useState<ContentSection>('home');
+  const [selectedNavigationItem, setSelectedNavigationItem] = useState<string>(navigationItems[0]?.id || '');
   const { 
     hasAdminRole,
     isLoadingRoles,
     isLoadingTenants 
   } = useUser();
-
-  const contentItems = [
-    { id: 'home' as const, label: 'Home', icon: HomeIcon },
-    { id: 'secrets' as const, label: 'Secrets', icon: KeyIcon },
-  ];
 
   const getInlineViewItems = () => {
     const baseItems = [
@@ -61,9 +60,9 @@ export default function WristbandSidebar({ onContentSelect }: WristbandSidebarPr
     }
   }, [hasAdminRole, activeInlineView]);
 
-  const handleContentItemClick = (contentId: ContentSection) => {
-    setSelectedContentItem(contentId);
-    onContentSelect(contentId);
+  const handleNavigationItemClick = (itemId: string) => {
+    setSelectedNavigationItem(itemId);
+    onNavigate(itemId);
   };
 
   const handleInlineViewClick = (viewId: InlineViewSection) => {
@@ -88,16 +87,16 @@ export default function WristbandSidebar({ onContentSelect }: WristbandSidebarPr
     // State
     activeInlineView,
     lastSelectedInlineView,
-    selectedContentItem,
+    selectedNavigationItem,
     isLoadingRoles,
     isLoadingTenants,
     
     // Data
-    contentItems,
+    navigationItems,
     inlineViewItems: getInlineViewItems(),
     
     // Handlers
-    handleContentItemClick,
+    handleNavigationItemClick,
     handleInlineViewClick,
     setActiveInlineView,
     setLastSelectedInlineView,

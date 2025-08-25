@@ -9,9 +9,9 @@ import {
   HomeIcon
 } from '@heroicons/react/24/outline';
 
-import ItemSettings from './InLineViews/Settings';
-import ItemUsers from './InLineViews/Users';
-import ItemAdmin from './InLineViews/Admin';
+import ItemSettings from './Views/SidebarSettings';
+import ItemUsers from './Views/SidebarUsers';
+import SidebarAdmin from './Views/SidebarAdmin';
 import TenantSwitcher from '@/components/Sidebar/TenantSwitcher';
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
@@ -231,7 +231,7 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
       case 'users':
         return <ItemUsers />;
       case 'admin':
-        return <ItemAdmin />;
+        return <SidebarAdmin />;
       default:
         return <ItemSettings />;
     }

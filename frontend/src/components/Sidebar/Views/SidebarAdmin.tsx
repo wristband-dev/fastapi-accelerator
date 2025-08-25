@@ -38,7 +38,7 @@ interface IdentityProviderDto {
   jitProvisioningEnabled: boolean;
 }
 
-export default function ItemAdmin() {
+export default function SidebarAdmin() {
   const { currentUser } = useUser();
   
   // Tenant/Organization state

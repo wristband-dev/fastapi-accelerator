@@ -198,7 +198,7 @@ class WristbandClient:
                 user_roles = next((ur for ur in roles.items if ur.userId == user.id), None)
                 if user_roles:
                     # Extract role names from the roles list
-                    user.roles = [role.sku for role in user_roles.roles]
+                    user.roles = [role.displayName for role in user_roles.roles]
                 else:
                     user.roles = []
             return all_users

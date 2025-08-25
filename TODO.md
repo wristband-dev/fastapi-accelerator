@@ -1,6 +1,5 @@
 To Do
-- Basic Role permissions issue
-- Check on user invite? Think it works
+- Invite user with correct roles
 - test forking the repo
 - link cloud flare
 - complete CICD

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from "@/components/Sidebar/Sidebar";
-import Home from "@/components/Content/Home";
-import ItemSecrets from "@/components/Content/Secrets";
+import Sidebar from "@/components/sidebar/Sidebar";
+import Home from "@/pages/Home";
+import ItemSecrets from "@/pages/Secrets";
 import { useUser } from '@/contexts/UserContext';
 import frontendApiClient from '@/client/frontend-api-client';
 

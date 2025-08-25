@@ -13,10 +13,14 @@ import sys
 from pathlib import Path
 from pprint import pprint
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.user import User
 
 
@@ -61,12 +65,12 @@ Examples:
     )
     args = parser.parse_args()
     
-    # Validate required arguments
-    if not args.tenant_id:
+    # Validate required arguments)
+    if not args.tenant_id and not os.getenv('TENANT_ID'):
         print("Error: --tenant-id is required (or set TENANT_ID environment variable)")
         sys.exit(1)
     
-    if not args.access_token:
+    if not args.access_token and not os.getenv('ACCESS_TOKEN'):
         print("Error: --access-token is required (or set ACCESS_TOKEN environment variable)")
         sys.exit(1)
     
@@ -75,7 +79,7 @@ Examples:
         sys.exit(1)
     try:
         # Initialize client and make API call
-        client = WristbandApiClient()
+        client = WristbandClient()
         print(f"Querying users for tenant_id: {args.tenant_id}")
         print(f"Start index: {args.start_index}, Count: {args.count}")
         

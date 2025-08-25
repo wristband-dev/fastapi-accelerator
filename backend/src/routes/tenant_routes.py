@@ -4,12 +4,12 @@ from fastapi.responses import JSONResponse
 import logging
 import os
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.tenant import Tenant, TenantUpdateRequest, TenantOption
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-wristband_client = WristbandApiClient()
+wristband_client = WristbandClient()
 
 @router.get('/me', response_model=Tenant)
 async def get_current_tenant(request: Request) -> Tenant:

@@ -16,7 +16,7 @@ from pprint import pprint
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.user import User
 from models.roles import RoleList   
 
@@ -78,7 +78,7 @@ Examples:
     
     try:
         # Initialize client
-        client = WristbandApiClient()
+        client = WristbandClient()
         
         # Step 1: Query tenant users
         print(f"📋 Querying users for tenant_id: {args.tenant_id}")

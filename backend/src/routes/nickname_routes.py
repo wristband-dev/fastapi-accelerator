@@ -3,13 +3,13 @@ from fastapi.responses import JSONResponse
 import logging
 import random
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.session_data import SessionData
 from models.user import UserProfileUpdate
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-wristband_client = WristbandApiClient()
+wristband_client = WristbandClient()
 
 # Simple lists for generating nicknames
 ADJECTIVES = [

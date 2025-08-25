@@ -2,7 +2,7 @@ import pytest
 import httpx
 import os
 from unittest.mock import AsyncMock, patch, MagicMock
-from src.clients.wristband_client import WristbandApiClient
+from src.clients.wristband_client import WristbandClient
 from src.models.user import User, UserList
 
 
@@ -18,7 +18,7 @@ class TestWristbandApiClient:
     @pytest.fixture
     def client(self, mock_env):
         """Create a WristbandApiClient instance for testing"""
-        return WristbandApiClient()
+        return WristbandClient()
 
     @pytest.fixture
     def mock_httpx_client(self):
@@ -28,7 +28,7 @@ class TestWristbandApiClient:
 
     def test_init_with_valid_domain(self, mock_env):
         """Test successful initialization with valid domain"""
-        client = WristbandApiClient()
+        client = WristbandClient()
         assert client.base_url == "https://test-domain.wristband.dev/api/v1"
         assert client.headers == {
             'Accept': 'application/json',
@@ -39,7 +39,7 @@ class TestWristbandApiClient:
         """Test initialization without APPLICATION_VANITY_DOMAIN raises ValueError"""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValueError, match="wristband_application_vanity_domain required for WristbandApiClient"):
-                WristbandApiClient()
+                WristbandClient()
 
     # ============================================================================================
     # get_user_info tests

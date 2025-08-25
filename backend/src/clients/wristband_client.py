@@ -10,7 +10,7 @@ from models.idp import IdentityProvider, IdentityProviderRequest, IdpOverrideTog
 
 logger = logging.getLogger(__name__)
 
-class WristbandApiClient:
+class WristbandClient:
     def __init__(self) -> None:
         application_vanity_domain = os.getenv("APPLICATION_VANITY_DOMAIN")
         if not application_vanity_domain:

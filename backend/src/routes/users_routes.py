@@ -4,13 +4,13 @@ from fastapi.responses import JSONResponse
 from fastapi import status
 import logging
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.user import User
 from models.invite import InviteUserRequest, InviteUserResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-wristband_client = WristbandApiClient()
+wristband_client = WristbandClient()
 
 @router.get('', response_model=list[User])
 async def get_users(request: Request) -> list[User]:

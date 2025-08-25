@@ -8,12 +8,12 @@ import hashlib
 import secrets
 from urllib.parse import urlencode
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.idp import IdentityProvider, UpsertIdpRequest, UpsertGoogleSamlMetadata, IdentityProviderRequest, IdpProtocol
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-wristband_client = WristbandApiClient()
+wristband_client = WristbandClient()
 # MARK: - Get All IDPs
 @router.get('/providers', response_model=list[IdentityProvider])
 async def get_identity_providers(request: Request) -> list[IdentityProvider]:

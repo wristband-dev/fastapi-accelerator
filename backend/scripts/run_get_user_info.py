@@ -18,7 +18,7 @@ from pydantic.types import T
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 
 load_dotenv()
 
@@ -72,7 +72,7 @@ Examples:
     
     try:
         # Initialize client and make API call
-        client = WristbandApiClient()
+        client = WristbandClient()
         print(f"Fetching user info for user_id: {args.user_id}")
         
         user_info = await client.get_user_info(args.user_id, args.access_token, include_roles=True)

@@ -7,18 +7,18 @@ Usage: python run_update_user_nickname.py --user-id <user_id> --nickname <nickna
 
 import argparse
 import asyncio
-import json
 import os
 import sys
 from pathlib import Path
 from pprint import pprint
-from pprint import pprint
-from models.user import User
 
-# Add the src directory to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+from dotenv import load_dotenv
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
+from models.user import UserProfileUpdate
+
+
+load_dotenv()
 
 
 async def main():
@@ -26,18 +26,18 @@ async def main():
         description='Update user nickname in Wristband API',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Environment variables:
-  USER_ID                User ID to update nickname for
-  NICKNAME              New nickname to set
-  ACCESS_TOKEN          Access token for authentication
-  APPLICATION_VANITY_DOMAIN  Application vanity domain (required for WristbandApiClient)
+            Environment variables:
+            USER_ID                User ID to update nickname for
+            NICKNAME              New nickname to set
+            ACCESS_TOKEN          Access token for authentication
+            APPLICATION_VANITY_DOMAIN  Application vanity domain (required for WristbandApiClient)
 
-Examples:
-  python run_update_user_nickname.py --user-id user123 --nickname "John Doe" --access-token token456
-  USER_ID=user123 NICKNAME="John Doe" ACCESS_TOKEN=token456 python run_update_user_nickname.py
+            Examples:
+            python run_update_user_nickname.py --user-id user123 --nickname "John Doe" --access-token token456
+            USER_ID=user123 NICKNAME="John Doe" ACCESS_TOKEN=token456 python run_update_user_nickname.py
         """
     )
-    
+
     parser.add_argument(
         '--user-id',
         help='User ID to update nickname for (env: USER_ID)',
@@ -61,11 +61,19 @@ Examples:
     
     args = parser.parse_args()
     
+    # Debug: Print environment variables
+    print(f"DEBUG - USER_ID env: {os.getenv('USER_ID')}")
+    print(f"DEBUG - NICKNAME env: {os.getenv('NICKNAME')}")
+    print(f"DEBUG - ACCESS_TOKEN env: {os.getenv('ACCESS_TOKEN')}")
+    print(f"DEBUG - APPLICATION_VANITY_DOMAIN env: {os.getenv('APPLICATION_VANITY_DOMAIN')}")
+    print(f"DEBUG - args.nickname: {args.nickname}")
+    
     # Validate required arguments
     if not args.user_id:
         print("Error: --user-id is required (or set USER_ID environment variable)")
         sys.exit(1)
     
+    print(args.nickname)
     if not args.nickname:
         print("Error: --nickname is required (or set NICKNAME environment variable)")
         sys.exit(1)
@@ -80,10 +88,14 @@ Examples:
     
     try:
         # Initialize client and make API call
-        client = WristbandApiClient()
+        client = WristbandClient()
         print(f"Updating nickname for user_id: {args.user_id} to: {args.nickname}")
         
-        user = await client.update_user_nickname(args.user_id, args.nickname, args.access_token)
+        user = await client.update_user(
+            user_id=args.user_id,
+            user_data=UserProfileUpdate(nickname=args.nickname),
+            access_token=args.access_token
+        )
         # Print results
         print("✅ Nickname updated successfully!")
         pprint(user.model_dump())

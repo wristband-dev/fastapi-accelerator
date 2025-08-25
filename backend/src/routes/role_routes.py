@@ -3,12 +3,12 @@ from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 import logging
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.role import Role
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-wristband_client = WristbandApiClient()
+wristband_client = WristbandClient()
 
 @router.get('/', response_model=List[Role])
 async def get_tenant_roles(request: Request):

@@ -20,7 +20,7 @@ export default function SidebarOpen({
   lastSelectedInlineView,
   onInlineViewChange 
 }: SidebarOpenProps) {
-  const wristbandSidebar = WristbandSidebar({ navigationItems, onNavigate });
+  const wristbandSidebar = WristbandSidebar({ navigationItems, onNavigate, initialInlineView: lastSelectedInlineView });
 
   // Note: Removed problematic useEffect hooks that were causing infinite loops
   // The sidebar state management should work without these synchronization effects
@@ -93,7 +93,10 @@ export default function SidebarOpen({
     return (
       <button
         key={item.id}
-        onClick={() => wristbandSidebar.handleInlineViewClick(item.id as InlineViewSection)}
+        onClick={() => {
+          wristbandSidebar.handleInlineViewClick(item.id as InlineViewSection);
+          onInlineViewChange(item.id as InlineViewSection);
+        }}
         className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 text-left rounded-lg transition-all duration-200 group ${
           wristbandSidebar.activeInlineView === item.id
             ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-sm'

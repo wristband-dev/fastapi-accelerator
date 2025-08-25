@@ -21,11 +21,12 @@ export interface NavigationItem {
 interface WristbandSidebarProps {
   navigationItems: NavigationItem[];
   onNavigate: (itemId: string) => void;
+  initialInlineView?: InlineViewSection;
 }
 
-export default function WristbandSidebar({ navigationItems, onNavigate }: WristbandSidebarProps) {
-  const [activeInlineView, setActiveInlineView] = useState<InlineViewSection>('user');
-  const [lastSelectedInlineView, setLastSelectedInlineView] = useState<InlineViewSection>('user');
+export default function WristbandSidebar({ navigationItems, onNavigate, initialInlineView = 'user' }: WristbandSidebarProps) {
+  const [activeInlineView, setActiveInlineView] = useState<InlineViewSection>(initialInlineView);
+  const [lastSelectedInlineView, setLastSelectedInlineView] = useState<InlineViewSection>(initialInlineView);
   const [selectedNavigationItem, setSelectedNavigationItem] = useState<string>(navigationItems[0]?.id || '');
   const { 
     hasAdminRole,

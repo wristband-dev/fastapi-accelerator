@@ -19,7 +19,7 @@ load_dotenv()
 # Add the src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 
 
 async def main():
@@ -78,7 +78,7 @@ Examples:
     
     try:
         # Initialize client and make API call
-        client = WristbandApiClient()
+        client = WristbandClient()
         print(f"Querying roles for tenant_id: {args.tenant_id}")
         
         roles = await client.query_tenant_roles(args.tenant_id, args.access_token)

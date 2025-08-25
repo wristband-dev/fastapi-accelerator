@@ -3,13 +3,13 @@ from fastapi import APIRouter, Request, Response, status
 from fastapi.responses import JSONResponse
 import logging
 
-from clients.wristband_client import WristbandApiClient
+from clients.wristband_client import WristbandClient
 from models.user import User, UserProfileUpdate, PasswordChangeRequest
 from models.role import Role
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-wristband_client = WristbandApiClient()
+wristband_client = WristbandClient()
 
 @router.get('/me', response_model=User)
 async def get_current_user(request: Request) -> User:

@@ -14,7 +14,6 @@ import ItemUsers from './Views/SidebarUsers';
 import SidebarAdmin from './Views/SidebarAdmin';
 import TenantSwitcher from '@/components/Sidebar/TenantSwitcher';
 import { useUser } from '@/contexts/UserContext';
-import frontendApiClient from '@/client/frontend-api-client';
 import { theme } from '@/utils/theme';
 
 interface SidebarProps {
@@ -32,11 +31,6 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
   const [lastSelectedInlineView, setLastSelectedInlineView] = useState<InlineViewSection>('user');
   const [selectedContentItem, setSelectedContentItem] = useState<ContentSection>('home');
   const { 
-    setCurrentTenant, 
-    setTenantOptions, 
-    setIsLoadingTenants, 
-    setUserRoles, 
-    setIsLoadingRoles, 
     hasAdminRole,
     isLoadingRoles,
     isLoadingTenants 
@@ -49,35 +43,7 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
     }
   }, [isOpen, lastSelectedInlineView]);
 
-  // Fetch tenant data and user roles when sidebar opens
-  useEffect(() => {
-    if (!isOpen) return;
 
-    const fetchUserData = async () => {
-      try {
-        setIsLoadingTenants(true);
-        setIsLoadingRoles(true);
-        
-        // Fetch current tenant, tenant options, and user roles in parallel
-        const [tenantResponse, optionsResponse, rolesResponse] = await Promise.all([
-          frontendApiClient.get('/tenant/me'),
-          frontendApiClient.get('/tenant/options'),
-          frontendApiClient.get('/user/me/roles')
-        ]);
-        
-        setCurrentTenant(tenantResponse.data);
-        setTenantOptions(optionsResponse.data);
-        setUserRoles(rolesResponse.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setIsLoadingTenants(false);
-        setIsLoadingRoles(false);
-      }
-    };
-
-    fetchUserData();
-  }, [isOpen, setCurrentTenant, setTenantOptions, setIsLoadingTenants, setUserRoles, setIsLoadingRoles]);
 
   // Prevent body scroll when sidebar is open
   React.useEffect(() => {
@@ -262,9 +228,19 @@ export default function Sidebar({ isOpen, onClose, onOpen, onContentSelect }: Si
     // Render loading skeleton for collapsed view
     if (item.isLoading) {
       return (
-        <div key={item.id} className="w-10 h-10 flex items-center justify-center rounded-lg mb-2 animate-pulse">
+        <button
+          key={item.id}
+          onClick={() => {
+            // Auto-open sidebar when clicking loading item in collapsed state
+            if (!isOpen) {
+              onOpen();
+            }
+          }}
+          className="w-10 h-10 flex items-center justify-center rounded-lg mb-2 animate-pulse hover:bg-white/10 transition-all duration-200"
+          title="Loading..."
+        >
           <div className="w-5 h-5 bg-white/30 rounded"></div>
-        </div>
+        </button>
       );
     }
 

@@ -19,7 +19,13 @@
 
 ---
 
-# Wristband Multi-Tenant App Accelerator
+# Multi-Tenant App Accelerator
+
+![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
+![Node](https://img.shields.io/badge/node-v18+-green.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-red.svg)
+![Next.js](https://img.shields.io/badge/Next.js-13+-black.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 This app consists of:
 
@@ -32,17 +38,28 @@ This app consists of:
 
 ## Table of Contents
 
-1. Requirements
-2. Optional Requirements
-3. Getting Started
-4. Deployment
-5. Questions
+- [🎯 Features](#-features)
+- [📋 Requirements](#-requirements)
+- [🔧 Optional Requirements](#-optional-requirements)
+- [🚀 Getting Started](#-getting-started)
+- [🌐 Deployment](#-deployment)
+- [❓ Questions](#-questions)
+
+## 🎯 Features
+
+- **🔐 Enterprise Authentication**: Secure Wristband auth integration
+- **🏢 Multi-Tenant Architecture**: Built-in tenant management
+- **⚡ FastAPI Backend**: High-performance Python API
+- **⚛️ Next.js Frontend**: Modern React-based UI
+- **☁️ Cloud-Ready**: GCP deployment with Terraform
+- **📊 Firebase Integration**: Optional document storage
+- **🛡️ Security First**: CSRF protection and secure sessions
 
 <br>
 <hr>
 <br>
 
-## Requirements
+## 📋 Requirements
 
 This demo app requires the following prerequisites:
 
@@ -71,7 +88,7 @@ brew install node
 <hr>
 <br>
 
-## Optional Requirements
+## 🔧 Optional Requirements
 
 ### Poetry
 Poetry is used for python project and dependency management. The `package.json` already has pip install shortcuts built in but this can help with future development.
@@ -90,6 +107,7 @@ Terraform is used to manage the GCP infrastructure as code if you are intending 
 ```bash
 terraform --version # Should show Terraform vx.x.x
 ```
+> **Note**: Needed for deployment
 
 ### Google Cloud
 GCP is used for firebase integration for the purposes of document storage
@@ -103,39 +121,40 @@ gcloud --version # Should show Google Cloud SDK x.x.x
 ```bash
 gcloud init
 ```
+> **Note**: Needed for deployment
 
 <br>
 <hr>
 <br>
 
-## Getting Started
+
+## 🚀 Getting Started
 
 You can start up the demo application in a few simple steps.
 
-### 1) Sign up for a Wristband account
+### Wristband Setup
+#### 1) Sign up for a [Wristband account](https://wristband.dev)
 
-First, make sure you sign up for a Wristband account at [https://wristband.dev](https://wristband.dev).
+#### 2) Create an App
 
-### 2) Provision the FastAPI demo application in the Wristband Dashboard
+> 💡 **Tip**: You can also follow the other [Demo App Guide](https://docs.wristband.dev/docs/setting-up-a-demo-app) for more detailed information.
+### Fork Repo
 
-After your Wristband account is set up, log in to the Wristband dashboard.  Once you land on the home page of the dashboard, click the button labelled "Add Demo App".  Make sure you choose the following options:
 
-- Step 1: Subject to Authenticate - Humans
-- Step 2: Application Framework - FastAPI (Python)
+```bash
+# 1. Clone and setup
+git clone https://github.com/wristband-dev/fastapi-accelerator.git
+cd fastapi-accelerator
+npm run setup
 
-You can also follow the [Demo App Guide](https://docs.wristband.dev/docs/setting-up-a-demo-app) for more information.
-
-### 3) Apply your Wristband configuration values
-
-After completing demo app creation, you will be prompted with values that you should use to create environment variables for the FastAPI server. You should see:
+# 2. Configure environment
+cp backend/.env.example backend/.env
+# Edit backend/.env with your Wristband credentials
 ```
-APPLICATION_VANITY_DOMAIN=
-CLIENT_ID=
-CLIENT_SECRET=
-``````
-Copy those values, then create an environment variable file for the FastAPI server at: `backend/.env`. Once created, paste the copied values into this file.
 
-### 4) Install dependencies
+
+
+
 
 From the root directory of this project, you can install all required dependencies for both the frontend and backend with a single command:
 
@@ -155,7 +174,7 @@ npm start
 <hr>
 <br>
 
-## Deployment
+## ☁️ Deployment
 
 This repository is set up to use terraform to deploy on google cloud platform for hosting of the fast api as well as using firebase for the datastore.
 

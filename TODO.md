@@ -1,8 +1,7 @@
 To Do
-- test forking the repo
 - link cloud flare
 - complete CICD
-- add all to README
+- check README
 
 Questions
 - David

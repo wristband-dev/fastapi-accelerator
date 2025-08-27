@@ -361,18 +361,20 @@ export default function ItemSecrets() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSecret, setEditingSecret] = useState<Secret | null>(null);
   const [showSecrets, setShowSecrets] = useState<{ [key: string]: boolean }>({});
+  const [datastoreNotEnabled, setDatastoreNotEnabled] = useState(false);
 
   const fetchSecrets = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await frontendApiClient.get('/secrets');
       setSecrets(response.data);
+      setDatastoreNotEnabled(false);
     } catch (error) {
       console.error('Error fetching secrets:', error);
       if (axios.isAxiosError(error)) {
         console.error('API Error:', error.response?.data);
         if (error.response?.data?.error === 'datastore_unavailable') {
-          alert('Datastore not enabled');
+          setDatastoreNotEnabled(true);
         }
       }
     } finally {
@@ -423,6 +425,26 @@ export default function ItemSecrets() {
       [sku]: !prev[sku]
     }));
   };
+
+  if (datastoreNotEnabled) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Secrets
+          </h1>
+        </div>
+        
+        <div className="text-center py-12">
+          <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-yellow-500" />
+          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">Datastore Not Enabled</h3>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">
+            The datastore is not enabled. Please enable it to use the secrets functionality.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

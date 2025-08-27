@@ -6,7 +6,7 @@ import logging
 
 from clients.wristband_client import WristbandClient
 from models.user import User
-from models.invite import InviteUserRequest, InviteUserResponse
+from models.invite import InviteUserRequest, InviteUserResponse, NewUserInvitationRequest
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -95,6 +95,36 @@ async def invite_user(request: Request, invite_request: InviteUserRequest) -> In
             raise
     except Exception as e:
         logger.exception(f"Error inviting user: {str(e)}")
+        raise
+
+@router.get('/invitations/pending', response_model=list[NewUserInvitationRequest])
+async def get_pending_invitations(request: Request) -> list[NewUserInvitationRequest]:
+    """
+    Get pending user invitations for the current tenant
+    """
+    try:
+        # Get session data including access token and tenant ID
+        session_data = request.state.session.get()
+        access_token = session_data.access_token
+        tenant_id = session_data.tenant_id
+        
+        # Query new user invitation requests using the Wristband API
+        return await wristband_client.query_new_user_invitation_requests(
+            tenant_id=tenant_id,
+            access_token=access_token
+        )
+    
+    except ValueError as e:
+        error_str = str(e)
+        # Handle 403 Forbidden errors gracefully - user doesn't have admin permissions
+        if "403" in error_str and "unauthorized" in error_str.lower():
+            logger.warning(f"User {session_data.user_id} attempted to access pending invitations without admin permissions")
+            raise HTTPException(status_code=403, detail="Insufficient permissions to view pending invitations")
+        else:
+            logger.exception(f"Error querying pending invitations: {error_str}")
+            raise
+    except Exception as e:
+        logger.exception(f"Error querying pending invitations: {str(e)}")
         raise
 
 @router.delete('/{user_id}', status_code=204)

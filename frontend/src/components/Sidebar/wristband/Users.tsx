@@ -24,11 +24,29 @@ interface Role {
   description?: string;
 }
 
+interface PendingInvitation {
+  id: string;
+  email: string;
+  status: string;
+  invitationType: string;
+  rolesToAssign: string[];
+  expirationTime?: string;
+  metadata: {
+    creationTime: string;
+    lastModifiedTime: string;
+    version: string;
+  };
+}
+
+type UserOrInvitation = User | (PendingInvitation & { isPending: true });
+
 
 export default function ItemUsers() {
   const { hasAdminRole } = useUser();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
+  const [isLoadingInvitations, setIsLoadingInvitations] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -118,12 +136,29 @@ export default function ItemUsers() {
     }
   }, []);
 
+  const fetchPendingInvitations = useCallback(async () => {
+    try {
+      setIsLoadingInvitations(true);
+      console.log('Fetching pending invitations from /api/users/invitations/pending...');
+      const response = await frontendApiClient.get('/users/invitations/pending');
+      console.log('Pending invitations fetched successfully:', response.data);
+      setPendingInvitations(response.data || []);
+    } catch (error) {
+      console.error('Error fetching pending invitations:', error);
+      setPendingInvitations([]);
+      // Don't show error for invitations fetch as it's not critical
+    } finally {
+      setIsLoadingInvitations(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
     if (hasAdminRole) {
       fetchRoles();
+      fetchPendingInvitations();
     }
-  }, [hasAdminRole]); // Remove fetchUsers and fetchRoles from deps to prevent infinite loop
+  }, [hasAdminRole]); // Remove fetch functions from deps to prevent infinite loop
 
   // Initialize with default roles immediately to ensure something is always available
   useEffect(() => {
@@ -179,17 +214,31 @@ export default function ItemUsers() {
     }
   }, [activeDropdownUserId]);
 
-  const filteredUsers = users.filter(user => {
+  // Combine users and pending invitations
+  const combinedUsersAndInvitations: UserOrInvitation[] = [
+    ...users,
+    ...pendingInvitations.map(invitation => ({ ...invitation, isPending: true as const }))
+  ];
+
+  const filteredUsersAndInvitations = combinedUsersAndInvitations.filter(item => {
     const searchLower = searchTerm.toLowerCase();
-    const firstName = user.givenName || '';
-    const lastName = user.familyName || '';
-    const fullName = user.fullName || '';
-    const email = user.email || '';
     
-    return firstName.toLowerCase().includes(searchLower) ||
-           lastName.toLowerCase().includes(searchLower) ||
-           fullName.toLowerCase().includes(searchLower) ||
-           email.toLowerCase().includes(searchLower);
+    if ('isPending' in item) {
+      // This is a pending invitation
+      const email = item.email || '';
+      return email.toLowerCase().includes(searchLower);
+    } else {
+      // This is a regular user
+      const firstName = item.givenName || '';
+      const lastName = item.familyName || '';
+      const fullName = item.fullName || '';
+      const email = item.email || '';
+      
+      return firstName.toLowerCase().includes(searchLower) ||
+             lastName.toLowerCase().includes(searchLower) ||
+             fullName.toLowerCase().includes(searchLower) ||
+             email.toLowerCase().includes(searchLower);
+    }
   });
 
   const formatLastLogin = (dateString: string) => {
@@ -246,8 +295,11 @@ export default function ItemUsers() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Users
+          Users & Invitations
         </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Manage users and pending invitations
+        </p>
       </div>
       
       <div className="space-y-6">
@@ -284,16 +336,16 @@ export default function ItemUsers() {
       */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
-          {isLoadingUsers ? (
+          {(isLoadingUsers || isLoadingInvitations) ? (
             <div className="flex items-center justify-center py-12">
               <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
-          ) : filteredUsers.length === 0 ? (
+          ) : filteredUsersAndInvitations.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400">No users found</p>
+              <p className="text-gray-500 dark:text-gray-400">No users or pending invitations found</p>
             </div>
           ) : (
             <table className="w-full">
@@ -317,63 +369,118 @@ export default function ItemUsers() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredUsers.map((user) => (
+                {filteredUsersAndInvitations.map((item) => (
                 <tr 
-                  key={user.id} 
+                  key={item.id} 
                   className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
-                  onClick={() => setSelectedUser(user)}
+                  onClick={() => {
+                    if (!('isPending' in item)) {
+                      setSelectedUser(item);
+                    }
+                  }}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
-                        {user.pictureUrl ? (
-                          <img className="h-10 w-10 rounded-full" src={user.pictureUrl} alt="" />
+                        {'isPending' in item ? (
+                          // Pending invitation avatar
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center text-white font-medium">
+                            {item.email[0].toUpperCase()}
+                          </div>
+                        ) : item.pictureUrl ? (
+                          // Regular user with picture
+                          <img className="h-10 w-10 rounded-full" src={item.pictureUrl} alt="" />
                         ) : (
+                          // Regular user without picture
                           <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary-dark to-primary flex items-center justify-center text-white font-medium">
-                            {(user.givenName?.[0] || user.email[0]).toUpperCase()}{(user.familyName?.[0] || '').toUpperCase()}
+                            {(item.givenName?.[0] || item.email[0]).toUpperCase()}{(item.familyName?.[0] || '').toUpperCase()}
                           </div>
                         )}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {user.fullName || user.displayName || `${user.givenName || ''} ${user.familyName || ''}`.trim() || user.email}
+                          {'isPending' in item ? (
+                            // Pending invitation display name
+                            <>
+                              {item.email}
+                              <span className="ml-2 text-xs text-orange-600 dark:text-orange-400 font-normal">(Pending)</span>
+                            </>
+                          ) : (
+                            // Regular user display name
+                            item.fullName || item.displayName || `${item.givenName || ''} ${item.familyName || ''}`.trim() || item.email
+                          )}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {user.email}
+                          {'isPending' in item ? (
+                            item.invitationType
+                          ) : (
+                            item.email
+                          )}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-wrap gap-1">
-                      {user.roles.length > 0 ? (
-                        user.roles.map((role, index) => (
-                          <span key={index} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-primary/10 text-primary border-primary/20">
-                            {getRoleIcon(user.roles)}
-                            {role}
-                          </span>
-                        ))
+                      {'isPending' in item ? (
+                        // Pending invitation roles
+                        item.rolesToAssign && item.rolesToAssign.length > 0 ? (
+                          item.rolesToAssign.map((roleId, index) => {
+                            const roleObj = availableRoles.find(r => r.sku === roleId || r.id === roleId);
+                            const displayName = roleObj?.displayName || roleId;
+                            return (
+                              <span key={index} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700">
+                                <UserIcon className="w-3 h-3" />
+                                {displayName}
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className="text-gray-500 dark:text-gray-400 text-sm">No roles</span>
+                        )
                       ) : (
-                        <span className="text-gray-500 dark:text-gray-400 text-sm">No roles</span>
+                        // Regular user roles
+                        item.roles.length > 0 ? (
+                          item.roles.map((role, index) => (
+                            <span key={index} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-primary/10 text-primary border-primary/20">
+                              {getRoleIcon(item.roles)}
+                              {role}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-500 dark:text-gray-400 text-sm">No roles</span>
+                        )
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge('active')}`}>
-                      Active
-                    </span>
+                    {'isPending' in item ? (
+                      // Pending invitation status
+                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200">
+                        Pending
+                      </span>
+                    ) : (
+                      // Regular user status
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge('active')}`}>
+                        Active
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {formatLastLogin(user.metadata.creationTime)}
+                    {'isPending' in item ? (
+                      formatLastLogin(item.metadata.creationTime)
+                    ) : (
+                      formatLastLogin(item.metadata.creationTime)
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {hasAdminRole && (
-                      <div className="relative" ref={(el) => { dropdownRefs.current[user.id] = el; }}>
+                    {hasAdminRole && !('isPending' in item) && (
+                      <div className="relative" ref={(el) => { dropdownRefs.current[item.id] = el; }}>
                         <button 
                           className="text-gray-400 hover:text-primary transition-colors p-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (activeDropdownUserId === user.id) {
+                            if (activeDropdownUserId === item.id) {
                               setActiveDropdownUserId(null);
                               setDropdownPosition(null);
                             } else {
@@ -382,14 +489,12 @@ export default function ItemUsers() {
                                 top: rect.bottom + window.scrollY + 4,
                                 left: rect.right + window.scrollX - 140 // 140px is dropdown width
                               });
-                              setActiveDropdownUserId(user.id);
+                              setActiveDropdownUserId(item.id);
                             }
                           }}
                         >
                           <EllipsisVerticalIcon className="h-5 w-5" />
                         </button>
-                        
-
                       </div>
                     )}
                   </td>
@@ -642,6 +747,11 @@ export default function ItemUsers() {
                       
                       // Show success message
                       window.alert(`Invitation sent successfully to ${inviteEmail}`);
+                      
+                      // Refresh pending invitations list
+                      if (hasAdminRole) {
+                        fetchPendingInvitations();
+                      }
                       
                       // Close modal and reset form
                       setIsInviteModalOpen(false);

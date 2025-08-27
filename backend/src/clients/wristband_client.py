@@ -7,6 +7,7 @@ from models.user import User, UsersResponse, UserProfileUpdate
 from models.role import Role, RoleList
 from models.tenant import Tenant, TenantUpdateRequest, TenantOption
 from models.idp import IdentityProvider, IdentityProviderRequest, IdpOverrideToggle, IdpRedirectUrlConfig, UpsertGoogleSamlMetadata
+from models.invite import NewUserInvitationRequest, NewUserInvitationRequestsResponse
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,47 @@ class WristbandClient:
 
         if response.status_code not in [200, 201, 204]:
             raise ValueError(f'Error calling invite_user: {response.status_code} - {response.text}')
+
+
+    async def query_new_user_invitation_requests(self, tenant_id: str, access_token: str, start_index: int = 1, count: int = 50) -> list[NewUserInvitationRequest]:
+        # Query New User Invitation Requests API - https://docs.wristband.dev/reference/querynewuserinvitationrequestsfilteredbytenantv1
+        all_invitations = []
+        current_start_index = start_index
+        
+        while True:
+            params = {
+                'startIndex': current_start_index,
+                'count': count,
+            }
+            
+            response: httpx.Response = await self.client.get(
+                self.base_url + f'/tenants/{tenant_id}/new-user-invitation-requests',
+                headers={
+                    **self.headers,
+                    'Authorization': f'Bearer {access_token}'
+                },
+                params=params
+            )
+
+            print(response.json())
+            
+            if response.status_code != 200:
+                raise ValueError(f'Error calling query_new_user_invitation_requests: {response.status_code} - {response.text}')
+            
+            data = response.json() if response.content else {}
+            invitation_response = NewUserInvitationRequestsResponse(**data)
+            
+            # Collect invitations from this page
+            all_invitations.extend(invitation_response.items)
+            
+            # Check if we have more pages to fetch
+            if current_start_index + invitation_response.itemsPerPage >= invitation_response.totalResults:
+                break
+                
+            # Move to next page (startIndex is 1-based)
+            current_start_index += invitation_response.itemsPerPage
+        
+        return all_invitations
 
     ############################################################################################
     # MARK: Tenant Users APIs

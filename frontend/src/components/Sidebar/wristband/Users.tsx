@@ -259,8 +259,35 @@ export default function ItemUsers() {
   };
 
   const getStatusBadge = (status: string) => {
-    // For now, all users are shown as active
-    return 'bg-success/10 text-success';
+    switch (status.toUpperCase()) {
+      case 'ACTIVE':
+        return 'bg-success/10 text-success';
+      case 'PROVISIONED':
+        return 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200';
+      case 'INACTIVE':
+      case 'DEACTIVATED':
+        return 'bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200';
+      case 'SUSPENDED':
+        return 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200';
+      default:
+        return 'bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'ACTIVE':
+        return 'Active';
+      case 'PROVISIONED':
+        return 'Provisioned';
+      case 'INACTIVE':
+      case 'DEACTIVATED':
+        return 'Inactive';
+      case 'SUSPENDED':
+        return 'Suspended';
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+    }
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -490,9 +517,9 @@ export default function ItemUsers() {
                         Pending
                       </span>
                     ) : (
-                      // Regular user status
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge('active')}`}>
-                        Active
+                      // Regular user status  
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(item.status)}`}>
+                        {getStatusText(item.status)}
                       </span>
                     )}
                   </td>

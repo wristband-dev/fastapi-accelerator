@@ -33,7 +33,7 @@ export default function ItemUsers() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string>('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
@@ -448,6 +448,8 @@ export default function ItemUsers() {
             }`}
             onClick={() => {
               setIsInviteModalOpen(false);
+              setInviteEmail('');
+              setSelectedRole('');
               setEmailError(null);
               setIsRoleDropdownOpen(false);
               setActiveDropdownUserId(null);
@@ -474,6 +476,8 @@ export default function ItemUsers() {
                 <button
                   onClick={() => {
                     setIsInviteModalOpen(false);
+                    setInviteEmail('');
+                    setSelectedRole('');
                     setEmailError(null);
                     setIsRoleDropdownOpen(false);
                     setActiveDropdownUserId(null);
@@ -492,7 +496,7 @@ export default function ItemUsers() {
                 <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 pb-safe">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Email Address *
+                      Email Address
                     </label>
                     <input
                       type="email"
@@ -520,16 +524,12 @@ export default function ItemUsers() {
                     />
                     {emailError ? (
                       <p className="text-xs text-red-600 dark:text-red-400 mt-1">{emailError}</p>
-                    ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        The user will receive an invitation email to join the organization
-                      </p>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Roles (Optional)
+                      Role
                     </label>
                     <div className="relative" ref={roleDropdownRef}>
                       <button
@@ -538,11 +538,11 @@ export default function ItemUsers() {
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-800 dark:text-white transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 flex items-center justify-between"
                       >
                         <span className="block truncate">
-                          {selectedRoles.length === 0 ? (
-                            <span className="text-gray-500 dark:text-gray-400">Select roles...</span>
+                          {!selectedRole ? (
+                            <span className="text-gray-500 dark:text-gray-400">Select a role...</span>
                           ) : (
                             <span className="text-gray-900 dark:text-white">
-                              {selectedRoles.length} role{selectedRoles.length !== 1 ? 's' : ''} selected
+                              {availableRoles.find(r => r.sku === selectedRole)?.displayName || selectedRole}
                             </span>
                           )}
                         </span>
@@ -570,11 +570,8 @@ export default function ItemUsers() {
                                   key={role.id}
                                   type="button"
                                   onClick={() => {
-                                    if (selectedRoles.includes(role.sku)) {
-                                      setSelectedRoles(selectedRoles.filter(r => r !== role.sku));
-                                    } else {
-                                      setSelectedRoles([...selectedRoles, role.sku]);
-                                    }
+                                    setSelectedRole(role.sku);
+                                    setIsRoleDropdownOpen(false);
                                   }}
                                   className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150 flex items-center justify-between group"
                                 >
@@ -596,13 +593,13 @@ export default function ItemUsers() {
                                     )}
                                   </div>
                                   <div className="ml-3 flex-shrink-0">
-                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                                      selectedRoles.includes(role.sku)
-                                        ? 'bg-primary border-primary'
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                                      selectedRole === role.sku
+                                        ? 'border-primary'
                                         : 'border-gray-300 dark:border-gray-600 group-hover:border-gray-400 dark:group-hover:border-gray-500'
                                     }`}>
-                                      {selectedRoles.includes(role.sku) && (
-                                        <CheckIcon className="w-3 h-3 text-white" />
+                                      {selectedRole === role.sku && (
+                                        <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                                       )}
                                     </div>
                                   </div>
@@ -613,36 +610,6 @@ export default function ItemUsers() {
                         </div>
                       )}
                     </div>
-
-                    {/* Selected Roles Pills */}
-                    {selectedRoles.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {selectedRoles.map((roleId) => {
-                          const role = availableRoles.find(r => r.sku === roleId);
-                          return (
-                            <span
-                              key={roleId}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                            >
-                              {role?.displayName || roleId}
-                              <button
-                                type="button"
-                                onClick={() => setSelectedRoles(selectedRoles.filter(r => r !== roleId))}
-                                className="ml-1 hover:text-primary-dark"
-                              >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-                    
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Optionally assign roles to the invited user. You can assign roles later if needed.
-                    </p>
                   </div>
 
                 </div>
@@ -652,10 +619,15 @@ export default function ItemUsers() {
               <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  disabled={!inviteEmail || !!emailError}
+                  disabled={!inviteEmail || !!emailError || !selectedRole}
                   className="btn-primary w-full sm:w-auto px-6 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                   onClick={async () => {
                     if (!validateEmail(inviteEmail)) {
+                      return;
+                    }
+                    
+                    if (!selectedRole) {
+                      window.alert('Please select a role for the user.');
                       return;
                     }
                     
@@ -663,7 +635,7 @@ export default function ItemUsers() {
                       // Call the backend API to invite the user
                       const response = await frontendApiClient.post('/users/invite', {
                         email: inviteEmail,
-                        roles: selectedRoles
+                        roles: [selectedRole] // Keep as array for backend compatibility
                       });
                       
                       console.log('User invited successfully:', response.data);
@@ -674,7 +646,7 @@ export default function ItemUsers() {
                       // Close modal and reset form
                       setIsInviteModalOpen(false);
                       setInviteEmail('');
-                      setSelectedRoles([]);
+                      setSelectedRole('');
                       setEmailError(null);
                       setIsRoleDropdownOpen(false);
                       setActiveDropdownUserId(null);
@@ -693,6 +665,8 @@ export default function ItemUsers() {
                   className="mt-3 w-full sm:w-auto px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:mr-3 transition-all duration-200"
                   onClick={() => {
                     setIsInviteModalOpen(false);
+                    setInviteEmail('');
+                    setSelectedRole('');
                     setEmailError(null);
                     setIsRoleDropdownOpen(false);
                     setActiveDropdownUserId(null);

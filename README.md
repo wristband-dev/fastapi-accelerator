@@ -137,22 +137,34 @@ You can start up the demo application in a few simple steps.
 > 💡 **Tip**: You can also follow the other [Demo App Guide](https://docs.wristband.dev/docs/setting-up-a-demo-app) for more detailed information.
 
 
-### Fork Repo
+### Add Repo Upstream
 ```bash
-# 1. Clone and setup
-git clone https://github.com/wristband-dev/fastapi-accelerator.git
-cd fastapi-accelerator
-npm run setup
+# new empty folder
+mkdir myproj && cd myproj
+git init
 
-# 2. Configure environment
-cp backend/.env.example backend/.env
-# Edit backend/.env with your Wristband credentials
+# add upstream and fetch
+git remote add upstream https://github.com/wristband-dev/fastapi-accelerator.git
+git fetch upstream
+
+# create local main tracking upstream/main
+git checkout -b main upstream/main
+
+# verify
+git remote -v
+git branch -vv
+```
+``` bash
+# update later
+git pull upstream main
 ```
 
 ### Setup Environment
-Create files and enter values from wristband
+Create .env files and enter values from wristband
 ```bash
+# global env
 cp .env.example .env
+# nextjs specific
 cp frontend/.env.example frontend/.env
 ```
 

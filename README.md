@@ -129,18 +129,15 @@ gcloud init
 
 
 ## 🚀 Getting Started
-
 You can start up the demo application in a few simple steps.
-
 ### Wristband Setup
 #### 1) Sign up for a [Wristband account](https://wristband.dev)
-
 #### 2) Create an App
-
+#### 3) Follow [Wristband App Setup](./WRISTBAND_SETUP_STEPS.md)
 > 💡 **Tip**: You can also follow the other [Demo App Guide](https://docs.wristband.dev/docs/setting-up-a-demo-app) for more detailed information.
+
+
 ### Fork Repo
-
-
 ```bash
 # 1. Clone and setup
 git clone https://github.com/wristband-dev/fastapi-accelerator.git
@@ -152,20 +149,21 @@ cp backend/.env.example backend/.env
 # Edit backend/.env with your Wristband credentials
 ```
 
+### Setup Environment
+Create files and enter values from wristband
+```bash
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+```
 
 
-
-
-From the root directory of this project, you can install all required dependencies for both the frontend and backend with a single command:
-
+### Install Dependencies
 ```bash
 npm run setup
 ```
 
-### 5) Run the application
-
-While still in the root directory, you can start the demo application with:
-
+### Run the application
+Runs `backend` and `frontend` concurrently
 ```bash
 npm start
 ```

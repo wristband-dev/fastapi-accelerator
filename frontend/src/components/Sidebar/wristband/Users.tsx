@@ -41,7 +41,9 @@ export default function ItemUsers() {
   const roleDropdownRef = useRef<HTMLDivElement>(null);
   const [activeDropdownUserId, setActiveDropdownUserId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{top: number, left: number} | null>(null);
   const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
+  const portalDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleApiError = useCallback((error: unknown) => {
     console.error(error);
@@ -156,8 +158,15 @@ export default function ItemUsers() {
     const handleClickOutside = (event: MouseEvent) => {
       if (activeDropdownUserId) {
         const dropdownRef = dropdownRefs.current[activeDropdownUserId];
-        if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
+        const target = event.target as Node;
+        
+        // Check if click is outside both the button and the portal dropdown
+        const isOutsideButton = dropdownRef && !dropdownRef.contains(target);
+        const isOutsidePortal = portalDropdownRef.current && !portalDropdownRef.current.contains(target);
+        
+        if (isOutsideButton && isOutsidePortal) {
           setActiveDropdownUserId(null);
+          setDropdownPosition(null);
         }
       }
     };
@@ -224,6 +233,7 @@ export default function ItemUsers() {
       
       window.alert('User has been deleted successfully.');
       setActiveDropdownUserId(null);
+      setDropdownPosition(null);
     } catch (error) {
       console.error('Error deleting user:', error);
       handleApiError(error);
@@ -363,35 +373,23 @@ export default function ItemUsers() {
                           className="text-gray-400 hover:text-primary transition-colors p-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setActiveDropdownUserId(activeDropdownUserId === user.id ? null : user.id);
+                            if (activeDropdownUserId === user.id) {
+                              setActiveDropdownUserId(null);
+                              setDropdownPosition(null);
+                            } else {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setDropdownPosition({
+                                top: rect.bottom + window.scrollY + 4,
+                                left: rect.right + window.scrollX - 140 // 140px is dropdown width
+                              });
+                              setActiveDropdownUserId(user.id);
+                            }
                           }}
                         >
                           <EllipsisVerticalIcon className="h-5 w-5" />
                         </button>
                         
-                        {/* Dropdown Menu */}
-                        {activeDropdownUserId === user.id && (
-                          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 min-w-[140px]">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteUser(user.id);
-                              }}
-                              disabled={isDeleting === user.id}
-                              className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {isDeleting === user.id ? (
-                                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                              ) : (
-                                <TrashIcon className="w-4 h-4" />
-                              )}
-                              {isDeleting === user.id ? 'Deleting...' : 'Delete User'}
-                            </button>
-                          </div>
-                        )}
+
                       </div>
                     )}
                   </td>
@@ -402,6 +400,41 @@ export default function ItemUsers() {
           )}
         </div>
       </div>
+
+      {/* 
+      MARK: - User Action Dropdown
+      */}
+      {activeDropdownUserId && dropdownPosition && ReactDOM.createPortal(
+        <div 
+          ref={portalDropdownRef}
+          className="fixed bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[140px] z-[1000]"
+          style={{
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteUser(activeDropdownUserId);
+            }}
+            disabled={isDeleting === activeDropdownUserId}
+            className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDeleting === activeDropdownUserId ? (
+              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <TrashIcon className="w-4 h-4" />
+            )}
+            {isDeleting === activeDropdownUserId ? 'Deleting...' : 'Delete User'}
+          </button>
+        </div>,
+        document.body
+      )}
 
       {/* 
       MARK: - Invite User Modal
@@ -418,6 +451,7 @@ export default function ItemUsers() {
               setEmailError(null);
               setIsRoleDropdownOpen(false);
               setActiveDropdownUserId(null);
+              setDropdownPosition(null);
             }}
           />
           
@@ -443,6 +477,7 @@ export default function ItemUsers() {
                     setEmailError(null);
                     setIsRoleDropdownOpen(false);
                     setActiveDropdownUserId(null);
+                    setDropdownPosition(null);
                   }}
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
                 >
@@ -642,6 +677,8 @@ export default function ItemUsers() {
                       setSelectedRoles([]);
                       setEmailError(null);
                       setIsRoleDropdownOpen(false);
+                      setActiveDropdownUserId(null);
+                      setDropdownPosition(null);
                       
                     } catch (error) {
                       console.error('Error inviting user:', error);
@@ -659,6 +696,7 @@ export default function ItemUsers() {
                     setEmailError(null);
                     setIsRoleDropdownOpen(false);
                     setActiveDropdownUserId(null);
+                    setDropdownPosition(null);
                   }}
                 >
                   Cancel

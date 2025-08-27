@@ -24,6 +24,9 @@ Authorization -> Permission Groups
         - user:delete
         
 Authorization -> Roles
+    - Account Admin
+        - all permissions
+        - ONE per tenant to manage stripe / payment integration
     - Admin
         - all permission groups
     - Explorer / Viewer (Whatever)

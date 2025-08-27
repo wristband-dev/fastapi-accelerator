@@ -11,7 +11,7 @@ const child = spawn('next', ['dev', '-p', port.toString()], {
 
 // Display a clear message with the frontend URL
 console.log('\n======================================');
-console.log(`🚀 FRONTEND IS RUNNING AT: http://localhost:${port}`);
+console.log(`🚀 FRONTEND IS RUNNING AT: ${process.env.NEXT_PUBLIC_BASE_URL || ''}:${port}`);
 console.log('======================================\n');
 
 child.on('close', (code) => {

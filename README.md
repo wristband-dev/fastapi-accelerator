@@ -107,7 +107,7 @@ Terraform is used to manage the GCP infrastructure as code if you are intending 
 ```bash
 terraform --version # Should show Terraform vx.x.x
 ```
-> **Note**: Needed for deployment
+> **Note**: Needed for Deployment & Document Storage
 
 ### Google Cloud
 GCP is used for firebase integration for the purposes of document storage
@@ -121,7 +121,7 @@ gcloud --version # Should show Google Cloud SDK x.x.x
 ```bash
 gcloud init
 ```
-> **Note**: Needed for deployment
+> **Note**: Needed for Deployment & Document Storage
 
 <br>
 <hr>

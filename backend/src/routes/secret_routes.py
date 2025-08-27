@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 import logging
 
-from database.firestore_database import set_document, doc_exists, get_document, query_documents, delete_document
+from database.firestore_database import set_document, doc_exists, get_document, query_documents, delete_document, is_database_available
 from models.secret import Secret
 
 router = APIRouter()
@@ -15,6 +15,12 @@ async def upsert_secret(request: Request, secret_request: Secret):
     """
     Upsert (create or update) a secret for the current tenant
     """
+    if not is_database_available():
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"error": "datastore_unavailable", "message": "Datastore not enabled"}
+        )
+    
     try:
         # Get tenant ID from session
         session_data = request.state.session.get()
@@ -48,6 +54,12 @@ async def check_secret_exists(request: Request, sku: str):
     """
     Check if a secret with the given SKU exists for the current tenant
     """
+    if not is_database_available():
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"error": "datastore_unavailable", "message": "Datastore not enabled"}
+        )
+    
     try:
         # Get tenant ID from session
         session_data = request.state.session.get()
@@ -73,6 +85,12 @@ async def get_secrets(request: Request):
     """
     Get all secrets for the current tenant
     """
+    if not is_database_available():
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"error": "datastore_unavailable", "message": "Datastore not enabled"}
+        )
+    
     try:
         # Get tenant ID from session
         session_data = request.state.session.get()
@@ -99,6 +117,12 @@ async def get_secret(request: Request, sku: str):
     """
     Get a specific secret by SKU for the current tenant
     """
+    if not is_database_available():
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"error": "datastore_unavailable", "message": "Datastore not enabled"}
+        )
+    
     try:
         # Get tenant ID from session
         session_data = request.state.session.get()
@@ -130,6 +154,12 @@ async def delete_secret(request: Request, sku: str):
     """
     Delete a secret by SKU for the current tenant
     """
+    if not is_database_available():
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"error": "datastore_unavailable", "message": "Datastore not enabled"}
+        )
+    
     try:
         # Get tenant ID from session
         session_data = request.state.session.get()

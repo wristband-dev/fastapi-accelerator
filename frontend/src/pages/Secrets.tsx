@@ -96,6 +96,9 @@ function SecretModal({ isOpen, onClose, onSave, editingSecret }: SecretModalProp
       }
     } catch (error) {
       console.error('Error checking SKU:', error);
+      if (axios.isAxiosError(error) && error.response?.data?.error === 'datastore_unavailable') {
+        setError('Datastore not enabled');
+      }
     } finally {
       setIsCheckingSku(false);
     }
@@ -141,7 +144,11 @@ function SecretModal({ isOpen, onClose, onSave, editingSecret }: SecretModalProp
       console.error('Error saving secret:', error);
       if (axios.isAxiosError(error)) {
         const errorData = error.response?.data;
-        setError(errorData?.message || 'Failed to save secret. Please try again.');
+        if (errorData?.error === 'datastore_unavailable') {
+          setError('Datastore not enabled');
+        } else {
+          setError(errorData?.message || 'Failed to save secret. Please try again.');
+        }
       } else {
         setError('An unexpected error occurred. Please try again.');
       }
@@ -364,6 +371,9 @@ export default function ItemSecrets() {
       console.error('Error fetching secrets:', error);
       if (axios.isAxiosError(error)) {
         console.error('API Error:', error.response?.data);
+        if (error.response?.data?.error === 'datastore_unavailable') {
+          alert('Datastore not enabled');
+        }
       }
     } finally {
       setIsLoading(false);
@@ -398,7 +408,11 @@ export default function ItemSecrets() {
         fetchSecrets();
       } catch (error) {
         console.error('Error deleting secret:', error);
-        alert('Failed to delete secret. Please try again.');
+        if (axios.isAxiosError(error) && error.response?.data?.error === 'datastore_unavailable') {
+          alert('Datastore not enabled');
+        } else {
+          alert('Failed to delete secret. Please try again.');
+        }
       }
     }
   };

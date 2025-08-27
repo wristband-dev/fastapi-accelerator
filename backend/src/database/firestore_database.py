@@ -136,14 +136,19 @@ def initialize_firebase() -> Client:
 
 # Initialize the global db instance
 try:
-    db: Client = initialize_firebase()
+    db: Optional[Client] = initialize_firebase()
+    logger.info("✅ Firebase initialized successfully")
 except Exception as e:
-    logger.error(f"Failed to initialize Firebase: {e}")
-    raise
+    logger.warning(f"⚠️  Firebase not available: {e}")
+    db = None
 
-def get_db() -> Client:
+def get_db() -> Optional[Client]:
     """Return the global Firestore client."""
     return db
+
+def is_database_available() -> bool:
+    """Check if the database is available."""
+    return db is not None
 
 # =============================================================================
 # HELPER FUNCTIONS

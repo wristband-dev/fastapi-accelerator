@@ -127,6 +127,37 @@ async def get_pending_invitations(request: Request) -> list[NewUserInvitationReq
         logger.exception(f"Error querying pending invitations: {str(e)}")
         raise
 
+@router.delete('/invitations/{invitation_id}', status_code=204)
+async def cancel_invitation(request: Request, invitation_id: str) -> None:
+    """
+    Cancel a pending user invitation
+    """
+    try:
+        # Get session data including access token
+        session_data = request.state.session.get()
+        access_token = session_data.access_token
+        
+        # Cancel the invitation using the Wristband API
+        await wristband_client.cancel_new_user_invitation(
+            invitation_id=invitation_id,
+            access_token=access_token
+        )
+        
+        logger.info(f"Successfully cancelled invitation: {invitation_id}")
+        
+    except ValueError as e:
+        error_str = str(e)
+        # Handle 403 Forbidden errors gracefully - user doesn't have admin permissions
+        if "403" in error_str and "unauthorized" in error_str.lower():
+            logger.warning(f"User {session_data.user_id} attempted to cancel invitation without admin permissions")
+            raise HTTPException(status_code=403, detail="Insufficient permissions to cancel invitations")
+        else:
+            logger.exception(f"Error cancelling invitation: {error_str}")
+            raise
+    except Exception as e:
+        logger.exception(f"Error cancelling invitation {invitation_id}: {str(e)}")
+        raise
+
 @router.delete('/{user_id}', status_code=204)
 async def delete_user(request: Request, user_id: str) -> None:
     """

@@ -187,6 +187,22 @@ class WristbandClient:
         
         return all_invitations
 
+    async def cancel_new_user_invitation(self, invitation_id: str, access_token: str) -> None:
+        # Cancel New User Invite API - https://docs.wristband.dev/reference/cancelnewuserinvitev1
+        response: httpx.Response = await self.client.post(
+            self.base_url + '/new-user-invitation/cancel-invite',
+            headers={
+                **self.headers,
+                'Authorization': f'Bearer {access_token}'
+            },
+            json={
+                'invitationRequestId': invitation_id
+            }
+        )
+
+        if response.status_code not in [200, 201, 204]:
+            raise ValueError(f'Error calling cancel_new_user_invitation: {response.status_code} - {response.text}')
+
     ############################################################################################
     # MARK: Tenant Users APIs
     ############################################################################################

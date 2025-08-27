@@ -254,7 +254,10 @@ class WristbandClient:
             self.base_url + f'/tenants/{tenant_id}/roles',
             headers={
                 **self.headers,
-                'Authorization': f'Bearer {access_token}'
+                'Authorization': f'Bearer {access_token}',
+            },
+            params={
+                'include_application_roles': 'true'
             }
         )
 

@@ -109,10 +109,18 @@ async def get_pending_invitations(request: Request) -> list[NewUserInvitationReq
         tenant_id = session_data.tenant_id
         
         # Query new user invitation requests using the Wristband API
-        return await wristband_client.query_new_user_invitation_requests(
+        all_invitations = await wristband_client.query_new_user_invitation_requests(
             tenant_id=tenant_id,
             access_token=access_token
         )
+        
+        # Filter to only return pending invitations (not cancelled, expired, or accepted)
+        pending_invitations = [
+            invitation for invitation in all_invitations 
+            if invitation.status in ['PENDING_INVITE_ACCEPTANCE', 'PENDING_EMAIL_VERIFICATION']
+        ]
+        
+        return pending_invitations
     
     except ValueError as e:
         error_str = str(e)

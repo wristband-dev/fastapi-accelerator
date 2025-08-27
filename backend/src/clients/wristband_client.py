@@ -196,7 +196,7 @@ class WristbandClient:
                 'Authorization': f'Bearer {access_token}'
             },
             json={
-                'invitationRequestId': invitation_id
+                'newUserInvitationRequestId': invitation_id
             }
         )
 

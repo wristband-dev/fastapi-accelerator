@@ -199,7 +199,7 @@ Navigate to **OAuth2 Clients** in your Wristband dashboard and create a new clie
 - `http://localhost:6001/api/auth/callback`
 
 **OR**
-- `http://{your-domain}/api/auth/callback`
+- `https://{your-domain}/api/auth/callback`
 
 <div style="border: 2px solid #e53935; background: #ffebee; padding: 16px; border-radius: 6px; color: #b71c1c;">
   <strong>Important:</strong> Copy and save your <strong>Client ID</strong> and <strong>Client Secret</strong> for your environment configuration.
@@ -241,8 +241,8 @@ Navigate to **Application Settings** in your Wristband dashboard.
 
 | Setting | Value |
 |---------|-------|
-| Login URL | `http://{your-domain}/api/auth/login` |
-| Logout URL | `http://l{your-domain}:3001` |
+| Login URL | `https://{your-domain}/api/auth/login` |
+| Logout URL | `https://{your-domain}:3001` |
 
 
 **Enable Features:**

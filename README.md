@@ -233,6 +233,24 @@ cd infrastructure
 ./export_cloud_run_key.sh
 ```
 
+###  🌐 Cloudflare Hosting Configuration
+
+| Setting         | Value                        |
+|-----------------|-----------------------------|
+| **Build Command**   | `npm install && npm run build` |
+| **Build Output**    | `.next`                        |
+| **Root Directory**  | `frontend/`                    |
+| **Build Comments**  | Enabled                        |
+
+
+
+| ENV Var         | Value                        |
+|-----------------|-----------------------------|
+| **NEXT_PUBLIC_APPLICATION_SIGNUP_URL**   | `https://your-app-name.us.wristband.dev/signup` |
+| **NEXT_PUBLIC_BASE_URL**    | `https://your-domain.com`                        |
+
+
+
 <br>
 <hr>
 <br>

@@ -50,7 +50,9 @@ Navigate to **Authorization** tab → **Permission Groups** in your Wristband da
 |-------|-------|
 | Permission Group Name | `application` |
 | Display Name | `Application Permissions` |
-| Tenant Visibility | `Application` |
+
+**Permission Boundary**
+- `Application`
 
 **Add Permissions:**
 - `tenant-discovery-workflow:execute`
@@ -63,7 +65,9 @@ Navigate to **Authorization** tab → **Permission Groups** in your Wristband da
 |-------|-------|
 | Permission Group Name | `personal` |
 | Display Name | `Personal Permissions` |
-| Tenant Visibility | `Self` |
+
+**Permission Boundary**
+- `Self`
 
 **Add Permissions:**
 - `change-email-workflow:execute`
@@ -78,7 +82,9 @@ Navigate to **Authorization** tab → **Permission Groups** in your Wristband da
 |-------|-------|
 | Permission Group Name | `tenant-viewer` |
 | Display Name | `Tenant Viewer Permissions` |
-| Tenant Visibility | `Tenant` |
+
+**Permission Boundary**
+- `Tenant`
 
 **Add Permissions:**
 - `new-user-invitation-request:read`
@@ -93,7 +99,9 @@ Navigate to **Authorization** tab → **Permission Groups** in your Wristband da
 |-------|-------|
 | Permission Group Name | `tenant-admin` |
 | Display Name | `Tenant Admin Permissions` |
-| Tenant Visibility | `Tenant` |
+
+**Permission Boundary**
+- `Tenant`
 
 **Add Permissions:**
 - `identity-provider:delete`
@@ -122,11 +130,14 @@ Navigate to **Authorization** tab → **Roles** in your Wristband dashboard.
 | Role Name | `account-admin` |
 | Display Name | `Account Admin` |
 
+**Permission Boundary**
+- `Leave Blank` - 
+
 **Assign Permission Groups:**
-- `tenant-admin`
-- `tenant-viewer`
-- `personal`
-- `application`
+- `Tenant Admin Permissions`
+- `Tenant Viewer Permissions`
+- `Personal Permissions`
+- `Application Permissions`
 
 > **Note**: Intended to have ONE per tenant for account ownership
 
@@ -139,10 +150,10 @@ Navigate to **Authorization** tab → **Roles** in your Wristband dashboard.
 | Display Name | `Admin` |
 
 **Assign Permission Groups:**
-- `tenant-admin`
-- `tenant-viewer`
-- `personal`
-- `application`
+- `Tenant Admin Permissions`
+- `Tenant Viewer Permissions`
+- `Personal Permissions`
+- `Application Permissions`
 
 ### 3. Standard User
 
@@ -153,9 +164,9 @@ Navigate to **Authorization** tab → **Roles** in your Wristband dashboard.
 | Display Name | `Standard` |
 
 **Assign Permission Groups:**
-- `tenant-viewer`
-- `personal`
-- `application`
+- `Tenant Viewer Permissions`
+- `Personal Permissions`
+- `Application Permissions`
 
 ### 4. Viewer
 
@@ -166,9 +177,9 @@ Navigate to **Authorization** tab → **Roles** in your Wristband dashboard.
 | Display Name | `Viewer` |
 
 **Assign Permission Groups:**
-- `tenant-viewer`
-- `personal`
-- `application`
+- `Tenant Viewer Permissions`
+- `Personal Permissions`
+- `Application Permissions`
 
 <br>
 <hr>
@@ -187,7 +198,12 @@ Navigate to **OAuth2 Clients** in your Wristband dashboard and create a new clie
 **Configure Redirect URLs:**
 - `http://localhost:6001/api/auth/callback`
 
-> **Important**: Copy and save your **Client ID** and **Client Secret** for your environment configuration.
+**OR**
+- `http://{your-domain}/api/auth/callback`
+
+<div style="border: 2px solid #e53935; background: #ffebee; padding: 16px; border-radius: 6px; color: #b71c1c;">
+  <strong>Important:</strong> Copy and save your <strong>Client ID</strong> and <strong>Client Secret</strong> for your environment configuration.
+</div>
 
 <br>
 <hr>
@@ -197,7 +213,15 @@ Navigate to **OAuth2 Clients** in your Wristband dashboard and create a new clie
 
 Navigate to **Authorization** tab → **Role Assignment Policies** to configure how roles are assigned to users.
 
-> **Note**: Configure role assignment policies based on your specific business requirements for user onboarding and tenant access.
+### 🎯 Recommended Role Assignment Policies
+
+| Policy                       | Description                                              | Default Value    |
+|------------------------------|----------------------------------------------------------|------------------|
+| **Default Sign Up Roles**    | Roles assigned to the user who creates the tenant        | `Account Admin`  |
+| **Default IDP User Sync Roles** | Roles assigned to users created from external IDPs    | `Viewer`         |
+
+> 💡 **Tip:** Adjust these defaults to match your organization's onboarding and access requirements.
+
 
 <br>
 <hr>
@@ -212,6 +236,14 @@ Navigate to **Application Settings** in your Wristband dashboard.
 |---------|-------|
 | Login URL | `http://localhost:6001/api/auth/login` |
 | Logout URL | `http://localhost:3001` |
+
+**OR**
+
+| Setting | Value |
+|---------|-------|
+| Login URL | `http://{your-domain}/api/auth/login` |
+| Logout URL | `http://l{your-domain}:3001` |
+
 
 **Enable Features:**
 - ✅ **Self Sign Up**

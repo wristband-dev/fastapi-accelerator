@@ -117,9 +117,15 @@ GCP is used for firebase integration for the purposes of document storage
 ```bash
 gcloud --version # Should show Google Cloud SDK x.x.x
 ```
-4. Init you gcloud account
+**Initialize gcloud**
 ```bash
 gcloud init
+```
+**Select or create a project**
+```bash
+Pick cloud project to use: 
+ [1] project-123
+ [2] Create a new project
 ```
 > **Note**: Needed for Deployment & Document Storage
 
@@ -133,7 +139,7 @@ You can start up the demo application in a few simple steps.
 ### Wristband Setup
 #### 1) Sign up for a [Wristband account](https://wristband.dev)
 #### 2) Create an App
-#### 3) Follow [Wristband App Setup](./WRISTBAND_SETUP_STEPS.md)
+#### 3) Follow [Wristband App Setup](docs/WRISTBAND_SETUP_STEPS.md)
 > 💡 **Tip**: You can also follow the other [Demo App Guide](https://docs.wristband.dev/docs/setting-up-a-demo-app) for more detailed information.
 
 

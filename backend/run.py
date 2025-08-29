@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import logging
 import uvicorn
+import os
 
 # Load environment variables BEFORE local imports
 load_dotenv()
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
     app.add_middleware(AuthMiddleware)
 
     # 2) Add session middleware
+    is_production = os.getenv('ENVIRONMENT') == 'PROD'
     app.add_middleware(
         EncryptedSessionMiddleware,
         cookie_name="session",
@@ -35,13 +37,22 @@ def create_app() -> FastAPI:
         max_age=1800,  # 30 minutes
         path="/",
         same_site="lax",
-        secure=False  # Set to True in production
+        secure=is_production  # True in production for HTTPS
     )
 
     # 3) Add CORS middleware
+    # Get allowed origins from environment or use defaults
+    domain = os.getenv('DOMAIN', 'localhost:3001')
+    allowed_origins = [
+        f"https://{domain}",
+        f"http://{domain}",
+        "http://localhost:3001",  # Keep for local development
+        "https://localhost:3001"
+    ]
+    
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3001"],
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"]
@@ -56,4 +67,9 @@ def create_app() -> FastAPI:
 app = create_app()
 
 if __name__ == '__main__':
-    uvicorn.run("run:app", host="localhost", port=6001, reload=True)
+    # For Cloud Run, we need to bind to 0.0.0.0 and use the PORT environment variable
+    host = "0.0.0.0" if os.getenv('ENVIRONMENT') == 'PROD' else "localhost"
+    port = int(os.getenv('PORT', 8080)) if os.getenv('ENVIRONMENT') == 'PROD' else 6001
+    reload = os.getenv('ENVIRONMENT') != 'PROD'
+    
+    uvicorn.run("run:app", host=host, port=port, reload=reload)

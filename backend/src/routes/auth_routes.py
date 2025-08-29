@@ -1,5 +1,6 @@
 # Standard library imports
 from datetime import datetime, timedelta
+import os
 from fastapi import APIRouter, Request
 from fastapi import Request
 from fastapi.routing import APIRouter
@@ -14,6 +15,10 @@ from models.session_data import SessionData
 from utils.csrf import create_csrf_token, delete_csrf_cookie, update_csrf_cookie
 
 router = APIRouter()
+
+def get_redirect_url():
+    domain = os.getenv('DOMAIN', 'localhost:3001')
+    return f"https://{domain}" if os.getenv('ENVIRONMENT') == 'PROD' else "http://localhost:3001"
 
 
 @router.get('/login')
@@ -51,7 +56,8 @@ async def callback(request: Request) -> Response:
     )
 
     # Create the callback response that sets the session and CSRF cookies.
-    response: Response = await wristband_auth.create_callback_response(request, "http://localhost:3001")
+    redirect_url = get_redirect_url()
+    response: Response = await wristband_auth.create_callback_response(request, redirect_url)
     request.state.session.update(response, session_data)
     update_csrf_cookie(response, session_data.csrf_token)  # CSRF_TOUCHPOINT
     return response
@@ -62,13 +68,14 @@ async def logout(request: Request) -> Response:
     session_data: SessionData = request.state.session.get()
 
     # Log out the user and redirect to the Wristband Logout Endpoint
+    redirect_url = get_redirect_url()
     response: Response = await wristband_auth.logout(
         req=request,
         config=LogoutConfig(
             refresh_token=session_data.refresh_token if session_data else None,
             tenant_custom_domain=session_data.tenant_custom_domain if session_data else None,
             tenant_domain_name=session_data.tenant_domain_name if session_data else None,
-            redirect_url="http://localhost:3001"
+            redirect_url=redirect_url
         )
     )
 

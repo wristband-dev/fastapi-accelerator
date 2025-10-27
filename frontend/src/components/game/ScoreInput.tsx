@@ -149,9 +149,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
         
         // Reset to all zeros for next round
         const resetScores: Record<string, number> = {};
-        gameState.currentGame.players.forEach(player => {
-          resetScores[player.id] = 0;
-        });
+        if (gameState.currentGame) {
+          gameState.currentGame.players.forEach(player => {
+            resetScores[player.id] = 0;
+          });
+        }
         setScores(resetScores);
         if (onCancelEdit) onCancelEdit();
       }
@@ -168,9 +170,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
     }
     // Reset to all zeros
     const resetScores: Record<string, number> = {};
-    gameState.currentGame.players.forEach(player => {
-      resetScores[player.id] = 0;
-    });
+    if (gameState.currentGame) {
+      gameState.currentGame.players.forEach(player => {
+        resetScores[player.id] = 0;
+      });
+    }
     setScores(resetScores);
     setError('');
   };

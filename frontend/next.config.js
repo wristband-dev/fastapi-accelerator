@@ -17,6 +17,10 @@ const nextConfig = {
         source: "/api/:path*",
         destination: `${backendUrl}/api/:path*`,
       },
+      {
+        source: "/logo",
+        destination: "/logo_light.svg",
+      },
     ];
   },
 };

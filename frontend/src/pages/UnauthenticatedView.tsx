@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { redirectToLogin } from "@wristband/react-client-auth";
-import { ChevronRightIcon, RocketLaunchIcon, ShieldCheckIcon, CloudIcon, CubeIcon, CircleStackIcon, BoltIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon, RocketLaunchIcon, ShieldCheckIcon, CloudIcon, CubeIcon, CircleStackIcon, BoltIcon, Bars3Icon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 /**
  * Custom hook for intersection observer to trigger animations on scroll
@@ -182,24 +182,17 @@ export default function UnauthenticatedView() {
       <section className="relative min-h-screen flex items-center pt-20 md:pt-0">
         <div className="max-w-7xl mx-auto px-6 py-12 w-full">
           <AnimatedSection className="text-center max-w-4xl mx-auto">
-            {/* Badge */}
-            <div className="group inline-flex items-center gap-2 bg-primary/10 dark:bg-primary/20 text-primary-dark dark:text-primary-light px-4 py-2 rounded-full text-sm font-medium mb-8 hover:bg-primary/20 dark:hover:bg-primary/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-              <RocketLaunchIcon className="w-4 h-4 group-hover:-translate-y-1 transition-transform duration-300" />
-              Multi-Tenant App Accelerator
-            </div>
-
             {/* Headline */}
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-              Build Multi-Tenant SaaS{' '}
+              Track Your Game Scores{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark">
-                In Minutes
+                With Ease
               </span>
             </h1>
 
             {/* Subheadline */}
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Enterprise-ready authentication, multi-tenant architecture, and cloud infrastructure — 
-              all configured and ready to deploy with <span className="font-semibold text-gray-900 dark:text-white">FastAPI</span> and <span className="font-semibold text-gray-900 dark:text-white">Next.js</span>
+              Keep track of scores for any game. Simple, fast, and organized score tracking for game nights with friends and family.
             </p>
 
             {/* CTA Buttons */}
@@ -208,20 +201,15 @@ export default function UnauthenticatedView() {
                 onClick={handleSignUp}
                 className="group px-8 py-4 btn-primary rounded-lg transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:scale-105 text-lg font-medium flex items-center justify-center gap-2 transform"
               >
-                Get Started
+                Get Started Free
                 <ChevronRightIcon className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
               </button>
-              <a
-                href="https://github.com/wristband-dev/fastapi-accelerator"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={handleLogin}
                 className="group px-8 py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1 text-lg font-medium flex items-center justify-center gap-2 transform hover:border-primary dark:hover:border-primary"
               >
-                View on GitHub
-                <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                </svg>
-              </a>
+                Sign In
+              </button>
             </div>
           </AnimatedSection>
         </div>
@@ -240,35 +228,35 @@ export default function UnauthenticatedView() {
           <AnimatedSection delay={200}>
             <div className="text-center mb-20">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                Everything You Need
+                Simple Score Tracking
               </h2>
               <div className="w-24 h-1 bg-gradient-to-r from-primary to-primary-dark mx-auto mb-6 rounded-full"></div>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                Production-ready from day one
+                Everything you need to track game scores
               </p>
             </div>
           </AnimatedSection>
 
-          <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <AnimatedSection delay={300}>
               <div className="group relative bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 h-full overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
                 
                 <div className="relative z-10">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900 dark:to-blue-800 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <ShieldCheckIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
                   </div>
                   
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    Enterprise Authentication
+                    Create Games
                   </h3>
                   
                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                    Secure Wristband auth integration with OAuth2, OIDC, and role-based access control out of the box
+                    Set up new games with custom player names and target scores in seconds
                   </p>
                 </div>
-                
-                <div className="absolute bottom-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full -mr-16 -mb-16 opacity-50"></div>
               </div>
             </AnimatedSection>
 
@@ -278,19 +266,19 @@ export default function UnauthenticatedView() {
                 
                 <div className="relative z-10">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900 dark:to-purple-800 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <CubeIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                    <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
                   </div>
                   
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    Multi-Tenant Architecture
+                    Track Scores
                   </h3>
                   
                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                    Built-in tenant management with strict isolation, perfect for B2B SaaS applications
+                    Add and edit round scores with intuitive controls and quick score buttons
                   </p>
                 </div>
-                
-                <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-full -mr-16 -mb-16 opacity-50"></div>
               </div>
             </AnimatedSection>
 
@@ -300,72 +288,17 @@ export default function UnauthenticatedView() {
                 
                 <div className="relative z-10">
                   <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900 dark:to-green-800 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <CloudIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
+                    <ClockIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
                   </div>
                   
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    Cloud-Ready
+                    View History
                   </h3>
                   
                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                    Deploy to GCP Cloud Run and Vercel with Terraform. Infrastructure as code included
+                    Access all your past games, see winners, and review game statistics anytime
                   </p>
                 </div>
-                
-                <div className="absolute bottom-0 right-0 w-32 h-32 bg-green-50 dark:bg-green-900/20 rounded-full -mr-16 -mb-16 opacity-50"></div>
-              </div>
-            </AnimatedSection>
-          </div>
-
-          {/* Additional Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mt-12">
-            <AnimatedSection delay={600}>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
-                    <BoltIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">FastAPI Backend</h4>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">High-performance Python API</p>
-              </div>
-            </AnimatedSection>
-
-            <AnimatedSection delay={650}>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M11.572 0c-.176 0-.31.001-.358.007a19.76 19.76 0 0 1-.364.033C7.443.346 4.25 2.185 2.228 5.012a11.875 11.875 0 0 0-2.119 5.243c-.096.659-.108.854-.108 1.747s.012 1.089.108 1.748c.652 4.506 3.86 8.292 8.209 9.695.779.25 1.6.422 2.534.525.363.04 1.935.04 2.299 0 1.611-.178 2.977-.577 4.323-1.264.207-.106.247-.134.219-.158-.02-.013-.9-1.193-1.955-2.62l-1.919-2.592-2.404-3.558a338.739 338.739 0 0 0-2.422-3.556c-.009-.002-.018 1.579-.023 3.51-.007 3.38-.01 3.515-.052 3.595a.426.426 0 0 1-.206.214c-.075.037-.14.044-.495.044H7.81l-.108-.068a.438.438 0 0 1-.157-.171l-.05-.106.006-4.703.007-4.705.072-.092a.645.645 0 0 1 .174-.143c.096-.047.134-.051.54-.051.478 0 .558.018.682.154.035.038 1.337 1.999 2.895 4.361a10760.433 10760.433 0 0 0 4.735 7.17l1.9 2.879.096-.063a12.317 12.317 0 0 0 2.466-2.163 11.944 11.944 0 0 0 2.824-6.134c.096-.66.108-.854.108-1.748 0-.893-.012-1.088-.108-1.747-.652-4.506-3.859-8.292-8.208-9.695a12.597 12.597 0 0 0-2.499-.523A33.119 33.119 0 0 0 11.573 0zm4.069 7.217c.347 0 .408.005.486.047a.473.473 0 0 1 .237.277c.018.06.023 1.365.018 4.304l-.006 4.218-.744-1.14-.746-1.14v-3.066c0-1.982.01-3.097.023-3.15a.478.478 0 0 1 .233-.296c.096-.05.13-.054.5-.054z"/>
-                    </svg>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Next.js Frontend</h4>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Modern React-based UI</p>
-              </div>
-            </AnimatedSection>
-
-            <AnimatedSection delay={700}>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-                    <CircleStackIcon className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Firebase Integration</h4>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Optional document storage</p>
-              </div>
-            </AnimatedSection>
-
-            <AnimatedSection delay={750}>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
-                    <ShieldCheckIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">Security First</h4>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">CSRF protection & secure sessions</p>
               </div>
             </AnimatedSection>
           </div>
@@ -378,10 +311,10 @@ export default function UnauthenticatedView() {
           <AnimatedSection>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Powered by Wristband
+                Secure & Reliable
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Enterprise-grade authentication that's secure by default, truly multi-tenant, and ungated for small businesses
+                Built with enterprise-grade authentication powered by Wristband
               </p>
             </div>
           </AnimatedSection>

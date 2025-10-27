@@ -1,11 +1,11 @@
-import { HomeIcon, KeyIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import { createNavItem } from '@/components/sidebar/types';
 import type { PageNavigationItem, SidebarConfig } from '@/components/sidebar/types';
 
 // Configure navigation items with their routes
 export const navigationItems: PageNavigationItem[] = [
   createNavItem('home', 'Home', HomeIcon, '/home'),
-  createNavItem('secrets', 'Secrets', KeyIcon, '/secrets', true),
+  createNavItem('history', 'History', BookOpenIcon, '/history'),
 ];
 
 // Get page ID from pathname

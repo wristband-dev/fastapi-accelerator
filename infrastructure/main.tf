@@ -42,8 +42,9 @@ provider "google-beta" {
 }
 
 # Configure Vercel Provider
+# Use a valid dummy token format when deployment is disabled to avoid validation errors
 provider "vercel" {
-  api_token = var.vercel_api_token
+  api_token = var.deployment_enabled && var.vercel_api_token != "" && length(var.vercel_api_token) == 24 ? var.vercel_api_token : "000000000000000000000000"
 }
 
 # Configure GitHub Provider (for secrets management)

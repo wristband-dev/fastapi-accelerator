@@ -39,7 +39,7 @@ export interface CustomTheme {
 
 // 2. User's custom theme - EDIT THIS TO CUSTOMIZE YOUR THEME
 export const userTheme: CustomTheme = {
-  primary: '#00AA81', 
+  primary: '#2563eb', 
   // #00AA81 - wristband green
   // #2563eb - blue  
   // #1e3a8a - navy blue

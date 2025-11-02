@@ -13,9 +13,17 @@ import { Game } from '@/models/game';
 
 interface ScoreChartProps {
   game: Game;
+  playerNames?: Map<string, string>;
 }
 
-const ScoreChart: React.FC<ScoreChartProps> = ({ game }) => {
+const ScoreChart: React.FC<ScoreChartProps> = ({ game, playerNames }) => {
+  const getPlayerDisplayName = (playerId: string) => {
+    if (playerNames && playerNames.has(playerId)) {
+      return playerNames.get(playerId)!;
+    }
+    return game.players.find(p => p.id === playerId)?.name || 'Unknown';
+  };
+
   // Generate chart data from rounds
   const chartData = React.useMemo(() => {
     const data: any[] = [];
@@ -30,7 +38,7 @@ const ScoreChart: React.FC<ScoreChartProps> = ({ game }) => {
     const startPoint: any = { round: 0 };
     game.players.forEach(player => {
       startPoint[player.id] = 0;
-      startPoint[`${player.id}_name`] = player.name;
+      startPoint[`${player.id}_name`] = getPlayerDisplayName(player.id);
     });
     data.push(startPoint);
     
@@ -41,14 +49,14 @@ const ScoreChart: React.FC<ScoreChartProps> = ({ game }) => {
       game.players.forEach(player => {
         runningTotals[player.id] += round.scores[player.id] || 0;
         roundData[player.id] = runningTotals[player.id];
-        roundData[`${player.id}_name`] = player.name;
+        roundData[`${player.id}_name`] = getPlayerDisplayName(player.id);
       });
       
       data.push(roundData);
     });
     
     return data;
-  }, [game]);
+  }, [game, playerNames]);
 
   // Color palette - vibrant and visually appealing colors
   const colors = [
@@ -166,7 +174,7 @@ const ScoreChart: React.FC<ScoreChartProps> = ({ game }) => {
               key={player.id}
               type="monotone"
               dataKey={player.id}
-              name={player.name}
+              name={getPlayerDisplayName(player.id)}
               stroke={colors[index % colors.length]}
               strokeWidth={3}
               dot={{

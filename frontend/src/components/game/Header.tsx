@@ -23,19 +23,12 @@ const Header: React.FC = () => {
     <div className="mb-10">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
         <div>
-          <h1 className="page-title mb-2">
-            Score Keeper
-          </h1>
-          <p className="page-description">
-            Track your game scores with ease
-          </p>
           {currentGame && (
-            <p className="page-text-muted mt-2">
-              Current Game: <span className="font-semibold page-text">{currentGame.name}</span>
-            </p>
+            <h1 className="page-title mb-2">
+            {currentGame.name}
+            </h1>
           )}
         </div>
-        
         {currentGame && (
           <button
             onClick={handleNewGame}

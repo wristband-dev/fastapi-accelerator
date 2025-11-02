@@ -133,9 +133,6 @@ export default function History() {
         <h1 className="page-title mb-4">
           Game History
         </h1>
-        <p className="page-description">
-          View and manage all games across your organization
-        </p>
       </div>
 
       {/* Search and Filters */}

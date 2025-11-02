@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGameContext } from '@/contexts/GameContext';
 import { Round } from '@/models/game';
+import { usePlayerNames } from '@/hooks/usePlayerName';
 
 interface ScoreInputProps {
   editingRound?: Round | null;
@@ -17,6 +18,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
 
   // Common score values for quick selection
   const quickScores = [-50, -25, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100, 125, 150];
+
+  // Get dynamic player names
+  const playerNames = usePlayerNames(gameState.currentGame?.players || []);
 
   useEffect(() => {
     // If we're editing a round, populate the form with the round's scores
@@ -203,7 +207,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
           {gameState.currentGame.players.map(player => (
             <div key={player.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 md:p-4">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold page-text">{player.name}</h4>
+                <h4 className="text-lg font-semibold page-text">
+                  {playerNames.get(player.id) || player.name}
+                </h4>
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"

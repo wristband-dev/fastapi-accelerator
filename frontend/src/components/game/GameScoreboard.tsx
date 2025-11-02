@@ -4,6 +4,7 @@ import { Round, Game } from '@/models/game';
 import ScoreInput from './ScoreInput';
 import ScoreChart from './ScoreChart';
 import EndGameModal from './EndGameModal';
+import { usePlayerNames } from '@/hooks/usePlayerName';
 
 const GameScoreboard: React.FC = () => {
   const { gameState, endGame, completeGame, refreshGames } = useGameContext();
@@ -15,6 +16,9 @@ const GameScoreboard: React.FC = () => {
   if (!currentGame) {
     return null;
   }
+
+  // Get dynamic player names (lookups for registered users, stored names for guests)
+  const playerNames = usePlayerNames(currentGame.players);
   
   const getPlayerTotals = (game: Game) => {
     const totals: Record<string, number> = {};
@@ -154,7 +158,9 @@ const GameScoreboard: React.FC = () => {
                     {getRankIcon(index)}
                     <span className="text-lg font-semibold text-gray-700">#{index + 1}</span>
                   </div>
-                  <span className="text-lg font-medium text-gray-800">{player.name}</span>
+                  <span className="text-lg font-medium text-gray-800">
+                    {playerNames.get(player.id) || player.name}
+                  </span>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-gray-800">
@@ -197,7 +203,9 @@ const GameScoreboard: React.FC = () => {
                 <tr className="bg-gray-50 dark:bg-gray-900">
                   <th className="py-3 px-4 text-left text-sm font-semibold page-text-muted rounded-tl-lg">Round</th>
                   {currentGame.players.map(player => (
-                    <th key={player.id} className="py-3 px-4 text-right text-sm font-semibold page-text-muted">{player.name}</th>
+                    <th key={player.id} className="py-3 px-4 text-right text-sm font-semibold page-text-muted">
+                      {playerNames.get(player.id) || player.name}
+                    </th>
                   ))}
                   <th className="py-3 px-4 text-right text-sm font-semibold page-text-muted rounded-tr-lg">Actions</th>
                 </tr>
@@ -214,12 +222,12 @@ const GameScoreboard: React.FC = () => {
                     <td className="py-3 px-2 md:px-4 text-right">
                       <button
                         onClick={() => handleEditRound(round)}
-                        className="bg-primary/10 dark:bg-primary/20 text-primary px-2 py-1 rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors inline-flex items-center space-x-1 text-xs"
+                        className="bg-primary/10 dark:bg-primary/20 text-primary px-2 py-1 rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors inline-flex items-center text-xs"
+                        title="Edit round"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
-                        <span className="hidden sm:inline">Edit</span>
                       </button>
                     </td>
                   </tr>
@@ -233,7 +241,7 @@ const GameScoreboard: React.FC = () => {
       {/* Score Progression Chart */}
       {currentGame.rounds.length > 0 && (
         <div className="mb-6">
-          <ScoreChart game={currentGame} />
+          <ScoreChart game={currentGame} playerNames={playerNames} />
         </div>
       )}
       

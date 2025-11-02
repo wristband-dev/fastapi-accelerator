@@ -27,6 +27,7 @@ import { WristbandAuthProvider } from "@wristband/react-client-auth";
 import { injectTheme } from "@/utils/theme";
 import { UserProvider } from "@/contexts/UserContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { GameProvider } from "@/contexts/GameContext";
 import { geistMono, geistSans } from "@/utils/fonts";
 import AuthenticatedLayout from "@/layouts/AuthenticatedLayout";
 import { navigationItems, sidebarConfig, getPageIdFromPathname, isAuthenticatedRoute } from "@/config/navigation";
@@ -52,22 +53,25 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         {/* User provider manages current user, tenant, and roles data */}
         <UserProvider>
-          {/* Conditionally wrap with AuthenticatedLayout based on route */}
-          {isAuthenticatedRoute(router.pathname) ? (
-            // Authenticated routes get the full layout (sidebar + header)
-            <div className={`${geistSans.variable} ${geistMono.variable} font-[family-name:var(--font-geist-sans)]`}>
-              <AuthenticatedLayout
-                currentPage={getPageIdFromPathname(router.pathname)}
-                navigationItems={navigationItems}
-                sidebarConfig={sidebarConfig}
-              >
-                <Component {...pageProps} />
-              </AuthenticatedLayout>
-            </div>
-          ) : (
-            // Root route (/) renders without layout wrapper
-            <Component {...pageProps} />
-          )}
+          {/* Game provider manages game state and persists across page navigation */}
+          <GameProvider>
+            {/* Conditionally wrap with AuthenticatedLayout based on route */}
+            {isAuthenticatedRoute(router.pathname) ? (
+              // Authenticated routes get the full layout (sidebar + header)
+              <div className={`${geistSans.variable} ${geistMono.variable} font-[family-name:var(--font-geist-sans)]`}>
+                <AuthenticatedLayout
+                  currentPage={getPageIdFromPathname(router.pathname)}
+                  navigationItems={navigationItems}
+                  sidebarConfig={sidebarConfig}
+                >
+                  <Component {...pageProps} />
+                </AuthenticatedLayout>
+              </div>
+            ) : (
+              // Root route (/) renders without layout wrapper
+              <Component {...pageProps} />
+            )}
+          </GameProvider>
         </UserProvider>
       </ThemeProvider>
     </WristbandAuthProvider>

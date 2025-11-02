@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { GameProvider, useGameContext } from '@/contexts/GameContext';
+import { useRouter } from 'next/router';
+import { useGameContext } from '@/contexts/GameContext';
 import { Game } from '@/models/game';
 import frontendApiClient from '@/client/frontend-api-client';
 import { useUser } from '@/contexts/UserContext';
@@ -12,7 +13,8 @@ interface TenantUser {
   familyName?: string;
 }
 
-function HistoryContent() {
+export default function History() {
+  const router = useRouter();
   const { gameState, selectGame, deleteGame, refreshGames } = useGameContext();
   const { currentUser } = useUser();
   const { games } = gameState;
@@ -122,7 +124,7 @@ function HistoryContent() {
 
   const handleViewGame = (gameId: string) => {
     selectGame(gameId);
-    window.location.href = '/home';
+    router.push('/home');
   };
 
   return (
@@ -364,14 +366,6 @@ function HistoryContent() {
         </div>
       )}
     </div>
-  );
-}
-
-export default function History() {
-  return (
-    <GameProvider>
-      <HistoryContent />
-    </GameProvider>
   );
 }
 

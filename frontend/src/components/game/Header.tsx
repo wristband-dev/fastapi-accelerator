@@ -6,7 +6,8 @@ const Header: React.FC = () => {
   const { currentGame } = gameState;
   
   const handleNewGame = () => {
-    if (currentGame && !window.confirm('You have a game in progress. Start a new game instead?')) {
+    // Only show confirmation if there's an IN PROGRESS game (not completed)
+    if (currentGame && !currentGame.isComplete && !window.confirm('You have a game in progress. Start a new game instead?')) {
       return;
     }
     

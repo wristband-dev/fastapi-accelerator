@@ -13,7 +13,7 @@ interface GameContextType {
   selectGame: (gameId: string) => void;
   deleteGame: (gameId: string) => Promise<void>;
   getPlayerTotals: (playerId: string) => number;
-  refreshGames: () => Promise<void>;
+  refreshGames: (tenantWide?: boolean, userId?: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
@@ -30,11 +30,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     refreshGames();
   }, []);
   
-  const refreshGames = async () => {
+  const refreshGames = async (tenantWide: boolean = false, userId?: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await frontendApiClient.get('/games');
+      const params = new URLSearchParams();
+      if (tenantWide) {
+        params.append('tenant_wide', 'true');
+      }
+      if (userId) {
+        params.append('user_id', userId);
+      }
+      
+      const response = await frontendApiClient.get(`/games?${params.toString()}`);
       const games = response.data.games || [];
       setGameState(prev => ({
         ...prev,
@@ -141,13 +149,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const completeGame = async () => {
     if (!gameState.currentGame) return;
     
+    const gameId = gameState.currentGame.id;
+    const gameName = gameState.currentGame.name;
+    
     setIsLoading(true);
     setError(null);
     try {
+      console.log(`Completing game: ${gameId} (${gameName})`);
       const response = await frontendApiClient.put(
-        `/games/${gameState.currentGame.id}/complete`
+        `/games/${gameId}/complete`
       );
       const completedGame = response.data;
+      
+      console.log(`Game completed successfully. isComplete: ${completedGame.isComplete}`, completedGame);
       
       setGameState(prev => ({
         ...prev,

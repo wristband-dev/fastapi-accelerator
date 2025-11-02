@@ -49,6 +49,21 @@ const NewGameForm: React.FC = () => {
     setCustomScoreInput(String(score));
   };
 
+  // Check if form is valid
+  const isFormValid = () => {
+    // Check game name
+    if (!gameName.trim()) return false;
+    
+    // Check target score
+    if (!targetScore || targetScore < 1) return false;
+    
+    // Check players (at least 2 with names)
+    const validPlayers = playerNames.filter(name => name.trim() !== '');
+    if (validPlayers.length < 2) return false;
+    
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -104,7 +119,9 @@ const NewGameForm: React.FC = () => {
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="page-form-label">Game Name</label>
+          <label className="page-form-label">
+            Game Name <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             value={gameName}
@@ -121,6 +138,7 @@ const NewGameForm: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
             </svg>
             <span>Target Score</span>
+            <span className="text-red-500">*</span>
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             {[300, 500, 750, 1000].map(score => (
@@ -158,6 +176,8 @@ const NewGameForm: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             <span>Players</span>
+            <span className="text-red-500">*</span>
+            <span className="text-xs text-gray-500">(minimum 2)</span>
           </label>
           <div className="space-y-3">
             {playerNames.map((name, index) => (
@@ -202,7 +222,7 @@ const NewGameForm: React.FC = () => {
         
         <button
           type="submit"
-          disabled={isSubmitting || !targetScore || targetScore < 1}
+          disabled={isSubmitting || !isFormValid()}
           className="w-full page-btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Creating Game...' : 'Start Game'}

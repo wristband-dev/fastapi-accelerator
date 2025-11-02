@@ -1,12 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameProvider, useGameContext } from '@/contexts/GameContext';
 import { Game } from '@/models/game';
+import frontendApiClient from '@/client/frontend-api-client';
+import { useUser } from '@/contexts/UserContext';
+import UserDropdown from '@/components/UserDropdown';
+
+interface TenantUser {
+  id: string;
+  email: string;
+  givenName?: string;
+  familyName?: string;
+}
 
 function HistoryContent() {
-  const { gameState, selectGame, deleteGame } = useGameContext();
+  const { gameState, selectGame, deleteGame, refreshGames } = useGameContext();
+  const { currentUser } = useUser();
   const { games } = gameState;
   const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'inProgress'>('all');
+  const [selectedUserId, setSelectedUserId] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [tenantUsers, setTenantUsers] = useState<TenantUser[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   
+  // Fetch tenant users on mount
+  useEffect(() => {
+    const fetchTenantUsers = async () => {
+      setLoadingUsers(true);
+      try {
+        const response = await frontendApiClient.get('/users');
+        setTenantUsers(response.data || []);
+      } catch (err) {
+        console.error('Error fetching tenant users:', err);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    
+    fetchTenantUsers();
+    // Fetch all tenant games
+    refreshGames(true);
+  }, []);
+
   const getPlayerTotals = (game: Game) => {
     const totals: Record<string, number> = {};
     
@@ -23,12 +57,51 @@ function HistoryContent() {
     return totals;
   };
 
-  // Filter games based on status
+  const getUserDisplayName = (userId: string) => {
+    const user = tenantUsers.find(u => u.id === userId);
+    if (!user) return 'Unknown User';
+    
+    if (user.givenName && user.familyName) {
+      return `${user.givenName} ${user.familyName}`;
+    }
+    if (user.givenName) {
+      return user.givenName;
+    }
+    return user.email;
+  };
+
+  // Apply filters
   const filteredGames = games.filter(game => {
-    if (filterStatus === 'complete') return game.isComplete;
-    if (filterStatus === 'inProgress') return !game.isComplete;
+    // Status filter
+    if (filterStatus === 'complete' && !game.isComplete) return false;
+    if (filterStatus === 'inProgress' && game.isComplete) return false;
+    
+    // User filter
+    if (selectedUserId !== 'all' && game.userId !== selectedUserId) return false;
+    
+    // Search filter
+    if (searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase();
+      const gameName = game.name.toLowerCase();
+      const playerNames = game.players.map(p => p.name.toLowerCase()).join(' ');
+      const creator = getUserDisplayName(game.userId).toLowerCase();
+      
+      if (!gameName.includes(query) && !playerNames.includes(query) && !creator.includes(query)) {
+        return false;
+      }
+    }
+    
     return true;
   });
+
+  const handleUserFilterChange = async (userId: string) => {
+    setSelectedUserId(userId);
+    if (userId === 'all') {
+      await refreshGames(true);
+    } else {
+      await refreshGames(true, userId);
+    }
+  };
 
   // Sort games by date (newest first)
   const sortedGames = [...filteredGames].sort((a, b) => 
@@ -59,42 +132,90 @@ function HistoryContent() {
           Game History
         </h1>
         <p className="page-description">
-          View and manage all your games
+          View and manage all games across your organization
         </p>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setFilterStatus('all')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            filterStatus === 'all'
-              ? 'bg-primary text-white'
-              : 'page-btn-secondary'
-          }`}
-        >
-          All Games ({games.length})
-        </button>
-        <button
-          onClick={() => setFilterStatus('inProgress')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            filterStatus === 'inProgress'
-              ? 'bg-primary text-white'
-              : 'page-btn-secondary'
-          }`}
-        >
-          In Progress ({games.filter(g => !g.isComplete).length})
-        </button>
-        <button
-          onClick={() => setFilterStatus('complete')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            filterStatus === 'complete'
-              ? 'bg-primary text-white'
-              : 'page-btn-secondary'
-          }`}
-        >
-          Completed ({games.filter(g => g.isComplete).length})
-        </button>
+      {/* Search and Filters */}
+      <div className="mb-6 space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Search by game name, player name, or creator..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="page-form-input pl-10"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Filter Controls */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Status Filter */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilterStatus('all')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filterStatus === 'all'
+                  ? 'bg-primary text-white'
+                  : 'page-btn-secondary'
+              }`}
+            >
+              All ({games.length})
+            </button>
+            <button
+              onClick={() => setFilterStatus('inProgress')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filterStatus === 'inProgress'
+                  ? 'bg-primary text-white'
+                  : 'page-btn-secondary'
+              }`}
+            >
+              In Progress ({games.filter(g => !g.isComplete).length})
+            </button>
+            <button
+              onClick={() => setFilterStatus('complete')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filterStatus === 'complete'
+                  ? 'bg-primary text-white'
+                  : 'page-btn-secondary'
+              }`}
+            >
+              Completed ({games.filter(g => g.isComplete).length})
+            </button>
+          </div>
+
+          {/* User Filter */}
+          <div className="flex-1 min-w-[200px]">
+            <UserDropdown
+              users={tenantUsers}
+              selectedUserId={selectedUserId}
+              currentUserId={currentUser?.id}
+              onSelect={handleUserFilterChange}
+              disabled={loadingUsers}
+            />
+          </div>
+        </div>
+        
+        {/* Results count */}
+        <div className="text-sm page-text-muted">
+          Showing {sortedGames.length} of {games.length} games
+        </div>
       </div>
 
       {/* Games List */}
@@ -107,11 +228,13 @@ function HistoryContent() {
           </div>
           <h3 className="page-section-title mb-2">No games found</h3>
           <p className="page-text-muted mb-4">
-            {filterStatus === 'all' 
-              ? "You haven't created any games yet."
+            {searchQuery 
+              ? `No games match "${searchQuery}"`
+              : filterStatus === 'all' 
+              ? "No games have been created yet."
               : filterStatus === 'inProgress'
-              ? "You don't have any games in progress."
-              : "You haven't completed any games yet."}
+              ? "No games in progress."
+              : "No completed games yet."}
           </p>
           <a href="/home" className="page-btn-primary inline-flex items-center space-x-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,12 +286,22 @@ function HistoryContent() {
                   <h3 className="page-card-title group-hover:text-primary transition-colors line-clamp-1">
                     {game.name}
                   </h3>
-                  <p className="page-text-muted text-xs mt-1 flex items-center space-x-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>{dateFormatted}</span>
-                  </p>
+                  <div className="space-y-1 mt-2">
+                    <p className="page-text-muted text-xs flex items-center space-x-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>{dateFormatted}</span>
+                    </p>
+                    <p className="page-text-muted text-xs flex items-center space-x-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span>
+                        {currentUser && game.userId === currentUser.id ? 'You' : getUserDisplayName(game.userId)}
+                      </span>
+                    </p>
+                  </div>
                 </div>
 
                 <div className="page-card-content space-y-4">

@@ -80,19 +80,44 @@ async def create_game(game_data: GameCreate, session: MySession = Depends(get_se
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @router.get('', response_model=GamesResponse)
-async def get_games(session: MySession = Depends(get_session)) -> Response:
-    """Get all games for the current user."""
+async def get_games(
+    session: MySession = Depends(get_session),
+    tenant_wide: bool = False,
+    user_id: str = None
+) -> Response:
+    """Get games for the current user or all games in tenant."""
     try:
-        # Query games for this user, ordered by date descending
-        games_data = doc_store.query_documents(
-            COLLECTION_PATH,
-            tenant_id=session.tenant_id,
-            where_field="userId",
-            where_operator="==",
-            where_value=session.user_id,
-            order_by_field="date",
-            order_direction="DESC"
-        )
+        if tenant_wide:
+            # Get all games in the tenant, optionally filtered by user_id
+            if user_id:
+                games_data = doc_store.query_documents(
+                    COLLECTION_PATH,
+                    tenant_id=session.tenant_id,
+                    where_field="userId",
+                    where_operator="==",
+                    where_value=user_id,
+                    order_by_field="date",
+                    order_direction="DESC"
+                )
+            else:
+                # Get all games for the tenant
+                games_data = doc_store.query_documents(
+                    COLLECTION_PATH,
+                    tenant_id=session.tenant_id,
+                    order_by_field="date",
+                    order_direction="DESC"
+                )
+        else:
+            # Query games for this user only
+            games_data = doc_store.query_documents(
+                COLLECTION_PATH,
+                tenant_id=session.tenant_id,
+                where_field="userId",
+                where_operator="==",
+                where_value=session.user_id,
+                order_by_field="date",
+                order_direction="DESC"
+            )
         
         games = [Game(**game_data) for game_data in games_data]
         
@@ -324,29 +349,42 @@ async def complete_game(game_id: str, session: MySession = Depends(get_session))
         )
         
         if not game_data:
+            logger.error(f"Game {game_id} not found")
             raise HTTPException(status_code=404, detail="Game not found")
+        
+        logger.info(f"Attempting to complete game {game_id}. Current isComplete: {game_data.get('isComplete')}, userId: {game_data.get('userId')}, session user: {session.user_id}")
         
         # Verify the game belongs to the user
         if game_data.get("userId") != session.user_id:
+            logger.warning(f"User {session.user_id} tried to complete game {game_id} owned by {game_data.get('userId')}")
             raise HTTPException(status_code=403, detail="Not authorized to modify this game")
         
         # Update game to mark as complete
-        doc_store.update_document(
+        update_result = doc_store.update_document(
             COLLECTION_PATH,
             game_id,
             {"isComplete": True},
             tenant_id=session.tenant_id
         )
         
-        # Get updated game
+        if not update_result:
+            logger.error(f"Failed to update game {game_id} in database")
+            raise HTTPException(status_code=500, detail="Failed to update game")
+        
+        # Get updated game to verify
         updated_game_data = doc_store.get_document(
             COLLECTION_PATH, 
             game_id,
             tenant_id=session.tenant_id
         )
         
+        if not updated_game_data:
+            logger.error(f"Game {game_id} disappeared after update!")
+            raise HTTPException(status_code=500, detail="Game not found after update")
+        
+        logger.info(f"Successfully marked game {game_id} as complete. New isComplete: {updated_game_data.get('isComplete')}")
+        
         game = Game(**updated_game_data)
-        logger.info(f"Marked game {game_id} as complete for user {session.user_id}")
         return JSONResponse(content=game.model_dump())
         
     except HTTPException:

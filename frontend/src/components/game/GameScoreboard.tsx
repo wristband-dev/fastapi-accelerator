@@ -6,7 +6,7 @@ import ScoreChart from './ScoreChart';
 import EndGameModal from './EndGameModal';
 
 const GameScoreboard: React.FC = () => {
-  const { gameState, endGame, completeGame } = useGameContext();
+  const { gameState, endGame, completeGame, refreshGames } = useGameContext();
   const { currentGame } = gameState;
   const [editingRound, setEditingRound] = useState<Round | null>(null);
   const [showScoreInput, setShowScoreInput] = useState(false);
@@ -46,6 +46,8 @@ const GameScoreboard: React.FC = () => {
   const handleCompleteGame = async () => {
     try {
       await completeGame();
+      // Refresh games to ensure we have the latest state from database
+      await refreshGames();
     } catch (err) {
       console.error('Error completing game:', err);
     }

@@ -16,7 +16,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Common score values for quick selection
-  const quickScores = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100, 125, 150];
+  const quickScores = [-50, -25, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100, 125, 150];
 
   useEffect(() => {
     // If we're editing a round, populate the form with the round's scores
@@ -39,7 +39,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
   const adjustScore = (playerId: string, delta: number) => {
     setScores(prev => ({
       ...prev,
-      [playerId]: Math.max(0, (prev[playerId] || 0) + delta)
+      [playerId]: (prev[playerId] || 0) + delta
     }));
   };
 
@@ -72,7 +72,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
         // Switching back to button mode - apply the input value
         const inputValue = tempInputValues[playerId];
         if (inputValue !== undefined && inputValue !== '') {
-          const numValue = Math.max(0, parseInt(inputValue) || 0);
+          const numValue = parseInt(inputValue) || 0;
           setScores(prevScores => ({
             ...prevScores,
             [playerId]: numValue
@@ -84,18 +84,22 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
   };
 
   const handleDirectInput = (playerId: string, value: string) => {
-    // Allow only numbers
-    const numericValue = value.replace(/[^0-9]/g, '');
+    // Allow numbers and minus sign
+    const numericValue = value.replace(/[^0-9-]/g, '');
+    // Ensure minus sign only appears at the start
+    const sanitizedValue = numericValue.startsWith('-') 
+      ? '-' + numericValue.slice(1).replace(/-/g, '')
+      : numericValue.replace(/-/g, '');
     setTempInputValues(prev => ({
       ...prev,
-      [playerId]: numericValue
+      [playerId]: sanitizedValue
     }));
   };
 
   const applyDirectInput = (playerId: string) => {
     const inputValue = tempInputValues[playerId];
     if (inputValue !== undefined && inputValue !== '') {
-      const numValue = Math.max(0, parseInt(inputValue) || 0);
+      const numValue = parseInt(inputValue) || 0;
       setScores(prev => ({
         ...prev,
         [playerId]: numValue
@@ -332,6 +336,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
                   {quickScores.map(score => {
                     const isSelected = scores[player.id] === score;
                     const isClose = Math.abs((scores[player.id] || 0) - score) <= 2 && score !== 0;
+                    const isNegative = score < 0;
                     
                     return (
                       <button
@@ -341,9 +346,15 @@ const ScoreInput: React.FC<ScoreInputProps> = ({ editingRound = null, onCancelEd
                         disabled={isSubmitting}
                         className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 transform hover:scale-105 ${
                           isSelected
-                            ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-300'
+                            ? isNegative
+                              ? 'bg-red-600 text-white shadow-lg ring-2 ring-red-300'
+                              : 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-300'
                             : isClose
-                            ? 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200'
+                            ? isNegative
+                              ? 'bg-red-100 text-red-700 border border-red-300 hover:bg-red-200'
+                              : 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200'
+                            : isNegative
+                            ? 'bg-white text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200'
                             : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-600 border border-gray-300'
                         }`}
                       >

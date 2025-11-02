@@ -5,6 +5,7 @@ const NewGameForm: React.FC = () => {
   const { startNewGame } = useGameContext();
   const [gameName, setGameName] = useState('');
   const [targetScore, setTargetScore] = useState(500);
+  const [customScoreInput, setCustomScoreInput] = useState('500');
   const [playerNames, setPlayerNames] = useState(['', '']);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,12 +29,37 @@ const NewGameForm: React.FC = () => {
     setPlayerNames(newNames);
   };
 
+  const handleCustomScoreChange = (value: string) => {
+    // Allow only numbers
+    const numericValue = value.replace(/[^0-9]/g, '');
+    setCustomScoreInput(numericValue);
+    
+    // Update targetScore if there's a valid number, otherwise set to 0
+    if (numericValue !== '') {
+      const numValue = parseInt(numericValue);
+      setTargetScore(numValue > 0 ? numValue : 0);
+    } else {
+      // Empty input - set to 0 to disable submit
+      setTargetScore(0);
+    }
+  };
+
+  const handleQuickScoreSelect = (score: number) => {
+    setTargetScore(score);
+    setCustomScoreInput(String(score));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
     if (!gameName.trim()) {
       setError('Please enter a game name');
+      return;
+    }
+
+    if (!targetScore || targetScore < 1) {
+      setError('Please enter a valid target score (at least 1)');
       return;
     }
     
@@ -51,6 +77,7 @@ const NewGameForm: React.FC = () => {
       setGameName('');
       setPlayerNames(['', '']);
       setTargetScore(500);
+      setCustomScoreInput('500');
       setError('');
     } catch (err) {
       setError('Failed to create game. Please try again.');
@@ -95,15 +122,15 @@ const NewGameForm: React.FC = () => {
             </svg>
             <span>Target Score</span>
           </label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             {[300, 500, 750, 1000].map(score => (
               <button
                 key={score}
                 type="button"
-                onClick={() => setTargetScore(score)}
+                onClick={() => handleQuickScoreSelect(score)}
                 disabled={isSubmitting}
                 className={`p-3 rounded-lg transition-all duration-200 font-medium text-center ${
-                  targetScore === score
+                  targetScore === score && customScoreInput === String(score)
                     ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-300'
                     : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-300'
                 }`}
@@ -112,6 +139,16 @@ const NewGameForm: React.FC = () => {
                 <div className="text-xs opacity-75">points</div>
               </button>
             ))}
+          </div>
+          <div className="mt-3">
+            <input
+              type="text"
+              value={customScoreInput}
+              onChange={(e) => handleCustomScoreChange(e.target.value)}
+              className="page-form-input"
+              placeholder="Enter custom target score"
+              disabled={isSubmitting}
+            />
           </div>
         </div>
         
@@ -165,7 +202,7 @@ const NewGameForm: React.FC = () => {
         
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !targetScore || targetScore < 1}
           className="w-full page-btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Creating Game...' : 'Start Game'}

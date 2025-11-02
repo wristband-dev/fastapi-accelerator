@@ -9,6 +9,7 @@ interface GameContextType {
   addRound: (scores: Record<string, number>) => Promise<void>;
   editRound: (roundId: string, scores: Record<string, number>) => Promise<void>;
   endGame: () => void;
+  completeGame: () => Promise<void>;
   selectGame: (gameId: string) => void;
   deleteGame: (gameId: string) => Promise<void>;
   getPlayerTotals: (playerId: string) => number;
@@ -136,6 +137,33 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       currentGame: null
     }));
   };
+
+  const completeGame = async () => {
+    if (!gameState.currentGame) return;
+    
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await frontendApiClient.put(
+        `/games/${gameState.currentGame.id}/complete`
+      );
+      const completedGame = response.data;
+      
+      setGameState(prev => ({
+        ...prev,
+        games: prev.games.map(g => 
+          g.id === completedGame.id ? completedGame : g
+        ),
+        currentGame: null
+      }));
+    } catch (err) {
+      console.error('Error completing game:', err);
+      setError('Failed to complete game');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const selectGame = (gameId: string) => {
     const selected = gameState.games.find(g => g.id === gameId) || null;
@@ -185,6 +213,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       addRound,
       editRound,
       endGame,
+      completeGame,
       selectGame,
       deleteGame,
       getPlayerTotals,

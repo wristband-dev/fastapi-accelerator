@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useGameContext } from '@/contexts/GameContext';
 import { Round, Game } from '@/models/game';
 import ScoreInput from './ScoreInput';
+import ScoreChart from './ScoreChart';
+import EndGameModal from './EndGameModal';
 
 const GameScoreboard: React.FC = () => {
-  const { gameState, endGame } = useGameContext();
+  const { gameState, endGame, completeGame } = useGameContext();
   const { currentGame } = gameState;
   const [editingRound, setEditingRound] = useState<Round | null>(null);
   const [showScoreInput, setShowScoreInput] = useState(false);
+  const [showEndGameModal, setShowEndGameModal] = useState(false);
   
   if (!currentGame) {
     return null;
@@ -37,9 +40,19 @@ const GameScoreboard: React.FC = () => {
   );
   
   const handleEndGame = () => {
-    if (window.confirm('Are you sure you want to end this game?')) {
-      endGame();
+    setShowEndGameModal(true);
+  };
+
+  const handleCompleteGame = async () => {
+    try {
+      await completeGame();
+    } catch (err) {
+      console.error('Error completing game:', err);
     }
+  };
+
+  const handleSaveForLater = () => {
+    endGame();
   };
 
   const handleEditRound = (round: Round) => {
@@ -215,6 +228,13 @@ const GameScoreboard: React.FC = () => {
         )}
       </div>
       
+      {/* Score Progression Chart */}
+      {currentGame.rounds.length > 0 && (
+        <div className="mb-6">
+          <ScoreChart game={currentGame} />
+        </div>
+      )}
+      
       {/* Score Input - Only show when editing or adding */}
       {showScoreInput && (
         <div id="score-input-section">
@@ -237,6 +257,15 @@ const GameScoreboard: React.FC = () => {
           </svg>
         </button>
       )}
+
+      {/* End Game Modal */}
+      <EndGameModal
+        isOpen={showEndGameModal}
+        onClose={() => setShowEndGameModal(false)}
+        onComplete={handleCompleteGame}
+        onSaveForLater={handleSaveForLater}
+        gameName={currentGame.name}
+      />
     </>
   );
 };

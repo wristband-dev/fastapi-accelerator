@@ -312,3 +312,46 @@ async def edit_round(game_id: str, round_id: str, round_data: RoundCreate, sessi
         logger.exception(f"Error editing round: {str(e)}")
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@router.put('/{game_id}/complete', response_model=Game)
+async def complete_game(game_id: str, session: MySession = Depends(get_session)) -> Response:
+    """Mark a game as complete."""
+    try:
+        # Get existing game
+        game_data = doc_store.get_document(
+            COLLECTION_PATH, 
+            game_id,
+            tenant_id=session.tenant_id
+        )
+        
+        if not game_data:
+            raise HTTPException(status_code=404, detail="Game not found")
+        
+        # Verify the game belongs to the user
+        if game_data.get("userId") != session.user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to modify this game")
+        
+        # Update game to mark as complete
+        doc_store.update_document(
+            COLLECTION_PATH,
+            game_id,
+            {"isComplete": True},
+            tenant_id=session.tenant_id
+        )
+        
+        # Get updated game
+        updated_game_data = doc_store.get_document(
+            COLLECTION_PATH, 
+            game_id,
+            tenant_id=session.tenant_id
+        )
+        
+        game = Game(**updated_game_data)
+        logger.info(f"Marked game {game_id} as complete for user {session.user_id}")
+        return JSONResponse(content=game.model_dump())
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error completing game: {str(e)}")
+        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

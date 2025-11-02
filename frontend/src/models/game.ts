@@ -1,6 +1,7 @@
 export interface Player {
   id: string;
   name: string;
+  userId?: string; // Present for registered users, undefined for custom/guest players
 }
 
 export interface Round {

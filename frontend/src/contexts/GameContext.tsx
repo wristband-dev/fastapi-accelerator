@@ -3,9 +3,14 @@ import { Game, GameState, Round } from '@/models/game';
 import frontendApiClient from '@/client/frontend-api-client';
 import axios from 'axios';
 
+interface PlayerInput {
+  userId?: string;
+  customName?: string;
+}
+
 interface GameContextType {
   gameState: GameState;
-  startNewGame: (name: string, players: string[], targetScore?: number) => Promise<void>;
+  startNewGame: (name: string, players: PlayerInput[], targetScore?: number) => Promise<void>;
   addRound: (scores: Record<string, number>) => Promise<void>;
   editRound: (roundId: string, scores: Record<string, number>) => Promise<void>;
   endGame: () => void;
@@ -56,7 +61,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
-  const startNewGame = async (name: string, players: string[], targetScore = 500) => {
+  const startNewGame = async (name: string, players: PlayerInput[], targetScore = 500) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -66,6 +71,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         targetScore
       });
       const newGame = response.data;
+      
+      console.log('Game created successfully:', newGame);
       
       setGameState(prev => ({
         ...prev,

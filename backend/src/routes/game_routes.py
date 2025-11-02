@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response, status, Depends, HTTPException
 from fastapi.responses import JSONResponse
 import logging
-from typing import List, Dict
+from typing import Optional, Dict
 from datetime import datetime
 import random
 import string
@@ -9,7 +9,7 @@ import string
 from wristband.fastapi_auth import get_session
 from auth.wristband import require_session_auth
 from models.wristband.session import MySession
-from models.game import Game, GameCreate, GameUpdate, RoundCreate, GamesResponse, Player, Round
+from models.game import Game, GameCreate, GameUpdate, RoundCreate, GamesResponse, Player, Round, PlayerInput
 from database import doc_store
 
 router = APIRouter(dependencies=[Depends(require_session_auth)])
@@ -39,18 +39,57 @@ def calculate_player_totals(game: Game) -> Dict[str, int]:
     
     return totals
 
+async def get_user_display_name(user_id: str, access_token: str) -> Optional[str]:
+    """Fetch user display name from Wristband API."""
+    try:
+        from clients.wristband_client import WristbandClient
+        wristband_client = WristbandClient()
+        user = await wristband_client.get_user_info(user_id=user_id, access_token=access_token)
+        
+        # Build display name from User model
+        if user.givenName and user.familyName:
+            return f"{user.givenName} {user.familyName}"
+        elif user.givenName:
+            return user.givenName
+        elif user.email:
+            return user.email
+        return "Unknown User"
+    except Exception as e:
+        logger.warning(f"Error fetching user {user_id}: {e}")
+        return "Unknown User"
+
 @router.post('', response_model=Game)
 async def create_game(game_data: GameCreate, session: MySession = Depends(get_session)) -> Response:
     """Create a new game."""
     try:
-        # Create players with IDs
-        players = [
-            Player(
-                id=f"{generate_id()}_{idx}", 
-                name=name
-            ) 
-            for idx, name in enumerate(game_data.players)
-        ]
+        # Create players from input
+        players = []
+        for idx, player_input in enumerate(game_data.players):
+            player_id = f"{generate_id()}_{idx}"
+            
+            if player_input.userId:
+                # Registered user - fetch their display name
+                display_name = await get_user_display_name(player_input.userId, session.access_token)
+                players.append(Player(
+                    id=player_id,
+                    name=display_name,
+                    userId=player_input.userId
+                ))
+                logger.debug(f"Added registered user player: {display_name} (userId: {player_input.userId})")
+            elif player_input.customName:
+                # Guest/custom player
+                players.append(Player(
+                    id=player_id,
+                    name=player_input.customName.strip(),
+                    userId=None
+                ))
+                logger.debug(f"Added custom player: {player_input.customName}")
+            else:
+                logger.warning(f"Invalid player input at index {idx}: neither userId nor customName provided")
+                continue
+        
+        if len(players) < 2:
+            raise HTTPException(status_code=400, detail="At least 2 players are required")
         
         # Create the game
         game = Game(
@@ -72,9 +111,11 @@ async def create_game(game_data: GameCreate, session: MySession = Depends(get_se
             tenant_id=session.tenant_id
         )
         
-        logger.info(f"Created game {game.id} for user {session.user_id}")
+        logger.info(f"Created game {game.id} for user {session.user_id} with {len(players)} players")
         return JSONResponse(content=game.model_dump(), status_code=status.HTTP_201_CREATED)
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception(f"Error creating game: {str(e)}")
         return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -21,7 +21,7 @@ resource "google_cloud_run_service" "api_prod" {
         }
         env {
           name  = "DOMAIN_NAME"
-          value = var.vercel_domain_name
+          value = var.vercel_domain_name != "" ? var.vercel_domain_name : "${var.vercel_project_name}.vercel.app"
         }
         env {
           name  = "CLIENT_ID"

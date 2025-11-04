@@ -157,7 +157,7 @@ resource "github_actions_environment_secret" "prod_domain_name" {
   repository      = var.repository_name
   environment     = github_repository_environment.prod.environment
   secret_name     = "DOMAIN_NAME"
-  plaintext_value = var.prod_domain_name
+  plaintext_value = var.prod_domain_name != "" ? var.prod_domain_name : "${var.vercel_project_name}.vercel.app"
 }
 
 resource "github_actions_environment_secret" "prod_next_public_backend_url" {

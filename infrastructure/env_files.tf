@@ -55,7 +55,7 @@ resource "local_file" "env_prod" {
   
   content = <<-EOT
 ENVIRONMENT="PROD"
-DOMAIN_NAME="${var.vercel_domain_name}"
+DOMAIN_NAME="${var.vercel_domain_name != "" ? var.vercel_domain_name : "${var.vercel_project_name}.vercel.app"}"
 CLIENT_ID="${module.wristband_prod[0].oauth2_client_id}"
 CLIENT_SECRET="${module.wristband_prod[0].oauth2_client_secret}"
 APPLICATION_VANITY_DOMAIN="${var.wb_prod_application_vanity_domain}"

@@ -29,12 +29,12 @@
 
 This app consists of:
 
-- **FastAPI Backend**: A Python backend with Wristband authentication intOrganization Settings
-egration
+- **FastAPI Backend**: A Python backend with Wristband authentication integration
 - **Next.js Frontend**: A React-based frontend with authentication context
 - **GCP Firebase DocStore (Optional)**: Integration to GCP Firebase for document storage
-- **GCP Cloud Run (Required for Deployment)**: Integration to GCP Cloud Run to host your FastApi backend 
+- **GCP Cloud Run (Required for Deployment)**: Integration to GCP Cloud Run to host your FastAPI backend
 - **Vercel (Required for Deployment)**: Integration to Vercel to host your Next.js frontend
+- **Terraform Infrastructure as Code**: Terraform scripts to provision and manage GCP, Firebase, Wristband, Github, and Vercel resources
 
 
 ## Table of Contents

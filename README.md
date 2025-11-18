@@ -113,10 +113,11 @@ You can start up the application locally in a few simple steps.
 This keeps a connection to the original repository for updates:
 
 1. Visit the [original repository](https://github.com/wristband-dev/fastapi-accelerator)
-2. Click the "Fork" button in the top-right corner
-3. Clone your forked repository:
+2. Click the "Use this template" button in the top-right corner
+3. Name the repository
+3. On your local machine - Clone your repository:
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/your-org/your-repo-name.git
 cd your-repo-name
 ```
 

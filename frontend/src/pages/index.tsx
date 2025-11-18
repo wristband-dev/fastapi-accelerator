@@ -4,6 +4,7 @@ import Head from 'next/head'
 import { useWristbandAuth as useWBAuth } from '@wristband/react-client-auth'
 import { LandingView } from '@/components/LandingView'
 import LoadingScreen from '@/components/LoadingScreen'
+import { APP_NAME } from '@/config/sidebarConfig'
 
 export default function Index() {
   const router = useRouter()
@@ -24,7 +25,7 @@ export default function Index() {
   return (
     <>
       <Head>
-        <title>Mobile-First Next.js App</title>
+        <title>{APP_NAME}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
       </Head>
       

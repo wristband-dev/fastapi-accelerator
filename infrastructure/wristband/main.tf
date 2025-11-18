@@ -463,6 +463,41 @@ resource "restapi_object" "page_branding" {
   depends_on = [restapi_object.app_settings]
 }
 
+# Email Branding Configuration
+# Only create if color is provided (logo_url is optional)
+resource "restapi_object" "email_branding" {
+  count = var.color != "" ? 1 : 0
+  
+  path = "/email-brandings"
+  
+  data = jsonencode(merge({
+    # Required fields
+    ownerId   = local.application_id
+    ownerType = "APPLICATION"
+    
+    # Primary button styling (required)
+    primaryButtonBackgroundColor    = var.color
+    primaryButtonTextColor          = "#FFFFFF"
+    primaryButtonBorderRadiusPixels = 8
+    primaryButtonBorderColor        = var.color
+    
+    # Logo styling (optional)
+    logoHeightPixels = 64
+    logoWidthPixels  = 297
+  },
+  # Only include logoUrl if it's provided
+  var.logo_url != "" ? {
+    logoUrl = var.logo_url
+  } : {}))
+  
+  query_string  = "upsert=true"
+  create_method = "POST"
+  # Use synthetic ID based on owner to prevent path-based updates
+  object_id = "email-branding-${local.application_id}"
+  
+  depends_on = [restapi_object.page_branding]
+}
+
 # Update frontend theme.ts with the primary color from page branding
 resource "local_file" "theme_config" {
   count = var.color != "" ? 1 : 0

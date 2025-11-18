@@ -179,11 +179,29 @@ npm start
 
 ## 🎨 Customization
 
-### Update Brand Colors
-Edit [`frontend/src/utils/theme.ts`](frontend/src/utils/theme.ts) and change the primary color:
+### Update Brand Colors & Logo
+The infrastructure automatically configures both **Page Branding** (login/auth pages) and **Email Branding** (transactional emails) in Wristband using the settings in [`infrastructure/config.tfvars`](infrastructure/config.tfvars):
+
+```hcl
+# Page & Email Branding Configuration
+logo_url = "https://your-domain.com/logo.svg"  # Optional - shown on auth pages and emails
+color    = "#2563EB"  # Primary brand color - used for buttons, links, etc.
+```
+
+When you run `terraform apply`, this will:
+- Configure Wristband's login/auth pages with your branding
+- Configure all Wristband transactional emails with your branding
+- Automatically update [`frontend/src/config/theme.ts`](frontend/src/config/theme.ts) with your primary color
+
+> **Note**: Both logo and color are shared between page and email branding. The color is used for button backgrounds and borders in emails, with white text for optimal contrast.
+
+### Manual Frontend Theme Updates
+You can also manually edit [`frontend/src/config/theme.ts`](frontend/src/config/theme.ts) and change the primary color:
 ```typescript
-export const userTheme: CustomTheme = {
-  primary: '#00AA81',  // Change to your brand color (e.g., '#2563eb' for blue)
+export const theme = {
+  colors: {
+    primary: '#00AA81',  // Change to your brand color (e.g., '#2563eb' for blue)
+  }
 };
 ```
 

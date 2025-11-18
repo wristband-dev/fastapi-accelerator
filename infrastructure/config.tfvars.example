@@ -8,10 +8,15 @@ deployment_enabled = false
 #  WRISTBAND AUTHENTICATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# ─── Page Branding Configuration (Optional) ────────────────────────────────────
-# color: Required for page branding (also updates frontend theme.ts)
+# ─── Branding Configuration (Optional) ─────────────────────────────────────────
+# Configures both Page Branding (login/auth pages) and Email Branding (transactional emails)
+# 
+# color: Required for branding (also updates frontend theme.ts)
+#   - Used for button backgrounds and borders (with white text for contrast)
 # logo_url: Optional - leave empty ("") if not needed
-# Note: If color is empty (""), page branding will be skipped entirely
+#   - Displayed on login pages and in email headers
+# 
+# Note: If color is empty (""), all branding configuration will be skipped
 logo_url = "https://your-domain.com/logo.svg"
 color    = "#007bff"
 

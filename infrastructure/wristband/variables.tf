@@ -47,13 +47,13 @@ variable "access_token" {
 }
 
 variable "logo_url" {
-  description = "URL for the brand logo in page branding"
+  description = "URL for the brand logo in page branding and email branding"
   type        = string
   default     = ""
 }
 
 variable "color" {
-  description = "Primary brand color for page branding (hex color code)"
+  description = "Primary brand color for page branding and email branding (hex color code)"
   type        = string
   default     = "#007bff"
 }

@@ -39,6 +39,11 @@ output "page_branding_id" {
   value       = length(restapi_object.page_branding) > 0 ? restapi_object.page_branding[0].id : null
 }
 
+output "email_branding_configured" {
+  description = "Whether email branding has been configured"
+  value       = length(restapi_object.email_branding) > 0 ? true : false
+}
+
 output "theme_color" {
   description = "Primary theme color applied to frontend"
   value       = var.color

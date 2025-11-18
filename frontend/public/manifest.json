@@ -1,0 +1,11 @@
+{
+  "name": "FastAPI Accelerator App",
+  "short_name": "FastAPI Accelerator",
+  "description": "FastAPI Accelerator App",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": []
+}

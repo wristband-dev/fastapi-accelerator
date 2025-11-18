@@ -1,0 +1,16 @@
+# Build artifacts
+.next/
+node_modules/
+
+# Development files
+.env.local
+.env*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+

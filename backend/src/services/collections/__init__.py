@@ -1,0 +1,3 @@
+SECRETS_COLLECTION = "secrets"
+
+
